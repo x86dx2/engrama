@@ -1,0 +1,40 @@
+# CLAUDE.md — Gate de governança (Engrama)
+
+> Toda a governança e a memória institucional deste projeto vivem em **`.engrama/`** (o *Engrama*). Este arquivo é só o **gate de entrada** que o harness do Orquestrador carrega automaticamente da raiz — o conteúdo normativo está no Engrama.
+
+## Gate operacional obrigatório
+
+Antes de qualquer ação relevante, ler nesta ordem:
+
+1. `.engrama/governance/index.md`
+2. `.engrama/governance/papeis-e-alcadas.md`
+3. `.engrama/governance/cadeia-de-comando.md`
+4. `.engrama/governance/modelo-operacional.md`
+5. `.engrama/governance/continuidade-de-sessao.md`
+6. topo de `.engrama/log.md`
+
+No **primeiro retorno útil** da sessão, declarar: papel assumido · alçada · estado factual (topo do `.engrama/log.md`) · próximo passo seguro · o que depende de aprovação da Autoridade. **Sem esse gate, a sessão não está corretamente aberta.**
+
+## Modelo em uma página
+
+- **Tríade (por função, não por vendor):** **Orquestrador** = Orquestrador/Auditor/QA/Arquiteto (dono do git; **não escreve código de fatia**) · **Executor Crítico** = escreve o código; critica ativamente · **Autoridade de Mudança** = arbitra discordâncias; aprova produção.
+- **Executor-bridge:** o Orquestrador invoca o Executor direto (`{{EXECUTOR_CMD}}`); **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003)
+- **Executor é freio ativo:** objeção material → escala à Autoridade; o Orquestrador **não tem overrule**. (ADR 0004)
+- **Governança não se autoaprova:** edição de governança vai à **crítica do Executor antes do commit** — imposto pelo gate mecânico `.engrama/scripts/critique-gate.sh`. (ADR 0006)
+- **Subagentes** só na lane do Orquestrador; **nunca** escrevem código de fatia. (ADR 0008)
+- **Produção intocável:** ordem + 2ª confirmação; o Orquestrador nunca aprova MR de prod. (ADR 0009)
+
+Detalhe normativo e matriz de alçadas: `.engrama/governance/papeis-e-alcadas.md`. Schema do Engrama: `.engrama/CLAUDE.md`.
+
+## Regras do projeto
+
+- Faça o que foi pedido; nada mais, nada menos. Preferir editar a criar.
+- SEMPRE ler um arquivo antes de editá-lo. NUNCA commitar secrets, credenciais ou `.env`.
+- Atualizar o Engrama (`.engrama/log.md` + página/ADR/gap) **antes** do commit não-trivial.
+- Validar input nas fronteiras do sistema.
+
+## Stack do projeto
+
+Stack-alvo: `{{STACK}}`.
+
+> Template: descreva a stack concreta e as regras específicas do seu projeto aqui (este bloco é o único pedaço project-specific da raiz; tudo mais é o Engrama).

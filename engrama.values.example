@@ -1,0 +1,19 @@
+# Valores do Engrama — copie para .engrama.values e preencha.
+# Formato: CHAVE=valor   (sem as chaves {{ }}, sem aspas, sem '#' no valor).
+# O install.sh substitui {{CHAVE}} -> valor em todos os arquivos instalados.
+
+# --- INFERÍVEIS (o agente preenche do repo e confirma) ---
+PROJETO=MeuProjeto
+REPO_PATH=/caminho/absoluto/do/repo
+ORQUESTRADOR=Claude (Claude Code)
+AUTORIDADE=Humano (voce@exemplo.com)
+DATA=2026-01-01
+STACK=preencher (ex.: Node + Postgres)
+DEV_URL=localhost:3000
+
+# --- PERGUNTAR AO HUMANO (não inferível com segurança) ---
+EXECUTOR=Codex
+EXECUTOR_CMD=codex exec
+MODELO_CRITICA=preencher (maior modelo aprovado, só para o papel de crítica)
+MODELO_EXECUTOR_PESADO=preencher (modelo forte de execução)
+MODELO_EXECUTOR_LEVE=preencher (modelo barato/rápido de execução)
