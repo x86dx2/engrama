@@ -11,6 +11,19 @@
 #   cd /repo-alvo && bash /caminho/do/engrama/install.sh [/caminho/do/values]
 set -u
 
+escape_sed_replacement() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/&/\\&/g; s/#/\\#/g'
+}
+
+report_remaining_placeholders() {
+  local root="$1" rem
+  rem="$(grep -rho '{{[A-Z_]*}}' "$root/CLAUDE.md" "$root/AGENTS.md" "$root/.engrama" 2>/dev/null | sort -u | tr '\n' ' ' || true)"
+  echo ""
+  echo "Placeholders restantes: '${rem}'  (vazio = ok)"
+  echo ""
+  [ -z "$rem" ]
+}
+
 usage() {
   cat <<'EOF'
 Uso:
@@ -74,20 +87,46 @@ rsync -a --exclude '.DS_Store' "$TEMPLATE"/. "$ROOT"/ || { echo "ERRO ao copiar"
 echo "Copiado para a raiz: CLAUDE.md AGENTS.md .engrama/ .claude/settings.json"
 
 # 3) montar um programa sed a partir do values (portável: sed -f, sem -i)
-SEDPROG="$(mktemp)"; trap 'rm -f "$SEDPROG"' EXIT
+SEDPROG="$(mktemp)" || { echo "ERRO ao criar arquivo temporário"; exit 1; }
+trap 'rm -f "$SEDPROG"' EXIT
 while IFS='=' read -r key val || [ -n "${key:-}" ]; do
   key="$(printf '%s' "${key:-}" | tr -d '[:space:]')"
   case "$key" in ''|\#*) continue;; esac
   val="${val%$'\r'}"                       # tira CR de arquivos salvos em Windows
-  printf 's#{{%s}}#%s#g\n' "$key" "$val" >> "$SEDPROG"
+  val="$(escape_sed_replacement "$val")" || {
+    echo "ERRO ao preparar valor do placeholder: $key"
+    exit 1
+  }
+  printf 's#{{%s}}#%s#g\n' "$key" "$val" >> "$SEDPROG" || {
+    echo "ERRO ao montar programa de substituição"
+    exit 1
+  }
 done < "$VALUES"
 
 # 4) aplicar a substituição SÓ nos arquivos textuais instalados
-find "$ROOT/.engrama" "$ROOT/CLAUDE.md" "$ROOT/AGENTS.md" \
-  \( -name '*.md' -o -name '*.sh' -o -name '.gitignore' -o -name 'pre-commit' \) -type f 2>/dev/null \
-  | while IFS= read -r f; do
-      sed -f "$SEDPROG" "$f" > "$f.govtmp" && mv "$f.govtmp" "$f"
-    done
+apply_failed=0
+while IFS= read -r -d '' f; do
+  if ! sed -f "$SEDPROG" "$f" > "$f.govtmp"; then
+    rm -f "$f.govtmp"
+    echo "ERRO ao substituir placeholders em: $f"
+    apply_failed=1
+    break
+  fi
+  if ! mv "$f.govtmp" "$f"; then
+    rm -f "$f.govtmp"
+    echo "ERRO ao gravar arquivo substituído: $f"
+    apply_failed=1
+    break
+  fi
+done < <(
+  find "$ROOT/.engrama" "$ROOT/CLAUDE.md" "$ROOT/AGENTS.md" -type f \
+    \( -name '*.md' -o -name '*.sh' -o -name '.gitignore' -o -name 'pre-commit' \) \
+    -print0 2>/dev/null
+)
+[ "$apply_failed" -eq 0 ] || {
+  report_remaining_placeholders "$ROOT"
+  exit 1
+}
 
 # 5) ativar o gate
 chmod +x "$ROOT"/.engrama/scripts/*.sh "$ROOT"/.engrama/githooks/* 2>/dev/null || true
@@ -95,10 +134,10 @@ git -C "$ROOT" config core.hooksPath .engrama/githooks
 echo "Gate ativado: core.hooksPath=.engrama/githooks"
 
 # 6) relatório
-rem="$(grep -rho '{{[A-Z_]*}}' "$ROOT/CLAUDE.md" "$ROOT/AGENTS.md" "$ROOT/.engrama" 2>/dev/null | sort -u | tr '\n' ' ')"
-echo ""
-echo "Placeholders restantes: '${rem}'  (vazio = ok)"
-echo ""
+if ! report_remaining_placeholders "$ROOT"; then
+  echo "ERRO: substituição incompleta; abortando."
+  exit 1
+fi
 echo "PRÓXIMO (julgamento do AGENTE — ver INSTALL.md):"
 echo "  Passo 3) concluir o bootstrap do projeto em .engrama/project/bootstrap-do-projeto.md"
 echo "  Passo 4) adaptar classify() em .engrama/scripts/critique-gate.sh às superfícies sensíveis deste projeto"

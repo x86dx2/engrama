@@ -25,11 +25,48 @@ CRITIQUE_MODEL="gpt-5.5"        # ex.: "gpt-5.5"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 cd "$REPO_ROOT" || exit 0
 
-STAGED="$(git diff --cached --name-only 2>/dev/null)"
-[ -z "$STAGED" ] && exit 0
+git diff --cached --quiet --exit-code -- 2>/dev/null && exit 0
 
 CATS=""
 addcat() { case " $CATS " in *" $1 "*) ;; *) CATS="$CATS $1" ;; esac; }
+
+trim() {
+  local s="$1"
+  s="${s#"${s%%[![:space:]]*}"}"
+  s="${s%"${s##*[![:space:]]}"}"
+  printf '%s' "$s"
+}
+
+extract_branch_from_header() {
+  local header="$1"
+  if [[ "$header" =~ ^##\ \[[0-9]{4}-[0-9]{2}-[0-9]{2}\]\ (.*)$ ]]; then
+    trim "${BASH_REMATCH[1]}"
+    return 0
+  fi
+  return 1
+}
+
+is_ok_verdict() {
+  local verdict_lc
+  verdict_lc="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$verdict_lc" in
+    confirmo|confirmo-bug|ressalvas|dispensada|n/a:*|waiver*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_blocking_objection() {
+  local verdict="$1"
+  if printf '%s\n' "$verdict" | grep -qi 'waiver'; then
+    return 1
+  fi
+
+  if printf '%s\n' "$verdict" | grep -qiE '^(objec|objeç|discordo)'; then
+    return 0
+  fi
+
+  return 1
+}
 
 # ── CONFIG DO PROJETO: arquivo → categoria(s) ─────────────────────────────────
 # Engrama central: governance/gate/contract sao as categorias ativas.
@@ -41,6 +78,7 @@ classify() {
     CLAUDE.md|AGENTS.md|README.md|INSTALL.md|INSTANTIATE.md) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
+    .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
 
     # Template distribuivel. Mudancas aqui alteram o que novos projetos recebem.
     template/CLAUDE.md|template/AGENTS.md) addcat governance ;;
@@ -50,41 +88,81 @@ classify() {
     # Instalador, hook, settings e defaults mecanicos.
     bootstrap.sh|install.sh|sync-template.sh|engrama.values.example) addcat gate ;;
     .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .github/*) addcat gate ;;
     template/.engrama/scripts/critique-gate*|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
 
     # Contrato verificavel do bootstrap/template.
+    tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
     *) : ;;
   esac
 }
 
-while IFS= read -r f; do
-  [ -z "$f" ] && continue
+while IFS= read -r -d '' f; do
   classify "$f"
-done <<EOF
-$STAGED
-EOF
+done < <(git diff --cached --name-only -z 2>/dev/null)
 
 [ -z "$CATS" ] && exit 0
 
 BRANCH="$(git branch --show-current 2>/dev/null)"
+if [ -z "$BRANCH" ]; then
+  {
+    echo "──────────────────────────────────────────────────────────────"
+    echo "🚫 GATE DE CRÍTICA — commit BLOQUEADO"
+    echo ""
+    echo "HEAD destacado (detached HEAD) em mudança sensível."
+    echo "Categorias sensíveis tocadas:$CATS"
+    echo "Sem branch nominal, o gate não consegue casar a crítica no ledger com segurança."
+    echo "Faça checkout em uma branch antes de comitar esta fatia sensível."
+    echo "──────────────────────────────────────────────────────────────"
+  } >&2
+  exit 2
+fi
+
 LEDGER=".engrama/qa/criticas-do-executor.md"
 # Versão durável: índice (staged) com fallback p/ HEAD. NÃO usa o working-tree.
 LEDGER_CONTENT="$(git show ":$LEDGER" 2>/dev/null || true)"
 [ -z "$LEDGER_CONTENT" ] && LEDGER_CONTENT="$(git show "HEAD:$LEDGER" 2>/dev/null || true)"
 
-# NB: 'waiver' é detectado por substring; escreva-o sempre no POSITIVO
-# ('waiver <quem/quando>'), nunca a palavra numa negação na mesma linha de
-# uma objeção (ex.: evite "objeção sem waiver" na mesma linha) — fail-closed.
-OK_TOKENS='confirmo|confirmo-bug|ressalvas|N/A:|waiver|dispensada'
 MISSING=""
 BLOCKED_OBJ=""
 
 for cat in $CATS; do
-  # Branch space-delimitada (evita slice/1 casar slice/10); formato do ledger: "] <branch> | [tags]"
-  branchlines="$(printf '%s\n' "$LEDGER_CONTENT" | grep -F " $BRANCH " | grep -F "[$cat]" || true)"
-  obj="$(printf '%s\n' "$branchlines" | grep -iE 'objeç|objec' | grep -viE 'waiver' || true)"
-  ok="$(printf '%s\n' "$branchlines" | grep -viE 'pendente' | grep -iE "$OK_TOKENS" || true)"
+  ok=""
+  obj=""
+
+  while IFS= read -r line; do
+    case "$line" in
+      '## ['*)
+        IFS='|' read -r field1 field2 field3 field4 _rest <<< "$line"
+        field1="$(trim "${field1:-}")"
+        field2="$(trim "${field2:-}")"
+        field3="$(trim "${field3:-}")"
+        field4="$(trim "${field4:-}")"
+
+        [ -n "$field4" ] || continue
+
+        entry_branch="$(extract_branch_from_header "$field1")" || continue
+        [ "$entry_branch" = "$BRANCH" ] || continue
+
+        case "$field2" in
+          *"[$cat]"*) ;;
+          *) continue ;;
+        esac
+
+        if is_blocking_objection "$field3"; then
+          obj=1
+        fi
+
+        if is_ok_verdict "$field3"; then
+          ok=1
+        fi
+        ;;
+      *)
+        ;;
+    esac
+  done < <(printf '%s\n' "$LEDGER_CONTENT")
+
   if [ -n "$obj" ]; then BLOCKED_OBJ="$BLOCKED_OBJ $cat"; fi
   if [ -z "$ok" ] || [ -n "$obj" ]; then MISSING="$MISSING $cat"; fi
 done
@@ -107,3 +185,5 @@ done
   echo "──────────────────────────────────────────────────────────────"
 } >&2
 exit 2
+
+# probe sensivel 335e696
