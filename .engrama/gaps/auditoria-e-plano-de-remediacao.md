@@ -61,7 +61,7 @@ Núcleo conceitual (tríade, ADR 0004, filosofia de teste RED-first/golden) **fi
 | **R4** | MÉDIO | detached HEAD (`BRANCH` vazio) casa espaço-duplo no ledger → false-allow. | `gate R4` |
 | **EX1** | ALTO | enforcement burlável: `--no-verify`, `git -c core.hooksPath=/dev/null`, commit fora do harness; `PreToolUse` fail-open se faltar `python3`. Sem CI/server-side. | manual |
 | **EX2** | ALTO | **drift sem trilho de sync**: `sync-template.sh` é referenciado em `critique-gate.sh:51` mas **não existe**; `install.sh` copia só de `template/`; raiz e template divergem estruturalmente (a raiz cabeia paths `template/*`; o template carrega 4 exemplos de domínio comentados). *(Correção factual da crítica: ambos têm 3 categorias ATIVAS — não "3 vs 7".)* | manual |
-| **EX3** | MÉDIO | claims absolutistas no [[README]] vs realidade de lembrete cooperativo; ADR 0006 diz "crítica no bootstrap", ledger diz `dispensada`. | manual |
+| **EX3** | MÉDIO | claims absolutistas no `README.md` vs realidade de lembrete cooperativo; ADR 0006 diz "crítica no bootstrap", ledger diz `dispensada`. | manual |
 | **EX4** | MÉDIO | `source_refs` absolutos contradizem portabilidade; schema "Estrutura" em `.engrama/CLAUDE.md` lista dirs inexistentes; defaults `gpt-5.x` hardcoded como PADRÃO. | manual |
 | **EX5** | MÉDIO | `.engrama/gaps/` (e `roadmap/`, `domain/`) e `tests/gate/` **não estão no `classify()`** → governança e os testes do gate **escapam o gate** (demonstrado ao vivo: este plano passou sem crítica exigida). | live |
 | **EX6** | MÉDIO | sem teste/cobertura do hook `critique-gate-hook.sh` (parse JSON + `python3` + interceptação de `git commit`). | manual |
@@ -75,7 +75,7 @@ Achado-bônus: stageiar o próprio ledger (`.engrama/qa/*`) já classifica como 
 1. ✅ **FEITO (branch `fix/p0-instalador-substituicao-segura`).** Instalador corrigido via executor-bridge: `escape_sed_replacement()` (escapa `\`/`&`/`#`) + `find -print0`/`read -d ''` + **fail-closed** (aborta `exit 1` se sobrar placeholder). `C5/C6/C7` promovidos a CORRETO; `C9` adversário adicionado; suíte 9/9 verde; shellcheck limpo. Resta `*.govtmp` no `.gitignore` (P3).
 2. **CI** `.github/workflows/ci.yml`: matriz `ubuntu`+`macos` rodando `shellcheck` + `bash tests/run.sh`. Como **required status check** + branch protection, vira a **única camada de enforcement não-burlável**. → fecha parte de EX1.
 3. **Cabear os testes no `classify()` de forma explícita** (não `tests/*` amplo): `tests/gate/* → gate`, `tests/contract/* → contract`; e **`.engrama/gaps|roadmap|domain/* → governance`**. → fecha EX5.
-4. **Alinhar claims à verdade.** Reescrever [[README]] (l.49-51) e [[decisions/0006-governanca-nao-se-autoaprova]] para "lembrete imposto no caminho cooperativo, deliberadamente burlável; garantia real = CI/server-side". Reconciliar ADR 0006 ↔ ledger (`dispensada`). → fecha EX3.
+4. **Alinhar claims à verdade.** Reescrever `README.md` (l.49-51) e [[decisions/0006-governanca-nao-se-autoaprova]] para "lembrete imposto no caminho cooperativo, deliberadamente burlável; garantia real = CI/server-side". Reconciliar ADR 0006 ↔ ledger (`dispensada`). → fecha EX3.
 
 ### P1 — Endurecer o gate (fail-open → fail-closed)
 5. **Classificação robusta:** `git diff --cached --name-only -z` **em stream direto** + `read -r -d ''` (resolve non-ASCII; com `-z`, `quotePath=false` é redundante — *correção da crítica*). → promove `R3`.

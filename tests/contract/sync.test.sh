@@ -9,6 +9,8 @@ ROOT_GATE="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
 ROOT_HOOK="$REPO_ROOT/.engrama/scripts/critique-gate-hook.sh"
 TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/scripts/critique-gate-hook.sh"
+ROOT_LINT="$REPO_ROOT/lint.sh"
+TEMPLATE_LINT="$REPO_ROOT/template/lint.sh"
 SYNC_SCRIPT="$REPO_ROOT/sync-template.sh"
 
 PASS=0; FAIL=0; HOLES=0; RESULTS=""
@@ -52,6 +54,9 @@ check S2 CORRETO "$_r" "hook do template identico ao da raiz"
 
 if grep -q 'sync-template\.sh' "$ROOT_GATE" && [ -f "$SYNC_SCRIPT" ]; then _r=0; else _r=1; fi
 check S3 CORRETO "$_r" "referencia a sync-template.sh resolve para arquivo existente"
+
+if cmp -s "$ROOT_LINT" "$TEMPLATE_LINT"; then _r=0; else _r=1; fi
+check S3B CORRETO "$_r" "lint.sh do template identico ao da raiz"
 
 if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template preserva placeholders do gate"

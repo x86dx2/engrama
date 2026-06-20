@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] feat | T1 (absorcao ai-memory/walrus) — lint.sh + fuzz do parser + CI de qualidade
+- Branch `absorcao/t1-lint-fuzz-ci`. Executor (`codex exec`, ajuste-menor) escreveu; Orquestrador auditou (lint sensivel, fuzz deterministico/oracle, suite verde).
+- **lint.sh**: entrega o workflow "Lint" que o schema prometia mas nao implementava (wikilinks orfaos, source_refs quebrados, frontmatter, ADR superseded). Ja pegou 2 wikilinks reais. Propagado ao template.
+- **fuzz.test.sh**: 200 cenarios pseudo-aleatorios deterministicos com oracle independente — property test do parser do gate (absorcao walrus/simulation).
+- **CI**: + `bash lint.sh`, **gitleaks** (secret scan) e **markdownlint** (absorcao ai-memory/walrus).
+- Suite: 238 asserts verdes (gate 12 + fuzz 200 + lint 7 + sync 6 + contract 9 + ci 4); shellcheck limpo.
+- **PROXIMO:** T2 (auto-captura por hooks + loop falha->regra) e T3 (atestacao verificavel do R1).
+
 ## [2026-06-20] fix | P2b — CI reexecuta o gate contra o PR (mitiga R1) + honestidade alinhada
 - Branch `remediacao/p2b-ci-gate`. Executor (`codex exec`, ajuste-menor) criou `critique-gate-ci.sh` (wrapper que monta um repo sintético na branch do PR e reusa o gate local — mesma `classify()` + parsing por campo, zero duplicação); `tests/gate/ci.test.sh` (4 casos); e o step de CI em `pull_request`.
 - **R1 mitigado server-side:** o controle passa a rodar num lugar não-burlável pelo autor. Falta só marcar o check como *required* no branch protection (config de repo) para bloquear o merge.

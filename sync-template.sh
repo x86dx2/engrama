@@ -10,8 +10,10 @@ set -eu
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT_GATE="$HERE/.engrama/scripts/critique-gate.sh"
 ROOT_HOOK="$HERE/.engrama/scripts/critique-gate-hook.sh"
+ROOT_LINT="$HERE/lint.sh"
 TEMPLATE_GATE="$HERE/template/.engrama/scripts/critique-gate.sh"
 TEMPLATE_HOOK="$HERE/template/.engrama/scripts/critique-gate-hook.sh"
+TEMPLATE_LINT="$HERE/template/lint.sh"
 TMPDIR_SYNC=""
 
 fail() {
@@ -67,6 +69,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
+    lint.sh) addcat gate ;;
     .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
@@ -124,6 +127,7 @@ compose_template_gate() {
 main() {
   need_file "$ROOT_GATE"
   need_file "$ROOT_HOOK"
+  need_file "$ROOT_LINT"
   need_file "$TEMPLATE_GATE"
   need_file "$TEMPLATE_HOOK"
 
@@ -132,11 +136,13 @@ main() {
 
   compose_template_gate "$TMPDIR_SYNC" "$TMPDIR_SYNC/critique-gate.sh"
   cp "$ROOT_HOOK" "$TMPDIR_SYNC/critique-gate-hook.sh"
+  cp "$ROOT_LINT" "$TMPDIR_SYNC/lint.sh"
 
   write_if_changed "$TMPDIR_SYNC/critique-gate.sh" "$TEMPLATE_GATE"
   write_if_changed "$TMPDIR_SYNC/critique-gate-hook.sh" "$TEMPLATE_HOOK"
+  write_if_changed "$TMPDIR_SYNC/lint.sh" "$TEMPLATE_LINT"
 
-  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" 2>/dev/null || true
+  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_LINT" 2>/dev/null || true
 }
 
 main "$@"

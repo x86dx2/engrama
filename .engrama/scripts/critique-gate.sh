@@ -89,7 +89,7 @@ classify() {
     template/.engrama/governance/*|template/.engrama/decisions/*|template/.engrama/specs/*|template/.engrama/project/*|template/.engrama/qa/*) addcat governance ;;
 
     # Instalador, hook, settings e defaults mecanicos.
-    bootstrap.sh|install.sh|sync-template.sh|engrama.values.example) addcat gate ;;
+    bootstrap.sh|install.sh|lint.sh|sync-template.sh|engrama.values.example) addcat gate ;;
     .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     template/.engrama/scripts/critique-gate*|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
