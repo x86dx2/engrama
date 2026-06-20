@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] fix | R2/R5 — parsing por campo do ledger (gate deixa de usar grep-substring)
+- Branch `remediacao/auditoria-engrama`. Executor (`codex exec`, concordo) trocou o matching por **parsing por campo**; Orquestrador auditou (21 asserts verdes; gate ao vivo no índice real validado; contraprova bloqueia).
+- **R2 fechado** (`nao confirmo` não casa mais `confirmo` — veredito por enum no campo 3) e **R5 fechado** (branch por igualdade exata de campo, não substring na linha).
+- Doc do formato do ledger atualizada (gramática rígida de 4 campos). Registrado em [[qa/criticas-do-executor]].
+- **4 de 5 furos do gate corrigidos** (R2/R3/R4/R5). Resta **R1** (auto-aprovação / vínculo ao diff) — decisão de design.
+- **PRÓXIMO PASSO SEGURO:** decisão da Autoridade sobre (a) o commit desta fatia e (b) o design de R1 (sha256 do diff no ledger + caveat de independência server-side). Depois: P2 (sync-template raiz↔template) e P3 (LICENSE/CHANGELOG/docs).
+
 ## [2026-06-20] fix | P0.2/P0.3 + R3/R4 + hook — endurecimento do gate + CI (executor-bridge)
 - Branch `remediacao/auditoria-engrama`. Executor (`codex exec`) escreveu; Orquestrador auditou (21 asserts verdes, G1–G7 sem regressão).
 - **CI** `.github/workflows/ci.yml` (matriz ubuntu+macos: shellcheck + `tests/run.sh`) — a primeira camada de enforcement não-burlável.

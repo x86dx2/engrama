@@ -109,7 +109,7 @@ r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | nao confirmo, tenho ressalvas serias | ref"
 echo x > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
-check R2 FURO 0 "$(run_gate "$r")" "'nao confirmo' libera porque casa substring 'confirmo'"
+check R2 CORRETO 2 "$(run_gate "$r")" "'nao confirmo' agora BLOQUEIA (veredito lido por campo/enum, nao substring)"
 
 # R3: PATH NON-ASCII — git quota o nome ("...decis\303\243o.md") e classify() nao
 #     casa o leading-quote => CATS vazio => LIBERA (FURO). Isolado: NAO stageia o
@@ -145,7 +145,7 @@ r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] outra | [governance] afeta o fluxo main do produto | confirmo | ref"
 echo x > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
-check R5 FURO 0 "$(run_gate "$r")" "entrada de 'outra' branch que cita 'main' no texto libera (grep livre, nao por campo)"
+check R5 CORRETO 2 "$(run_gate "$r")" "entrada de 'outra' branch que cita 'main' NAO libera (branch por igualdade de campo, nao substring)"
 
 # ── RELATORIO ─────────────────────────────────────────────────────────────────
 printf '%b\n' "$RESULTS"
