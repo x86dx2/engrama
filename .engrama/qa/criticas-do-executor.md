@@ -84,3 +84,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Honestidade (Orquestrador, incorporando o caveat do Executor):** README/ADR 0006/comentário do gate atualizados — a CI **reexecuta o gate**; falta só o *required check* (config de repo) para bloquear o merge. Comentário do gate mudou → re-rodei `sync-template.sh` (template re-sincronizado; drift verde).
 - **Auditoria do Orquestrador (ADR 0005):** suíte 30 asserts verde (gate 12 · contract 9 · sync 5 · ci 4); shellcheck limpo; **teste independente do modo-CI** (branch sem ledger → bloqueia; `main` com entrada → libera; parsing por campo preservado); gate local intacto (diff vazio).
 - **Consenso.** **R1 mitigado server-side.** Roadmap da auditoria concluído (pendente só marcar o check como required no GitHub — fora do código).
+
+## [2026-06-20] absorcao/t1-lint-fuzz-ci | [governance][gate][contract] T1: lint.sh + fuzz do parser + CI de qualidade | confirmo | executor codex + auditoria orquestrador
+- **Absorcao:** ai-memory (curator/lint automatizado), walrus (simulation/fuzz + secret-scan/markdown-lint).
+- **Executor (codex, ajuste-menor):** `lint.sh` (wikilinks orfaos, source_refs quebrados, frontmatter, ADR superseded sem ponteiro) + `tests/contract/lint.test.sh` (7) + `tests/gate/fuzz.test.sh` (200, oracle-based, deterministico) + CI (lint + gitleaks + markdownlint); propagou `lint.sh` ao template (sync) e corrigiu 2 wikilinks reais.
+- **Auditoria (ADR 0005):** lint LIMPO no repo real e SENSIVEL (injetei link quebrado -> exit 1 com msg clara); fuzz deterministico (sem RANDOM/date) com oracle independente; suite verde (gate 12 - fuzz 200 - lint 7 - sync 6 - contract 9 - ci 4); shellcheck limpo. As 2 correcoes de wikilink sao legitimas (`[[README]]` nao era pagina do Engrama -> virou `README.md`).
+- **Consenso.** Entrega o "Lint" que o schema ja prometia (fecha mais um "prega-vs-pratica").
