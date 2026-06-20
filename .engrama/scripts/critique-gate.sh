@@ -25,8 +25,7 @@ CRITIQUE_MODEL="gpt-5.5"        # ex.: "gpt-5.5"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 cd "$REPO_ROOT" || exit 0
 
-STAGED="$(git diff --cached --name-only 2>/dev/null)"
-[ -z "$STAGED" ] && exit 0
+git diff --cached --quiet --exit-code -- 2>/dev/null && exit 0
 
 CATS=""
 addcat() { case " $CATS " in *" $1 "*) ;; *) CATS="$CATS $1" ;; esac; }
@@ -41,6 +40,7 @@ classify() {
     CLAUDE.md|AGENTS.md|README.md|INSTALL.md|INSTANTIATE.md) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
+    .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
 
     # Template distribuivel. Mudancas aqui alteram o que novos projetos recebem.
     template/CLAUDE.md|template/AGENTS.md) addcat governance ;;
@@ -50,24 +50,37 @@ classify() {
     # Instalador, hook, settings e defaults mecanicos.
     bootstrap.sh|install.sh|sync-template.sh|engrama.values.example) addcat gate ;;
     .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .github/*) addcat gate ;;
     template/.engrama/scripts/critique-gate*|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
 
     # Contrato verificavel do bootstrap/template.
+    tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
     *) : ;;
   esac
 }
 
-while IFS= read -r f; do
-  [ -z "$f" ] && continue
+while IFS= read -r -d '' f; do
   classify "$f"
-done <<EOF
-$STAGED
-EOF
+done < <(git diff --cached --name-only -z 2>/dev/null)
 
 [ -z "$CATS" ] && exit 0
 
 BRANCH="$(git branch --show-current 2>/dev/null)"
+if [ -z "$BRANCH" ]; then
+  {
+    echo "──────────────────────────────────────────────────────────────"
+    echo "🚫 GATE DE CRÍTICA — commit BLOQUEADO"
+    echo ""
+    echo "HEAD destacado (detached HEAD) em mudança sensível."
+    echo "Categorias sensíveis tocadas:$CATS"
+    echo "Sem branch nominal, o gate não consegue casar a crítica no ledger com segurança."
+    echo "Faça checkout em uma branch antes de comitar esta fatia sensível."
+    echo "──────────────────────────────────────────────────────────────"
+  } >&2
+  exit 2
+fi
+
 LEDGER=".engrama/qa/criticas-do-executor.md"
 # Versão durável: índice (staged) com fallback p/ HEAD. NÃO usa o working-tree.
 LEDGER_CONTENT="$(git show ":$LEDGER" 2>/dev/null || true)"

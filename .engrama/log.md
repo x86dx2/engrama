@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] fix | P0.2/P0.3 + R3/R4 + hook — endurecimento do gate + CI (executor-bridge)
+- Branch `remediacao/auditoria-engrama`. Executor (`codex exec`) escreveu; Orquestrador auditou (21 asserts verdes, G1–G7 sem regressão).
+- **CI** `.github/workflows/ci.yml` (matriz ubuntu+macos: shellcheck + `tests/run.sh`) — a primeira camada de enforcement não-burlável.
+- **Gate endurecido:** R3 (non-ASCII via `-z` stream) e R4 (detached HEAD fail-closed) **corrigidos e promovidos**; `classify()` agora cobre `tests/gate/`, `.github/`, `.engrama/gaps|roadmap|domain/`; hook fail-closed sem `python3`.
+- Registrado em [[qa/criticas-do-executor]]. Furos restantes: **R1** (vínculo ao diff), **R2/R5** (parsing por campo) — próxima fatia.
+- **PRÓXIMO PASSO SEGURO:** decisão da Autoridade sobre o commit; depois a fatia final do gate (R2/R5 parsing por campo + R1 vínculo ao diff) e P2 (fonte única raiz↔template / `sync-template.sh`).
+
 ## [2026-06-20] fix | P0.1 — instalador: substituição literal segura + fail-closed (executor-bridge)
 - Branch `fix/p0-instalador-substituicao-segura`. Executor (`codex exec`) corrigiu `install.sh`; Orquestrador auditou.
 - **Bug fechado (era CRÍTICO):** valor com `#` quebrava o `sed -f` global (instalação 100% crua com exit 0); `&` corrompia. Agora: escape literal (`\`,`&`,`#`) + `find -print0`/`read -d ''` + **fail-closed** (aborta exit 1 se sobrar placeholder).

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Install shellcheck on macOS
+        if: runner.os == 'macOS'
+        run: brew install shellcheck
+
+      - name: Run shellcheck
+        run: >
+          shellcheck install.sh bootstrap.sh .engrama/scripts/*.sh
+          .engrama/githooks/pre-commit tests/run.sh tests/gate/*.test.sh
+          tests/contract/*.test.sh
+
+      - name: Run test suite
+        run: bash tests/run.sh

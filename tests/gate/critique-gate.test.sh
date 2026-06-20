@@ -118,7 +118,7 @@ check R2 FURO 0 "$(run_gate "$r")" "'nao confirmo' libera porque casa substring 
 r="$(new_repo main)"
 echo x > "$r/.engrama/governance/decisão.md"
 git -C "$r" add ".engrama/governance/decisão.md"
-check R3 FURO 0 "$(run_gate "$r")" "arquivo sensivel acentuado escapa a classificacao (fail-open; controle ASCII bloqueia)"
+check R3 CORRETO 2 "$(run_gate "$r")" "arquivo acentuado agora CLASSIFICADO e bloqueado (R3 corrigido via -z stream)"
 
 # R4: DETACHED HEAD com linha de ledger contendo espaco-duplo => casa BRANCH vazio (FURO).
 r="$(new_repo main)"
@@ -127,7 +127,7 @@ echo base > "$r/base.txt"; git -C "$r" add .; git -C "$r" commit -qm base
 git -C "$r" checkout -q --detach
 echo x > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
-check R4 FURO 0 "$(run_gate "$r")" "detached HEAD: BRANCH vazio casa espaco-duplo no ledger"
+check R4 CORRETO 2 "$(run_gate "$r")" "detached HEAD agora FAIL-CLOSED: bloqueia em vez de casar espaco-duplo (R4 corrigido)"
 
 # G7: o gate le o ledger STAGED, nao o working-tree (prova o ponto forte).
 #     Stageia gov + ledger COM 'confirmo'; depois SUJA o working-tree (sem stage).
