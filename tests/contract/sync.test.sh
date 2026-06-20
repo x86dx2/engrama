@@ -9,8 +9,12 @@ ROOT_GATE="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
 ROOT_HOOK="$REPO_ROOT/.engrama/scripts/critique-gate-hook.sh"
 TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/scripts/critique-gate-hook.sh"
+ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
+TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.sh"
 ROOT_LINT="$REPO_ROOT/lint.sh"
 TEMPLATE_LINT="$REPO_ROOT/template/lint.sh"
+ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
+TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 SYNC_SCRIPT="$REPO_ROOT/sync-template.sh"
 
 PASS=0; FAIL=0; HOLES=0; RESULTS=""
@@ -52,11 +56,17 @@ check S1 CORRETO "$_r" "gate raiz/template com logica identica fora vars placeho
 if cmp -s "$ROOT_HOOK" "$TEMPLATE_HOOK"; then _r=0; else _r=1; fi
 check S2 CORRETO "$_r" "hook do template identico ao da raiz"
 
+if cmp -s "$ROOT_SESSION_CONTEXT" "$TEMPLATE_SESSION_CONTEXT"; then _r=0; else _r=1; fi
+check S2B CORRETO "$_r" "session-context do template identico ao da raiz"
+
 if grep -q 'sync-template\.sh' "$ROOT_GATE" && [ -f "$SYNC_SCRIPT" ]; then _r=0; else _r=1; fi
 check S3 CORRETO "$_r" "referencia a sync-template.sh resolve para arquivo existente"
 
 if cmp -s "$ROOT_LINT" "$TEMPLATE_LINT"; then _r=0; else _r=1; fi
 check S3B CORRETO "$_r" "lint.sh do template identico ao da raiz"
+
+if cmp -s "$ROOT_SETTINGS" "$TEMPLATE_SETTINGS"; then _r=0; else _r=1; fi
+check S3C CORRETO "$_r" "settings.json do template identico ao da raiz"
 
 if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template preserva placeholders do gate"

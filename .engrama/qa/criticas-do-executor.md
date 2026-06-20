@@ -88,5 +88,12 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 ## [2026-06-20] absorcao/t1-lint-fuzz-ci | [governance][gate][contract] T1: lint.sh + fuzz do parser + CI de qualidade | confirmo | executor codex + auditoria orquestrador
 - **Absorcao:** ai-memory (curator/lint automatizado), walrus (simulation/fuzz + secret-scan/markdown-lint).
 - **Executor (codex, ajuste-menor):** `lint.sh` (wikilinks orfaos, source_refs quebrados, frontmatter, ADR superseded sem ponteiro) + `tests/contract/lint.test.sh` (7) + `tests/gate/fuzz.test.sh` (200, oracle-based, deterministico) + CI (lint + gitleaks + markdownlint); propagou `lint.sh` ao template (sync) e corrigiu 2 wikilinks reais.
-- **Auditoria (ADR 0005):** lint LIMPO no repo real e SENSIVEL (injetei link quebrado -> exit 1 com msg clara); fuzz deterministico (sem RANDOM/date) com oracle independente; suite verde (gate 12 - fuzz 200 - lint 7 - sync 6 - contract 9 - ci 4); shellcheck limpo. As 2 correcoes de wikilink sao legitimas (`[[README]]` nao era pagina do Engrama -> virou `README.md`).
+- **Auditoria (ADR 0005):** lint LIMPO no repo real e SENSIVEL (injetei link quebrado -> exit 1 com msg clara); fuzz deterministico (sem RANDOM/date) com oracle independente; suite verde (gate 12 - fuzz 200 - lint 7 - sync 6 - contract 9 - ci 4); shellcheck limpo. As 2 correcoes de wikilink sao legitimas (`README.md` nao era pagina do Engrama -> virou `README.md`).
 - **Consenso.** Entrega o "Lint" que o schema ja prometia (fecha mais um "prega-vs-pratica").
+
+## [2026-06-20] absorcao/t2a-hooks | [governance][gate][contract] T2a: auto-surface do checkpoint via hooks (SessionStart/PreCompact) | confirmo | executor codex + auditoria orquestrador
+- **Absorcao ai-memory:** hooks de ciclo de vida reduzem a cerimonia manual de "ler o topo do log".
+- **Executor (codex, concordo):** `session-context.sh` (imprime checkpoint + status do bootstrap + lembrete do handshake; read-only, sempre exit 0); mesclou `SessionStart`+`PreCompact` no `.claude/settings.json` PRESERVANDO o `PreToolUse`; teste `session-context.test.sh`; classify `.engrama/scripts/*.sh`->gate; propagado ao template + sync.
+- **Auditoria (ADR 0005):** script imprime o checkpoint real e DEGRADA sem quebrar (exit 0 mesmo sem `.engrama/`); settings.json valido, PreToolUse e `.env` deny preservados; suite verde (243 asserts); shellcheck limpo.
+- **Honestidade:** e auto-surface + lembrete, NAO auto-write (atualizar log/ledger segue manual — exige julgamento). Documentado no script e na saida.
+- **Consenso.**

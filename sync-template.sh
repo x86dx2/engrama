@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
-# sync-template.sh -- sincroniza apenas artefatos mecanicos do template a partir
-# da raiz canonica do Engrama.
+# sync-template.sh -- sincroniza artefatos mecanicos do template a partir da
+# raiz canonica do Engrama.
 #
-# Escopo intencional: scripts do gate/hook. Nao faz reverse-substituicao cega em
-# prosa de governanca/READMEs, porque valores livres podem aparecer em texto e a
-# operacao seria fragil.
+# Escopo intencional: scripts do harness/gate e settings mecanicos. Nao faz
+# reverse-substituicao cega em prosa de governanca/READMEs, porque valores
+# livres podem aparecer em texto e a operacao seria fragil.
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT_GATE="$HERE/.engrama/scripts/critique-gate.sh"
 ROOT_HOOK="$HERE/.engrama/scripts/critique-gate-hook.sh"
+ROOT_SESSION_CONTEXT="$HERE/.engrama/scripts/session-context.sh"
 ROOT_LINT="$HERE/lint.sh"
+ROOT_SETTINGS="$HERE/.claude/settings.json"
 TEMPLATE_GATE="$HERE/template/.engrama/scripts/critique-gate.sh"
 TEMPLATE_HOOK="$HERE/template/.engrama/scripts/critique-gate-hook.sh"
+TEMPLATE_SESSION_CONTEXT="$HERE/template/.engrama/scripts/session-context.sh"
 TEMPLATE_LINT="$HERE/template/lint.sh"
+TEMPLATE_SETTINGS="$HERE/template/.claude/settings.json"
 TMPDIR_SYNC=""
 
 fail() {
@@ -70,7 +74,7 @@ classify() {
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
     lint.sh) addcat gate ;;
-    .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
@@ -94,6 +98,7 @@ EOF
 
 write_if_changed() {
   local tmp="$1" dest="$2"
+  mkdir -p "$(dirname "$dest")"
   if [ -f "$dest" ] && cmp -s "$tmp" "$dest"; then
     rm -f "$tmp"
     echo "unchanged: ${dest#"$HERE"/}"
@@ -127,22 +132,29 @@ compose_template_gate() {
 main() {
   need_file "$ROOT_GATE"
   need_file "$ROOT_HOOK"
+  need_file "$ROOT_SESSION_CONTEXT"
   need_file "$ROOT_LINT"
+  need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
   need_file "$TEMPLATE_HOOK"
+  need_file "$TEMPLATE_SETTINGS"
 
   TMPDIR_SYNC="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-sync)"
   trap 'rm -rf "${TMPDIR_SYNC:-}"' EXIT
 
   compose_template_gate "$TMPDIR_SYNC" "$TMPDIR_SYNC/critique-gate.sh"
   cp "$ROOT_HOOK" "$TMPDIR_SYNC/critique-gate-hook.sh"
+  cp "$ROOT_SESSION_CONTEXT" "$TMPDIR_SYNC/session-context.sh"
   cp "$ROOT_LINT" "$TMPDIR_SYNC/lint.sh"
+  cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"
 
   write_if_changed "$TMPDIR_SYNC/critique-gate.sh" "$TEMPLATE_GATE"
   write_if_changed "$TMPDIR_SYNC/critique-gate-hook.sh" "$TEMPLATE_HOOK"
+  write_if_changed "$TMPDIR_SYNC/session-context.sh" "$TEMPLATE_SESSION_CONTEXT"
   write_if_changed "$TMPDIR_SYNC/lint.sh" "$TEMPLATE_LINT"
+  write_if_changed "$TMPDIR_SYNC/settings.json" "$TEMPLATE_SETTINGS"
 
-  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_LINT" 2>/dev/null || true
+  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" 2>/dev/null || true
 }
 
 main "$@"

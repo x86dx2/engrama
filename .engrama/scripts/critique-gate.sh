@@ -90,9 +90,9 @@ classify() {
 
     # Instalador, hook, settings e defaults mecanicos.
     bootstrap.sh|install.sh|lint.sh|sync-template.sh|engrama.values.example) addcat gate ;;
-    .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
-    template/.engrama/scripts/critique-gate*|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
+    template/.engrama/scripts/*.sh|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
 
     # Contrato verificavel do bootstrap/template.
     tests/gate/*|*/tests/gate/*) addcat gate ;;

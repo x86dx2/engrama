@@ -82,7 +82,7 @@ classify() {
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
     lint.sh) addcat gate ;;
-    .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
