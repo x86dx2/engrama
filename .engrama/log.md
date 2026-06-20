@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] feat | T2a (absorcao ai-memory) — auto-surface do checkpoint por hooks
+- Branch `absorcao/t2a-hooks`. Executor (`codex exec`, concordo); Orquestrador auditou (degradacao segura, settings valido, suite verde).
+- **session-context.sh** + hooks `SessionStart`/`PreCompact`: ao abrir/compactar a sessao, auto-surge o checkpoint (topo do log), status do bootstrap e lembrete do handshake — reduz a cerimonia manual de "ler o topo do log".
+- **Honesto:** auto-surface + lembrete, NAO auto-write. Atualizar log/ledger continua exigindo julgamento.
+- Suite 243 asserts verde; shellcheck limpo; PreToolUse do gate preservado.
+- **PROXIMO:** T2c (loop falha->regra) + metricas honestas, depois T3 (atestacao verificavel do R1).
+
 ## [2026-06-20] feat | T1 (absorcao ai-memory/walrus) — lint.sh + fuzz do parser + CI de qualidade
 - Branch `absorcao/t1-lint-fuzz-ci`. Executor (`codex exec`, ajuste-menor) escreveu; Orquestrador auditou (lint sensivel, fuzz deterministico/oracle, suite verde).
 - **lint.sh**: entrega o workflow "Lint" que o schema prometia mas nao implementava (wikilinks orfaos, source_refs quebrados, frontmatter, ADR superseded). Ja pegou 2 wikilinks reais. Propagado ao template.
