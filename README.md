@@ -48,7 +48,9 @@ O mapeamento é direto:
 | **Query** | **abertura de sessão**: ler gate → governança → topo do `.engrama/log.md`; responder "qual é meu papel / qual o estado / próximo passo seguro" (o *handshake* obrigatório) |
 | **Lint** | a varredura de saúde do Engrama **+** o **gate mecânico de crítica** (`.engrama/scripts/critique-gate.sh`) — um lint **contínuo e imposto** sobre superfície sensível, que bloqueia o commit sem a crítica registrada |
 
-> Em uma frase: o Karpathy resolve *"humanos abandonam wikis porque manter cansa"*; este pack aplica isso à governança — **o modelo operacional não apodrece** porque o agente o mantém, e o **gate** impede que ele seja burlado.
+> Em uma frase: o Karpathy resolve *"humanos abandonam wikis porque manter cansa"*; este pack aplica isso à governança — **o modelo operacional não apodrece** porque o agente o mantém, e o **gate** lembra/impõe a crítica no caminho cooperativo do commit.
+
+> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exigiria **enforcement server-side**: um *required status check* que reexecute o gate contra o diff do PR. **Isso ainda não existe** — a CI atual ([.github/workflows/ci.yml](.github/workflows/ci.yml)) roda `shellcheck` + a suíte de testes, mas **não** reexecuta o gate contra o PR, e *required check*/branch protection é configuração do repositório, não algo provado por este código. Hoje, portanto: o hook local é **atrito útil + registro**; o enforcement vinculante é **pendente** (ver o furo **R1** e o [plano de remediação](.engrama/gaps/auditoria-e-plano-de-remediacao.md)). O gate garante que a crítica esteja **registrada** antes do commit cooperativo — **não** que um agente independente de fato a tenha produzido.
 
 ---
 
