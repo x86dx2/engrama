@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install shellcheck on Ubuntu
         if: runner.os == 'Linux'
@@ -33,9 +35,24 @@ jobs:
 
       - name: Run shellcheck
         run: >
-          shellcheck install.sh bootstrap.sh .engrama/scripts/*.sh
+          shellcheck critique-gate-ci.sh install.sh bootstrap.sh .engrama/scripts/*.sh
           .engrama/githooks/pre-commit tests/run.sh tests/gate/*.test.sh
           tests/contract/*.test.sh
 
       - name: Run test suite
         run: bash tests/run.sh
+
+      - name: Fetch pull request base
+        if: github.event_name == 'pull_request'
+        run: >
+          git fetch --no-tags origin
+          "refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+
+      - name: Re-run critique gate against pull request diff
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BRANCH: ${{ github.head_ref }}
+          PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
+        run: |
+          git diff --name-only -z "origin/${{ github.base_ref }}...HEAD" > "$PR_FILES"
+          bash ./critique-gate-ci.sh --branch "$PR_BRANCH" --files-from "$PR_FILES"

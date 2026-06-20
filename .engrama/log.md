@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] fix | P2b — CI reexecuta o gate contra o PR (mitiga R1) + honestidade alinhada
+- Branch `remediacao/p2b-ci-gate`. Executor (`codex exec`, ajuste-menor) criou `critique-gate-ci.sh` (wrapper que monta um repo sintético na branch do PR e reusa o gate local — mesma `classify()` + parsing por campo, zero duplicação); `tests/gate/ci.test.sh` (4 casos); e o step de CI em `pull_request`.
+- **R1 mitigado server-side:** o controle passa a rodar num lugar não-burlável pelo autor. Falta só marcar o check como *required* no branch protection (config de repo) para bloquear o merge.
+- **Docs alinhadas** (incorporando o caveat do próprio Executor): README/ADR 0006/comentário do gate deixam de dizer "pendente" e descrevem o estado real (CI roda o gate; required-check é o passo de config que falta). Gate re-sincronizado ao template.
+- Auditoria do Orquestrador: suíte 30 asserts verde (gate 12 · contract 9 · sync 5 · ci 4); shellcheck limpo; teste independente do modo-CI (bloqueia sem ledger, libera com `confirmo`, parsing por campo preservado); gate local intacto.
+- **ROADMAP CONCLUÍDO:** P0.1–P0.4, P2, P2b, P3 entregues; 7/8 furos fechados; R1 mitigado server-side (pendente só o required-check de repo). Ver [[gaps/auditoria-e-plano-de-remediacao]] (STATUS FINAL).
+- **PRÓXIMO PASSO SEGURO:** Autoridade marca o check da CI como *required* no GitHub (fora do código); nada mais pendente no repo.
+
 ## [2026-06-20] fix | P2 — propaga fixes do gate ao template + sync-template.sh + drift test (fecha EX2)
 - Branch `remediacao/p2-sync-template`. Executor (`codex exec`, concordo) escreveu; Orquestrador auditou (smoke funcional + idempotência + sensibilidade do drift test).
 - **Bug fechado (EX2):** o `template/` distribuía o gate **vulnerável** (sem R2-R5/-z/detached/hook fail-closed) — projeto novo herdava os furos. Agora o template carrega o gate endurecido (lógica da raiz + placeholders + classify de domínio).

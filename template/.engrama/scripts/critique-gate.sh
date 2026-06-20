@@ -7,8 +7,9 @@
 # A crítica é feita por um agente/modelo INDEPENDENTE do Orquestrador (o Executor
 # no papel de crítica, read-only). O gate exige o REGISTRO da crítica antes do
 # commit — ele NÃO prova que um modelo independente de fato a produziu, e é um
-# freio COOPERATIVO LOCAL (burlável por --no-verify / fora do harness). O
-# enforcement vinculante (gate como required check na CI) é pendente — ver ADR 0006.
+# freio COOPERATIVO LOCAL (burlável por --no-verify / fora do harness). A CI
+# reexecuta este gate contra o PR (critique-gate-ci.sh); falta marcar o check
+# como required no repo para bloquear o merge — ver ADR 0006.
 #
 # ── COMO ADAPTAR AO SEU PROJETO ───────────────────────────────────────────────
 # 1. Ajuste as variáveis EXECUTOR_CMD / CRITIQUE_MODEL abaixo.
