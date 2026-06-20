@@ -2,9 +2,9 @@
 type: governance
 status: active
 touches: [governance/papeis-e-alcadas, governance/cadeia-de-comando, governance/modelo-operacional, decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]
-date: {{DATA}}
+date: 2026-06-20
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - /Users/x86/git-projects/engrama/CLAUDE.md
 ---
 
 Protocolos de **continuidade operacional**: como abrir, trabalhar e encerrar uma sessão; o handoff Orquestrador↔Executor pelo executor-bridge; e os pacotes mínimos que tornam a retomada independente de prompt longo.
@@ -25,7 +25,7 @@ Se [[project/bootstrap-do-projeto]] estiver `proposed` ou com `TODO`, o próximo
 
 ## Ordem mínima do Orquestrador para o Executor (executor-bridge)
 
-Toda invocação `{{EXECUTOR_CMD}}` carrega, no mínimo:
+Toda invocação `codex exec` carrega, no mínimo:
 1. objetivo da fatia;
 2. estado factual conhecido;
 3. escopo da execução;
@@ -35,7 +35,7 @@ Toda invocação `{{EXECUTOR_CMD}}` carrega, no mínimo:
 7. riscos já conhecidos;
 8. o que depende de aprovação da Autoridade;
 9. próximo passo seguro após a execução;
-10. **modelo/tier** escolhido (`{{MODELO_EXECUTOR_PESADO}}` / `{{MODELO_EXECUTOR_LEVE}}`) e por quê.
+10. **modelo/tier** escolhido (`gpt-5.4` / `gpt-5.4-mini`) e por quê.
 
 ## Resposta mínima obrigatória do Executor
 

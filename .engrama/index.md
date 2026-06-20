@@ -15,7 +15,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 ## Decisões (ADRs)
 - [[decisions/0001-governanca-tres-papeis]] — tríade Orquestrador/Executor/Autoridade + validação cruzada.
 - [[decisions/0002-orquestrador-dono-do-git-executor-escreve]] — Orquestrador dono do git; Executor escreve código; Orquestrador não escreve fatia.
-- [[decisions/0003-executor-bridge-orquestrador-invoca-executor]] — Orquestrador invoca Executor direto (`{{EXECUTOR_CMD}}`); sem relay da Autoridade de rotina.
+- [[decisions/0003-executor-bridge-orquestrador-invoca-executor]] — Orquestrador invoca Executor direto (`codex exec`); sem relay da Autoridade de rotina.
 - [[decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]] — Executor critica toda ordem; discordância → Autoridade decide.
 - [[decisions/0005-orquestrador-qa-reexecucao-e-metricas]] — Orquestrador é QA; re-executa gates; dono das métricas.
 - [[decisions/0006-governanca-nao-se-autoaprova]] — governança exige crítica do Executor antes do commit.
@@ -28,10 +28,10 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 - [[specs/README]] — índice + princípio (spec ≠ subagente).
 - [[specs/orquestrador]] · [[specs/executor]] — papéis (Orquestrador / Executor nas variações).
 - [[specs/executor-order]] — template da ordem ao Executor · [[specs/commit]] — checklist de commit.
-- [[specs/test-writing]] — convenções do harness · [[specs/infra-runbook]] — infra/stack/{{DEV_URL}}.
+- [[specs/test-writing]] — convenções do harness · [[specs/infra-runbook]] — infra/stack/N/A (sem servidor local).
 
 ## Processo
-- [[qa/criticas-do-executor]] — ledger de críticas do Executor ({{MODELO_CRITICA}}) + gate mecânico de commit (ADR 0006/0010).
+- [[qa/criticas-do-executor]] — ledger de críticas do Executor (gpt-5.5) + gate mecânico de commit (ADR 0006/0010).
 
 ## Páginas do seu projeto (domínio · roadmap · QA · gaps)
 

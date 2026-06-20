@@ -1,25 +1,26 @@
 # INSTALL.md — Auto-instalação do Engrama (PLAYBOOK DO AGENTE)
 
-> **Você (agente) está lendo isto** porque a pasta `docs/engrama/` foi copiada para um projeto e pediram para **instalar / configurar o Engrama**. Execute os passos abaixo na ordem. Onde estiver marcado **PERGUNTAR**, pergunte ao humano e **não invente**. Onde estiver **INFERIR**, descubra do repositório e **confirme** com o humano antes de gravar.
+> **Você (agente) está lendo isto** no repo-fonte do Engrama e pediram para **bootstrapar / instalar** o Engrama em outro projeto. Execute os passos abaixo na ordem. Onde estiver marcado **PERGUNTAR**, pergunte ao humano e **não invente**. Onde estiver **INFERIR**, descubra do repositório e **confirme** com o humano antes de gravar.
 
-Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.md`, o `.engrama/` de governança, o gate mecânico `.engrama/scripts/critique-gate.sh` ativo, e o primeiro commit feito sob as próprias regras. A partir daí, qualquer agente que abrir o repo cai no gate de governança.
+Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.md`, o `.engrama/` de governança, o `.claude/settings.json` com o hook do gate mecânico, e o primeiro commit feito sob as próprias regras. A partir daí, qualquer agente que abrir o repo cai no gate de governança e, no **primeiro startup**, é forçado a completar o bootstrap do projeto.
 
 ---
 
 ## Passo 0 — Pré-condições
 
-1. Estar num repositório git. Se não houver, criar: `git init -b main`.
-2. Checar colisão: se já existirem `CLAUDE.md`, `AGENTS.md` ou `.engrama/` na raiz, **não sobrescreva** — vá para a seção **Merge** no fim. Caso contrário, siga.
+1. Tenha o **caminho do repo-alvo**.
+2. Se o diretório-alvo ainda não for um repo git, o `bootstrap.sh` cria `git init -b main` para você.
+3. Se já existirem `CLAUDE.md`, `AGENTS.md`, `.engrama/` ou `.claude/settings.json` na raiz do projeto-alvo, **não sobrescreva** — vá para a seção **Merge** no fim. Caso contrário, siga.
 
 ## Passo 1 — Coletar os valores (INFERIR + PERGUNTAR)
 
-Monte o arquivo de valores. Copie o exemplo e preencha:
+O `bootstrap.sh` já infere defaults e instala direto na raiz do projeto-alvo. O arquivo de valores é **opcional** e serve só para override:
 
 ```bash
-cp docs/engrama/engrama.values.example docs/engrama/.engrama.values
+cp /caminho/do/engrama/engrama.values.example /tmp/finance.values
 ```
 
-Preencha cada chave (sem as chaves `{{ }}`):
+Defaults/heurísticas usados pelo bootstrap:
 
 | Chave | Como obter | |
 |---|---|---|
@@ -28,23 +29,30 @@ Preencha cada chave (sem as chaves `{{ }}`):
 | `PROJETO` | **INFERIR** do nome do diretório / `package.json` / remote git → **confirmar** | |
 | `STACK` | **INFERIR** do repo (`package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `pom.xml`…) → **confirmar** | |
 | `AUTORIDADE` | **INFERIR** de `git config user.email` → **confirmar** quem é a Autoridade de Mudança | |
-| `ORQUESTRADOR` | **INFERIR**: você mesmo (o agente que está instalando; ex.: "Claude (Claude Code)") | |
+| `ORQUESTRADOR` | **PADRÃO**: `Claude (Claude Code)` | |
 | `DEV_URL` | **INFERIR** de scripts/config (porta do dev) ou **PERGUNTAR** | |
-| `EXECUTOR` | **PERGUNTAR**: qual agente fará o papel de Executor Crítico (ex.: "Codex") | |
-| `EXECUTOR_CMD` | **PERGUNTAR**: comando que invoca o Executor (ex.: `codex exec`). Dica: cheque o `PATH` (`command -v codex`). | |
-| `MODELO_CRITICA` | **PERGUNTAR**: maior modelo aprovado, reservado ao papel de crítica | |
-| `MODELO_EXECUTOR_PESADO` | **PERGUNTAR**: modelo forte de execução | |
-| `MODELO_EXECUTOR_LEVE` | **PERGUNTAR**: modelo barato/rápido de execução | |
+| `EXECUTOR` | **PADRÃO**: `Codex` | |
+| `EXECUTOR_CMD` | **PADRÃO**: `codex exec` | |
+| `MODELO_CRITICA` | **PADRÃO**: `gpt-5.5` | |
+| `MODELO_EXECUTOR_PESADO` | **PADRÃO**: `gpt-5.4` | |
+| `MODELO_EXECUTOR_LEVE` | **PADRÃO**: `gpt-5.4-mini` | |
 
-> Os 4 itens de modelo + o `EXECUTOR_CMD` + quem é a `AUTORIDADE` **não são inferíveis com segurança** — pergunte. O resto, infira e confirme. Glossário completo de cada placeholder: [INSTANTIATE.md](INSTANTIATE.md).
+> O bootstrap já assume o padrão operacional atual do pack. Pergunte só quando o projeto-alvo divergir do padrão ou quando a `AUTORIDADE`/`STACK`/`DEV_URL` não estiverem claros. Glossário completo de cada placeholder: [INSTANTIATE.md](INSTANTIATE.md).
+
+Além disso, o bootstrap já semeia:
+- `FINALIDADE_DO_PROJETO` = `TODO: confirmar com a Autoridade na primeira abertura`
+- comandos canônicos inferidos (`CMD_DEV`, `CMD_BUILD`, `CMD_TEST`, `CMD_E2E`)
+- `.engrama/project/bootstrap-do-projeto.md` em `status: proposed`
+
+Esse arquivo é a trava do **primeiro startup**: enquanto estiver `proposed` ou com `TODO`, o Orquestrador precisa entrevistar a Autoridade e fechar finalidade, stack, comandos, fronteiras e superfícies sensíveis antes de trabalho substantivo.
 
 ## Passo 2 — Rodar o instalador mecânico
 
 ```bash
-bash docs/engrama/install.sh
+bash /caminho/do/engrama/bootstrap.sh /caminho/do/projeto-alvo [/tmp/override.values]
 ```
 
-Ele: copia `template/` → raiz do repo, substitui **todos** os placeholders a partir do `.engrama.values`, e ativa o hook (`core.hooksPath .engrama/githooks`). **Confirme** que a saída diz `Placeholders restantes: ''` (vazio). Se sobrou algum, complete o `.engrama.values` e rode de novo (o instalador recusa sobrescrever — veja Merge).
+Ele: cria/inicializa o repo-alvo se necessário, infere defaults, copia `template/` → raiz do repo, substitui **todos** os placeholders, instala `.claude/settings.json`, e ativa o hook (`core.hooksPath .engrama/githooks`). **Confirme** que a saída diz `Placeholders restantes: ''` (vazio). Se sobrou algum, ajuste o arquivo de override e rode de novo (o instalador recusa sobrescrever — veja Merge).
 
 ## Passo 3 — Adaptar o gate ao domínio (SEU julgamento)
 
@@ -88,9 +96,11 @@ A governança instalada **é** uma edição de governança → passa pelo própr
 
 - [ ] `grep -rho '{{[A-Z_]*}}' CLAUDE.md AGENTS.md .engrama` retorna **vazio**.
 - [ ] `git config core.hooksPath` = `.engrama/githooks`.
+- [ ] `.claude/settings.json` existe e chama `.engrama/scripts/critique-gate-hook.sh`.
 - [ ] **Teste do gate**: encene um commit tocando `.engrama/governance/` **sem** entrada no ledger para a branch → deve **bloquear** (🚫). Isso confirma que a regra está viva neste projeto.
 - [ ] Declare o **handshake** de abertura: papel · alçada · estado factual (topo do `.engrama/log.md`) · próximo passo seguro · o que depende da Autoridade.
-- [ ] (opcional) remova `docs/engrama/` ou mantenha como referência/fonte do template.
+- [ ] O repo-alvo ficou com `CLAUDE.md`, `AGENTS.md`, `.engrama/` e `.claude/settings.json` na raiz, sem copiar `docs/engrama/`.
+- [ ] `project/bootstrap-do-projeto.md` foi lido e, se ainda estiver `proposed`, o Orquestrador iniciou a entrevista de bootstrap com a Autoridade.
 
 ---
 
@@ -101,15 +111,17 @@ O instalador **recusa sobrescrever**. Nesse caso, faça merge manual:
 - **`CLAUDE.md` existente** → intercale a seção `## Gate operacional obrigatório` (ordem de leitura + handshake) e o `## Modelo em uma página` no topo do arquivo atual, preservando o conteúdo do projeto.
 - **`.engrama/` existente** → copie só o que falta (`.engrama/governance/`, `.engrama/decisions/0001-0010`, `.engrama/specs/`, `.engrama/qa/criticas-do-executor.md`, e o schema `.engrama/CLAUDE.md` se não houver um) e reconcilie a numeração de ADR.
 - **`.engrama/scripts/critique-gate.sh` existente** → reconcilie a `classify()`.
-- Depois, rode a substituição de placeholders à mão (ou um `install.sh` apontando para uma cópia limpa) e siga do Passo 3.
+- **`.claude/settings.json` existente** → mescle o hook `PreToolUse` que chama `.engrama/scripts/critique-gate-hook.sh`.
+- Depois, rode a substituição de placeholders à mão (ou um `install.sh` apontando para um arquivo de override) e siga do Passo 3.
 
 ## Limites honestos (não é zero-touch — por design)
 
-O agente faz **todo o trabalho mecânico** e **propõe tudo**, mas 4 coisas exigem o humano, porque o modelo é construído **em torno da Autoridade humana**:
+O agente faz **todo o trabalho mecânico** e **propõe tudo**, mas 3 coisas ainda exigem o humano, porque o modelo é construído **em torno da Autoridade humana**:
 
-1. a ferramenta e os **modelos do Executor** (`EXECUTOR_CMD` / `MODELO_*`);
-2. **quem é a Autoridade** de Mudança;
-3. o **mapa de superfície sensível** do gate (`classify()`) — depende do domínio;
-4. a **aprovação do 1º commit** (e de toda promoção sensível dali em diante).
+1. **quem é a Autoridade** de Mudança, quando a inferência não bastar ou estiver errada;
+2. o **mapa de superfície sensível** do gate (`classify()`) — depende do domínio;
+3. a **aprovação do 1º commit** (e de toda promoção sensível dali em diante).
+
+`EXECUTOR`, `EXECUTOR_CMD` e `MODELO_*` já saem preenchidos com o padrão atual do pack; só mude se o projeto-alvo divergir.
 
 Tudo o mais é automático.

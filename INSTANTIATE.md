@@ -2,7 +2,7 @@
 
 Guia passo a passo (**manual / referência**) para adotar este modelo em outro repositório. Tempo típico: ~20 min + o ritual de bootstrap.
 
-> **Prefere que o agente faça sozinho?** Use **[INSTALL.md](INSTALL.md)** — playbook de auto-instalação (o agente coleta valores, roda `install.sh`, adapta o gate e conduz o bootstrap). Este arquivo é a versão manual, útil como referência e para o glossário de placeholders.
+> **Prefere que o agente faça sozinho?** Use **[INSTALL.md](INSTALL.md)** e rode `bash /caminho/do/engrama/bootstrap.sh /caminho/do/projeto-novo`. Este arquivo é a versão manual, útil como referência e para o glossário de placeholders.
 
 ---
 
@@ -11,12 +11,14 @@ Guia passo a passo (**manual / referência**) para adotar este modelo em outro r
 Copie **o conteúdo de `template/`** para a **raiz** do projeto novo:
 
 ```bash
-cp -R docs/engrama/template/. /caminho/do/projeto-novo/
+cp -R /caminho/do/engrama/template/. /caminho/do/projeto-novo/
 cd /caminho/do/projeto-novo
 chmod +x .engrama/scripts/*.sh .engrama/githooks/pre-commit
 ```
 
 Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`.
+
+> Se você estiver seguindo o fluxo canônico herdado do `Ruflos`, copie também `.claude/settings.json` para ativar o hook `PreToolUse` do gate mecânico.
 
 ---
 

@@ -19,8 +19,8 @@
 set -u
 
 # >>> TEMPLATE: preencha com o seu executor/modelo de crítica <<<
-EXECUTOR_CMD="{{EXECUTOR_CMD}}"            # ex.: "codex exec"
-CRITIQUE_MODEL="{{MODELO_CRITICA}}"        # ex.: "gpt-5.5"
+EXECUTOR_CMD="codex exec"            # ex.: "codex exec"
+CRITIQUE_MODEL="gpt-5.5"        # ex.: "gpt-5.5"
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 cd "$REPO_ROOT" || exit 0
@@ -32,30 +32,28 @@ CATS=""
 addcat() { case " $CATS " in *" $1 "*) ;; *) CATS="$CATS $1" ;; esac; }
 
 # ── CONFIG DO PROJETO: arquivo → categoria(s) ─────────────────────────────────
-# Categorias OK: financial · rbac · auth · schema · governance · gate · contract.
-# governance/gate/contract sao UNIVERSAIS; o resto e ilustrativo — edite a vontade.
+# Engrama central: governance/gate/contract sao as categorias ativas.
+# financial/rbac/auth/schema ficam disponiveis para templates/projetos-alvo.
 classify() {
   local f="$1"
   case "$f" in
-    # --- Universais (não remova) ---
-    AGENTS.md|CLAUDE.md) addcat governance ;;
-    README.md|INSTALL.md|INSTANTIATE.md) addcat governance ;;
+    # Governanca ativa da instancia viva.
+    CLAUDE.md|AGENTS.md|README.md|INSTALL.md|INSTANTIATE.md) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
-    .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
-    tests/contract/*|*/tests/contract/*) addcat contract ;;
 
-    # --- TEMPLATE: superfícies de domínio (EXEMPLOS — troque pelos seus) ---
-    # Fluxo financeiro / invariantes de valor:
-    # src/server/services/agreements.*|src/server/services/ledger.*)    addcat financial ;;
-    # RBAC / permissões / multi-tenant:
-    # src/server/permissions.*|src/server/services/users.*)             addcat rbac ;;
-    # Autenticação / sessão / rate-limit / rotas de auth:
-    # src/server/auth.*|src/app/api/*/auth/*)                           addcat auth ;;
-    # Schema / migrations:
-    # migrations/*)                                                     addcat schema ;;
-    # Rotas de API em geral (fallback de RBAC):
-    # src/app/api/*)                                                    addcat rbac ;;
+    # Template distribuivel. Mudancas aqui alteram o que novos projetos recebem.
+    template/CLAUDE.md|template/AGENTS.md) addcat governance ;;
+    template/.engrama/CLAUDE.md|template/.engrama/index.md|template/.engrama/log.md) addcat governance ;;
+    template/.engrama/governance/*|template/.engrama/decisions/*|template/.engrama/specs/*|template/.engrama/project/*|template/.engrama/qa/*) addcat governance ;;
+
+    # Instalador, hook, settings e defaults mecanicos.
+    bootstrap.sh|install.sh|sync-template.sh|engrama.values.example) addcat gate ;;
+    .engrama/scripts/critique-gate*|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    template/.engrama/scripts/critique-gate*|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
+
+    # Contrato verificavel do bootstrap/template.
+    tests/contract/*|*/tests/contract/*) addcat contract ;;
     *) : ;;
   esac
 }

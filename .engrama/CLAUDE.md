@@ -7,7 +7,7 @@ Este engrama é a **memória institucional** do projeto. Ele NÃO é o código n
 ## Source of truth (não duplicar — referenciar)
 
 ```
-SOURCE_OF_TRUTH_REPO: {{REPO_PATH}}
+SOURCE_OF_TRUTH_REPO: /Users/x86/git-projects/engrama
 - CLAUDE.md / AGENTS.md       → gates de governança (entry-points)
 - .engrama/governance/*          → processo entre agentes (papéis, alçadas, handoff)
 - .engrama/decisions/*           → ADRs (por quê de cada decisão)
@@ -52,9 +52,9 @@ NÃO replica: estrutura de pastas do código, assinaturas/tipos/schemas, estado 
 type: decision | domain | workflow | roadmap | gap | governance | spec
 status: active | proposed | superseded | resolved
 touches: [slug-relacionado, outro-slug]
-date: {{DATA}}
+date: 2026-06-20
 source_refs:                       # caminhos absolutos no repo
-  - {{REPO_PATH}}/...
+  - /Users/x86/git-projects/engrama/...
 critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   # só em gaps de superfície sensível (ADR 0006/item 7)
 ---
 ```
@@ -103,7 +103,7 @@ Procurar: páginas órfãs; ADRs `superseded` sem ponteiro; invariantes citados 
 
 ## Formato do log.md
 ```
-## [{{DATA}}] decision | Modelo de governança de 3 papéis
+## [2026-06-20] decision | Modelo de governança de 3 papéis
 - ADR: [[decisions/0001-governanca-tres-papeis]]
 - Toca: [[governance/papeis-e-alcadas]]
 ```

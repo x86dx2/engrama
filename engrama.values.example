@@ -1,19 +1,24 @@
-# Valores do Engrama — copie para .engrama.values e preencha.
+# Valores de override do Engrama.
 # Formato: CHAVE=valor   (sem as chaves {{ }}, sem aspas, sem '#' no valor).
-# O install.sh substitui {{CHAVE}} -> valor em todos os arquivos instalados.
+# O bootstrap já infere defaults; use este arquivo só para sobrescrever.
 
-# --- INFERÍVEIS (o agente preenche do repo e confirma) ---
+# --- INFERÍVEIS / OVERRIDE OPCIONAL ---
 PROJETO=MeuProjeto
 REPO_PATH=/caminho/absoluto/do/repo
 ORQUESTRADOR=Claude (Claude Code)
 AUTORIDADE=Humano (voce@exemplo.com)
 DATA=2026-01-01
-STACK=preencher (ex.: Node + Postgres)
+FINALIDADE_DO_PROJETO=preencher na primeira abertura
+STACK=Node + Postgres
 DEV_URL=localhost:3000
+CMD_DEV=npm run dev
+CMD_BUILD=npm run build
+CMD_TEST=npm test
+CMD_E2E=N/A
 
-# --- PERGUNTAR AO HUMANO (não inferível com segurança) ---
+# --- PADRAO ATUAL DO PACK (sobrescreva só se divergir) ---
 EXECUTOR=Codex
 EXECUTOR_CMD=codex exec
-MODELO_CRITICA=preencher (maior modelo aprovado, só para o papel de crítica)
-MODELO_EXECUTOR_PESADO=preencher (modelo forte de execução)
-MODELO_EXECUTOR_LEVE=preencher (modelo barato/rápido de execução)
+MODELO_CRITICA=gpt-5.5
+MODELO_EXECUTOR_PESADO=gpt-5.4
+MODELO_EXECUTOR_LEVE=gpt-5.4-mini

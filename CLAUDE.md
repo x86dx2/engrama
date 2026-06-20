@@ -21,7 +21,7 @@ Se `.engrama/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou 
 ## Modelo em uma página
 
 - **Tríade (por função, não por vendor):** **Orquestrador** = Orquestrador/Auditor/QA/Arquiteto (dono do git; **não escreve código de fatia**) · **Executor Crítico** = escreve o código; critica ativamente · **Autoridade de Mudança** = arbitra discordâncias; aprova produção.
-- **Executor-bridge:** o Orquestrador invoca o Executor direto (`{{EXECUTOR_CMD}}`); **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003)
+- **Executor-bridge:** o Orquestrador invoca o Executor direto (`codex exec`); **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003)
 - **Executor é freio ativo:** objeção material → escala à Autoridade; o Orquestrador **não tem overrule**. (ADR 0004)
 - **Governança não se autoaprova:** edição de governança vai à **crítica do Executor antes do commit** — imposto pelo gate mecânico `.engrama/scripts/critique-gate.sh`. (ADR 0006)
 - **Subagentes** só na lane do Orquestrador; **nunca** escrevem código de fatia. (ADR 0008)
@@ -38,8 +38,6 @@ Detalhe normativo e matriz de alçadas: `.engrama/governance/papeis-e-alcadas.md
 
 ## Stack do projeto
 
-Stack-alvo: `{{STACK}}`.
+Stack-alvo: `Markdown + Bash + Git hooks + Claude Code settings`.
 
-Bootstrap do projeto: `.engrama/project/bootstrap-do-projeto.md`.
-
-> Template: descreva a stack concreta e as regras específicas do seu projeto aqui; use `.engrama/project/bootstrap-do-projeto.md` como fonte de verdade do primeiro startup.
+Este repo tem dois papeis: **instancia viva** do Engrama na raiz e **template distribuivel** em `template/`. A fonte de verdade do bootstrap deste proprio projeto e `.engrama/project/bootstrap-do-projeto.md`.

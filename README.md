@@ -112,7 +112,7 @@ template/
 
 Dois caminhos:
 
-- **Auto-instalação pelo agente (recomendado):** copie a pasta `docs/engrama/` para o projeto novo e diga ao agente *"instale o Engrama seguindo `docs/engrama/INSTALL.md`"*. O **[INSTALL.md](INSTALL.md)** é um playbook imperativo endereçado ao agente: ele coleta os valores (inferindo do repo + perguntando o que não dá pra inferir), roda o `install.sh` (copia `template/`→raiz, troca os placeholders, ativa o gate), adapta o gate ao domínio e conduz o ritual de bootstrap.
+- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bootstrap.sh /caminho/do/projeto-novo`. O **[INSTALL.md](INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` na raiz e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
 - **Manual (referência):** **[INSTANTIATE.md](INSTANTIATE.md)** — os mesmos passos feitos à mão, com o glossário completo dos 12 placeholders.
 
 Em ambos vale o **ritual de bootstrap** (ADR 0006): a governança se aplica a si mesma — o Engrama inicial vai à crítica do Executor e à aprovação da Autoridade antes do 1º commit.
