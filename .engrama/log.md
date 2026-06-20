@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] docs | P0.4 honestidade + P3 higiene (claims alinhados à verdade)
+- Branch `remediacao/p04-honestidade-higiene`. Orquestrador autorou; Executor (`codex exec`) criticou (`discordo`) e os ajustes foram **incorporados** (Path 1).
+- **Honestidade:** README/ADR 0006/comentário do gate deixam claro que o hook é **freio cooperativo local** (burlável); o enforcement vinculante (gate como *required check* server-side) é **pendente** — a CI atual só roda `shellcheck`+testes. Bootstrap chicken-and-egg explicitado.
+- **R1 mantido ABERTO** (não "aceito"): coerência entre README/ADR/CHANGELOG/teste/log/gaps/qa restaurada (o Executor pegou meu reframe parcial).
+- **Higiene:** `LICENSE` (MIT, confirmar titularidade), `CHANGELOG.md`, e correção do bloco "Estrutura" do schema (`.engrama/CLAUDE.md`).
+- **PRÓXIMO PASSO SEGURO:** decisão da Autoridade sobre o commit; depois **P2** (`sync-template.sh` raiz→template + step de CI que reexecuta o gate contra o PR — fecha parte do R1) e injeção de `{{ENGRAMA_VERSION}}`.
+
 ## [2026-06-20] fix | R2/R5 — parsing por campo do ledger (gate deixa de usar grep-substring)
 - Branch `remediacao/auditoria-engrama`. Executor (`codex exec`, concordo) trocou o matching por **parsing por campo**; Orquestrador auditou (21 asserts verdes; gate ao vivo no índice real validado; contraprova bloqueia).
 - **R2 fechado** (`nao confirmo` não casa mais `confirmo` — veredito por enum no campo 3) e **R5 fechado** (branch por igualdade exata de campo, não substring na linha).

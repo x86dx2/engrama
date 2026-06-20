@@ -96,13 +96,15 @@ check G6 CORRETO 0 "$(run_gate "$r")" "arquivo fora de superficie sensivel"
 
 # ── RED: furos reais (comportamento atual e inseguro) ─────────────────────────
 
-# R1: AUTO-APROVACAO no MESMO commit — autor escreve 'confirmo' e comita junto.
-#     O gate nao distingue prova independente de auto-atestado => LIBERA (FURO).
+# R1 (FURO ABERTO): AUTO-APROVACAO no MESMO commit — autor escreve 'confirmo' e
+#     comita junto. O gate LIBERA (nao distingue prova independente de auto-atestado).
+#     Mitigacao (gate como required check na CI + vinculo ao diff) e PENDENTE — ver
+#     ADR 0006 / gaps/auditoria-e-plano-de-remediacao. O hook local e cooperativo.
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] eu mesmo aprovei | confirmo | ref"
 echo x > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
-check R1 FURO 0 "$(run_gate "$r")" "auto-aprovacao no mesmo commit (sem identidade/diff independente)"
+check R1 FURO 0 "$(run_gate "$r")" "auto-aprovacao local LIBERA (furo aberto; enforcement server-side pendente)"
 
 # R2: FALSO-POSITIVO por substring — 'nao confirmo' contem 'confirmo' => LIBERA (FURO).
 r="$(new_repo main)"

@@ -5,8 +5,10 @@
 # CONCLUÍDA em .engrama/qa/criticas-do-executor.md, por CATEGORIA, referenciando a branch.
 #
 # A crítica é feita por um agente/modelo INDEPENDENTE do Orquestrador (o Executor
-# no papel de crítica, read-only). O gate não confia na memória do Orquestrador:
-# ele exige a PROVA registrada antes do commit.
+# no papel de crítica, read-only). O gate exige o REGISTRO da crítica antes do
+# commit — ele NÃO prova que um modelo independente de fato a produziu, e é um
+# freio COOPERATIVO LOCAL (burlável por --no-verify / fora do harness). O
+# enforcement vinculante (gate como required check na CI) é pendente — ver ADR 0006.
 #
 # ── COMO ADAPTAR AO SEU PROJETO ───────────────────────────────────────────────
 # 1. Ajuste as variáveis EXECUTOR_CMD / CRITIQUE_MODEL abaixo.
