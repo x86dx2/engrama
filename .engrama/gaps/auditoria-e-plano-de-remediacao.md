@@ -14,6 +14,19 @@ source_refs:
 
 Auditoria imparcial do Engrama (3 fontes independentes — leitura manual, workflow multi-agente de 47 agentes/39 achados confirmados, crítica externa do `codex`) **validada por testes** e **revisada pela crítica do Executor** (`codex exec`, veredito `discordo` → ajustes incorporados; ver [[qa/criticas-do-executor]]). Registra o que está **comprovadamente correto**, o que é **furo comprovado por teste**, e o **plano completo de remediação** por fases. Governança → não se autoaprova: o commit depende da Autoridade.
 
+## STATUS FINAL (2026-06-20) — roadmap entregue
+
+| Fase | Estado | Commit |
+|------|--------|--------|
+| P0.1 instalador (`#`/`&` + fail-closed) | ✅ | 8518b37 |
+| P0.2/P0.3 CI + classify + R3/R4 + hook | ✅ | 335e696 |
+| R2/R5 parsing por campo | ✅ | f024029 |
+| P0.4 honestidade + P3 higiene (LICENSE/CHANGELOG/schema) | ✅ | 735e3eb |
+| P2 sync-template + propaga fixes ao template + drift (EX2) | ✅ | 9b8da4e |
+| P2b CI reexecuta o gate contra o PR (`critique-gate-ci.sh`) | ✅ | (esta fatia) |
+
+**Furos:** 7 dos 8 fechados e travados por teste (C5/C6/C7 · R2/R3/R4/R5). **R1** (auto-aprovação local) **mitigado server-side** pela P2b — falta só marcar o check da CI como *required* no *branch protection* (config de repositório, fora do código) para o bloqueio de merge ser vinculante. Suíte: 30 asserts (gate 12 · contract 9 · sync 5 · ci 4). O modelo de governança foi dogfoodado em cada fatia (Executor escreve, Orquestrador audita, ledger registra, gate ao vivo) e **pegou erros reais no trabalho do Orquestrador 3×**.
+
 ## Método (por que confiar)
 
 Cruzei três análises e **fact-checkei até os próprios críticos**: refutei 1 alegação do `codex` (`tests/contract/*` em `case` do bash **casa** subpastas — `*` casa `/`); e **incorporei a crítica do Executor**, que pegou erros factuais e fragilidades nos meus próprios testes (ver seção final). Cada achado aponta o **teste que o prova** (`tests/run.sh`: 20 asserts, fail-fast sob setup quebrado).
