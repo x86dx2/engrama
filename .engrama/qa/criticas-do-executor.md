@@ -43,7 +43,8 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - Auditoria do Orquestrador/Codex nesta sessão: comparação com Ruflos, separação entre raiz viva e `template/`, `shellcheck` e smoke de bootstrap limpo antes do commit.
 - Próxima mudança sensível deve registrar crítica independente do Executor (`codex exec`, `gpt-5.5`) ou waiver explícito da Autoridade antes do commit.
 
-## [2026-06-20] main | [governance][gate][contract] auditoria + plano de remediacao + suites de teste | discordo-incorporado-aguarda-autoridade | crítica codex read-only
+## [2026-06-20] main | [governance][gate][contract] auditoria + plano de remediacao + suites de teste | waiver Autoridade 2026-06-20 (discordo do Executor incorporado; merge aprovado) | crítica codex read-only
+- **Arbitragem da Autoridade (2026-06-20):** o `discordo` do Executor foi integralmente incorporado (testes fail-fast, EX2, overclaims, R5/C8, R1 reformulado) e a Autoridade aprovou a integração via merge na `main` (commit de merge). Objeção resolvida; registrada por completude.
 - **Executor:** `codex exec` (read-only, papel de crítica), 2026-06-20. Ordem e resposta na íntegra anexadas à Autoridade (ADR 0003).
 - **Veredito do Executor:** `discordo` (objeção material; governança/gate é superfície sensível). 13 pontos.
 - **Incorporado pelo Orquestrador:** testes agora fail-fast (abortam em setup quebrado, provado); EX2 corrigido (3 categorias ativas, não 3v7); overclaims removidos; R5 (bypass cross-branch) e C8 (cobre bootstrap.sh) adicionados; R1 reformulado (sha256=vínculo ao conteúdo, exclui o ledger; independência exige server-side); P0 reordenado; hook test (EX6) previsto.
