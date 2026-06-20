@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] fix | P2 — propaga fixes do gate ao template + sync-template.sh + drift test (fecha EX2)
+- Branch `remediacao/p2-sync-template`. Executor (`codex exec`, concordo) escreveu; Orquestrador auditou (smoke funcional + idempotência + sensibilidade do drift test).
+- **Bug fechado (EX2):** o `template/` distribuía o gate **vulnerável** (sem R2-R5/-z/detached/hook fail-closed) — projeto novo herdava os furos. Agora o template carrega o gate endurecido (lógica da raiz + placeholders + classify de domínio).
+- **`sync-template.sh`** (gerador idempotente, composição por seções) resolve a referência fantasma; **`tests/contract/sync.test.sh`** trava o drift (provado sensível) e roda na CI.
+- **Smoke:** `bootstrap.sh /tmp/novo` → gate instalado tem `is_ok_verdict`, 0 placeholders, e bloqueia governança sem ledger.
+- **Roadmap:** P0.1–P0.4, P2, P3 entregues; **7/8 furos** fechados. Resta só **R1** (aberto, consciente) + a fatia server-side opcional (gate como required check na CI).
+- **PRÓXIMO PASSO SEGURO:** decisão da Autoridade sobre o commit/merge; opcional: P2b (step de CI rodando o gate contra o PR, que mitiga R1 de verdade).
+
 ## [2026-06-20] docs | P0.4 honestidade + P3 higiene (claims alinhados à verdade)
 - Branch `remediacao/p04-honestidade-higiene`. Orquestrador autorou; Executor (`codex exec`) criticou (`discordo`) e os ajustes foram **incorporados** (Path 1).
 - **Honestidade:** README/ADR 0006/comentário do gate deixam claro que o hook é **freio cooperativo local** (burlável); o enforcement vinculante (gate como *required check* server-side) é **pendente** — a CI atual só roda `shellcheck`+testes. Bootstrap chicken-and-egg explicitado.
