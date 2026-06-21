@@ -12,11 +12,13 @@ ROOT_GATE="$HERE/.engrama/scripts/critique-gate.sh"
 ROOT_HOOK="$HERE/.engrama/scripts/critique-gate-hook.sh"
 ROOT_SESSION_CONTEXT="$HERE/.engrama/scripts/session-context.sh"
 ROOT_LINT="$HERE/lint.sh"
+ROOT_DIFF_HASH="$HERE/engrama-diff-hash.sh"
 ROOT_SETTINGS="$HERE/.claude/settings.json"
 TEMPLATE_GATE="$HERE/template/.engrama/scripts/critique-gate.sh"
 TEMPLATE_HOOK="$HERE/template/.engrama/scripts/critique-gate-hook.sh"
 TEMPLATE_SESSION_CONTEXT="$HERE/template/.engrama/scripts/session-context.sh"
 TEMPLATE_LINT="$HERE/template/lint.sh"
+TEMPLATE_DIFF_HASH="$HERE/template/engrama-diff-hash.sh"
 TEMPLATE_SETTINGS="$HERE/template/.claude/settings.json"
 TMPDIR_SYNC=""
 
@@ -73,7 +75,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    lint.sh) addcat gate ;;
+    lint.sh|engrama-diff-hash.sh) addcat gate ;;
     .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
@@ -134,6 +136,7 @@ main() {
   need_file "$ROOT_HOOK"
   need_file "$ROOT_SESSION_CONTEXT"
   need_file "$ROOT_LINT"
+  need_file "$ROOT_DIFF_HASH"
   need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
   need_file "$TEMPLATE_HOOK"
@@ -146,15 +149,17 @@ main() {
   cp "$ROOT_HOOK" "$TMPDIR_SYNC/critique-gate-hook.sh"
   cp "$ROOT_SESSION_CONTEXT" "$TMPDIR_SYNC/session-context.sh"
   cp "$ROOT_LINT" "$TMPDIR_SYNC/lint.sh"
+  cp "$ROOT_DIFF_HASH" "$TMPDIR_SYNC/engrama-diff-hash.sh"
   cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"
 
   write_if_changed "$TMPDIR_SYNC/critique-gate.sh" "$TEMPLATE_GATE"
   write_if_changed "$TMPDIR_SYNC/critique-gate-hook.sh" "$TEMPLATE_HOOK"
   write_if_changed "$TMPDIR_SYNC/session-context.sh" "$TEMPLATE_SESSION_CONTEXT"
   write_if_changed "$TMPDIR_SYNC/lint.sh" "$TEMPLATE_LINT"
+  write_if_changed "$TMPDIR_SYNC/engrama-diff-hash.sh" "$TEMPLATE_DIFF_HASH"
   write_if_changed "$TMPDIR_SYNC/settings.json" "$TEMPLATE_SETTINGS"
 
-  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" 2>/dev/null || true
+  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" 2>/dev/null || true
 }
 
 main "$@"

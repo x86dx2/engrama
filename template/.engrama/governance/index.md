@@ -30,7 +30,7 @@ Governança **não** substitui o bootstrap do projeto. O **perfil inicial do pro
 3. [[governance/modelo-operacional]] — os princípios inegociáveis.
 4. [[governance/continuidade-de-sessao]] — abrir, trabalhar, encerrar, handoff.
 5. [[project/bootstrap-do-projeto]] — se estiver `proposed`, a primeira tarefa é completar o bootstrap com a Autoridade.
-6. ADRs de processo [[decisions/0001-governanca-tres-papeis]] … [[decisions/0009-producao-intocavel-dupla-confirmacao]] + roteamento de modelo/effort [[decisions/0010-roteamento-modelo-effort-do-executor]].
+6. ADRs de processo [[decisions/0001-governanca-tres-papeis]] … [[decisions/0009-producao-intocavel-dupla-confirmacao]] + roteamento de modelo/effort [[decisions/0010-roteamento-modelo-effort-do-executor]] + diff-binding verificável [[decisions/0011-diff-binding-atestacao-verificavel]].
 7. Topo do [[log]] — estado factual recente.
 
 ## O que adaptar por projeto

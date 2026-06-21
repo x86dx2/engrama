@@ -13,6 +13,8 @@ ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
 TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.sh"
 ROOT_LINT="$REPO_ROOT/lint.sh"
 TEMPLATE_LINT="$REPO_ROOT/template/lint.sh"
+ROOT_DIFF_HASH="$REPO_ROOT/engrama-diff-hash.sh"
+TEMPLATE_DIFF_HASH="$REPO_ROOT/template/engrama-diff-hash.sh"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 SYNC_SCRIPT="$REPO_ROOT/sync-template.sh"
@@ -65,8 +67,11 @@ check S3 CORRETO "$_r" "referencia a sync-template.sh resolve para arquivo exist
 if cmp -s "$ROOT_LINT" "$TEMPLATE_LINT"; then _r=0; else _r=1; fi
 check S3B CORRETO "$_r" "lint.sh do template identico ao da raiz"
 
+if cmp -s "$ROOT_DIFF_HASH" "$TEMPLATE_DIFF_HASH"; then _r=0; else _r=1; fi
+check S3C CORRETO "$_r" "engrama-diff-hash.sh do template identico ao da raiz"
+
 if cmp -s "$ROOT_SETTINGS" "$TEMPLATE_SETTINGS"; then _r=0; else _r=1; fi
-check S3C CORRETO "$_r" "settings.json do template identico ao da raiz"
+check S3D CORRETO "$_r" "settings.json do template identico ao da raiz"
 
 if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template preserva placeholders do gate"

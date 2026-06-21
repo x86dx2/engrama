@@ -23,6 +23,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 - [[decisions/0008-subagentes-so-na-lane-do-orquestrador]] — subagentes não executam código de fatia.
 - [[decisions/0009-producao-intocavel-dupla-confirmacao]] — produção intocável (inativo até existir deploy).
 - [[decisions/0010-roteamento-modelo-effort-do-executor]] — Orquestrador decide modelo+effort do Executor por tarefa (tiers T1–T4; conservador-pra-cima; risco=piso).
+- [[decisions/0011-diff-binding-atestacao-verificavel]] — ledger pode vincular a crítica ao diff staged por `sha256`, com modo estrito opt-in/CI.
 
 ## Specs (playbooks operacionais — o "como")
 - [[specs/README]] — índice + princípio (spec ≠ subagente).

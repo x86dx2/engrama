@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] feat | T3 (absorcao walrus) — diff-binding: atestacao verificavel (mitiga R1)
+- Branch `absorcao/t3-atestacao`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (backward-compat + 5 casos do zero + honestidade do ADR).
+- **diff-binding:** o ledger pode carregar `sha256:<hex>` (via `engrama-diff-hash.sh`, fingerprint estavel do `git diff --cached --raw` excluindo o ledger). Hash bate -> libera; arquivo editado apos a critica -> BLOQUEIA (vinculo obsoleto); modo estrito `ENGRAMA_REQUIRE_DIFF_BIND=1` (CI) exige o hash. Entradas sem hash = legado (backward-compat: G1-G7/R2-R5/fuzz intactas).
+- **ADR 0011** (honesto): prova cobertura DESTE diff; NAO prova independencia de identidade do critico (assinatura/chave = teto, codex nao expoe). CI estrita reexecuta o gate contra o diff real do PR.
+- **R1 mitigado** (nao eliminado): o caminho forte + CI estrita fecham "1 confirmo libera a branch toda" e "confirmo velho vale diff novo"; o legado local segue cooperativo (documentado).
+- Suite 249 asserts verde; shellcheck/lint limpos.
+- **Este commit dogfooda o diff-binding:** entrada de ledger vinculada por sha256.
+
 ## [2026-06-20] feat | T2c (absorcao headroom) — loop falha->regra + principio 12 (metricas honestas)
 - Branch `absorcao/t2c-governanca`. Orquestrador autorou; Executor (`codex exec`) criticou (`ajuste-menor`, 4 achados) -> incorporados.
 - **Principio 12** (honestidade de claims/metricas) em modelo-operacional + spec **licao-aprendida** (toda falha relevante vira regra duravel: gate/lint/teste/ADR). Propagado ao template.
