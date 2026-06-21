@@ -7,6 +7,12 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR4 — versionamento 0.1.0 + vendor/model-names honestos (EX4 parte 2)
+- Branch `feat/versionamento-vendor`. Executor (`codex exec`, concordo); Orquestrador auditou (smoke com VERSION, vendor honesto, suite verde).
+- **Versionamento (item 8):** `VERSION`=0.1.0 (fonte de verdade); `bin/bootstrap.sh` semeia `ENGRAMA_VERSION`; `template/.engrama/VERSION`={{ENGRAMA_VERSION}} -> projeto-alvo registra a versao instalada; teste C10 prova. CHANGELOG cortado em release `[0.1.0] - 2026-06-21`.
+- **Vendor honesto (item 7):** ids de modelo `gpt-5.x` relabelados de "PADRAO" para "EXEMPLO/confirme no seu codex exec" (nao verificados); nova secao "Camada de adaptadores de vendor" em papeis-e-alcadas (EXECUTOR_CMD/modelos/.claude sao adaptador trocavel; nucleo vendor-agnostico).
+- **PROXIMO:** apos o merge, criar a tag git `v0.1.0`. Com isso TODAS as pendencias levantadas estao fechadas.
+
 ## [2026-06-21] fix | PR3 — EX4(parte 1): source_refs absolutos -> relativos (portabilidade)
 - Branch `fix/source-refs-relativos`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (zero absolutos, portabilidade por clone, smoke com refs relativos).
 - Migrou os `source_refs` de TODOS os `.engrama/**/*.md` (raiz: `/Users/...`-><X>; template: `{{REPO_PATH}}/`-><X>) para **relativos à raiz**; corrigiu 3 paths fora de source_refs (`SOURCE_OF_TRUTH_REPO: .`, regra/exemplo do schema, prosa do infra-runbook); `lint.sh` valida relativo (compat com absoluto legado).

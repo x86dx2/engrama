@@ -30,13 +30,14 @@ Todos os pontos variáveis usam `{{CHAVE}}`. Defina os valores do seu projeto:
 |---|---|---|
 | `{{PROJETO}}` | nome do projeto | `Ruflos` |
 | `{{REPO_PATH}}` | caminho absoluto do repo (para `source_refs`) | `/Users/x86/git-projects/Ruflos` |
+| `{{ENGRAMA_VERSION}}` | versão do pack que gerou a instalação (`.engrama/VERSION`) | `0.1.0` |
 | `{{ORQUESTRADOR}}` | agente no papel de Orquestrador/Auditor | `Claude (Claude Code)` |
 | `{{EXECUTOR}}` | agente no papel de Executor Crítico | `Codex` |
 | `{{AUTORIDADE}}` | quem é a Autoridade de Mudança | `Humano (voce@exemplo.com)` |
-| `{{EXECUTOR_CMD}}` | comando que invoca o Executor | `codex exec` |
-| `{{MODELO_CRITICA}}` | modelo independente usado na crítica | `gpt-5.5` |
-| `{{MODELO_EXECUTOR_PESADO}}` | modelo do Executor para tarefas pesadas | `gpt-5.4` |
-| `{{MODELO_EXECUTOR_LEVE}}` | modelo do Executor para tarefas leves | `gpt-5.4-mini` |
+| `{{EXECUTOR_CMD}}` | comando que invoca o Executor (adaptador concreto do projeto) | `codex exec` |
+| `{{MODELO_CRITICA}}` | modelo independente usado na crítica | `gpt-5.5` *(exemplo; confirme o id real contra o seu `codex exec`)* |
+| `{{MODELO_EXECUTOR_PESADO}}` | modelo do Executor para tarefas pesadas | `gpt-5.4` *(exemplo; confirme o id real contra o seu `codex exec`)* |
+| `{{MODELO_EXECUTOR_LEVE}}` | modelo do Executor para tarefas leves | `gpt-5.4-mini` *(exemplo; confirme o id real contra o seu `codex exec`)* |
 | `{{STACK}}` | stack do projeto | `Cloudflare Workers + Next.js + D1` |
 | `{{DEV_URL}}` | URL/porta do dev local | `localhost:3000` |
 | `{{DATA}}` | data de instanciação (frontmatter/log) | `2026-06-17` |
@@ -44,7 +45,7 @@ Todos os pontos variáveis usam `{{CHAVE}}`. Defina os valores do seu projeto:
 Busque o que falta trocar:
 
 ```bash
-grep -rno '{{[A-Z_]*}}' . --include='*.md' --include='*.sh' | sort -u
+grep -rno '{{[A-Z_]*}}' . --include='*.md' --include='*.sh' --include='VERSION' | sort -u
 ```
 
 Substituição em lote (revise antes — o `{{REPO_PATH}}` e `{{DATA}}` têm `/` e devem ir primeiro):
@@ -55,6 +56,8 @@ grep -rl '{{PROJETO}}' . | xargs sed -i '' 's#{{PROJETO}}#Ruflos#g'
 grep -rl '{{EXECUTOR_CMD}}' . | xargs sed -i '' 's#{{EXECUTOR_CMD}}#codex exec#g'
 # … repita por placeholder …
 ```
+
+> `{{ENGRAMA_VERSION}}` deve receber a versão do pack-fonte que você está instalando (tipicamente `cat /caminho/do/engrama/VERSION`). `{{MODELO_*}}` são **exemplos**: confirme os ids reais no namespace do seu `codex exec` antes de gravar.
 
 > **Decisão de estilo:** o modelo é *"papéis por função, não por vendor"*. Na prosa normativa, os papéis aparecem como **Orquestrador / Executor / Autoridade** (canônicos). Os `{{ORQUESTRADOR/EXECUTOR/AUTORIDADE}}` aparecem **uma vez**, na tabela "Mapeamento atual" de `.engrama/governance/papeis-e-alcadas.md`. Trocar quem ocupa cada papel = editar só essa tabela.
 

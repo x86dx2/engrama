@@ -64,6 +64,9 @@ check S2B CORRETO "$_r" "session-context do template identico ao da raiz"
 if grep -Fq 'bin/*) addcat gate ;;' "$ROOT_GATE" && [ -f "$SYNC_SCRIPT" ]; then _r=0; else _r=1; fi
 check S3 CORRETO "$_r" "gate reconhece bin/* como tooling sensivel e o sync existe"
 
+if grep -Fq 'VERSION|template/.engrama/VERSION|bin/*) addcat gate ;;' "$ROOT_GATE"; then _r=0; else _r=1; fi
+check S3A CORRETO "$_r" "gate da raiz classifica VERSION e template/.engrama/VERSION como gate"
+
 if cmp -s "$ROOT_LINT" "$TEMPLATE_LINT"; then _r=0; else _r=1; fi
 check S3B CORRETO "$_r" "lint.sh do template identico ao da raiz"
 
@@ -75,6 +78,13 @@ check S3D CORRETO "$_r" "settings.json do template identico ao da raiz"
 
 if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template preserva placeholders do gate"
+
+if grep -Fq '.engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;' "$TEMPLATE_GATE"; then
+  _r=0
+else
+  _r=1
+fi
+check S4A CORRETO "$_r" "gate do template classifica .engrama/VERSION como gate"
 
 if grep -Fq '# src/server/services/agreements.*|src/server/services/ledger.*)    addcat financial ;;' "$TEMPLATE_GATE" \
   && grep -Fq '# src/server/permissions.*|src/server/services/users.*)             addcat rbac ;;' "$TEMPLATE_GATE" \

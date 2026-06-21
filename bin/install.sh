@@ -120,7 +120,7 @@ while IFS= read -r -d '' f; do
   fi
 done < <(
   find "$ROOT/.engrama" "$ROOT/CLAUDE.md" "$ROOT/AGENTS.md" -type f \
-    \( -name '*.md' -o -name '*.sh' -o -name '.gitignore' -o -name 'pre-commit' \) \
+    \( -name '*.md' -o -name '*.sh' -o -name '.gitignore' -o -name 'pre-commit' -o -name 'VERSION' \) \
     -print0 2>/dev/null
 )
 [ "$apply_failed" -eq 0 ] || {
@@ -137,6 +137,9 @@ echo "Gate ativado: core.hooksPath=.engrama/githooks"
 if ! report_remaining_placeholders "$ROOT"; then
   echo "ERRO: substituição incompleta; abortando."
   exit 1
+fi
+if [ -f "$ROOT/.engrama/VERSION" ]; then
+  printf 'Versao instalada do pack: %s\n' "$(sed -n '1{s/\r$//;p;q;}' "$ROOT/.engrama/VERSION" 2>/dev/null)"
 fi
 echo "PRÓXIMO (julgamento do AGENTE — ver docs/INSTALL.md):"
 echo "  Passo 3) concluir o bootstrap do projeto em .engrama/project/bootstrap-do-projeto.md"

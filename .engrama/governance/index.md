@@ -36,7 +36,7 @@ Governança **não** substitui o bootstrap do projeto. O **perfil inicial do pro
 ## O que adaptar por projeto
 
 - **Executor-bridge automatizado:** o **Orquestrador invoca o Executor diretamente** (`codex exec`) e fecha o loop até staging sozinho, sem relay humano de rotina. Ver [[decisions/0003-executor-bridge-orquestrador-invoca-executor]].
-  > Template: defina o comando concreto de invocação do Executor (`codex exec`) e o roteamento de modelos (`gpt-5.4` / `gpt-5.4-mini`) que o seu projeto vai usar — o roteamento escolhe o *modelo*, nunca *se* o Executor participa.
+  > Template: defina o comando concreto de invocação do Executor (`codex exec`, ou outro adaptador) e o roteamento de modelos do seu projeto (ex.: um tier pesado e um leve; confirme os ids reais no seu adaptador). O roteamento escolhe o *modelo*, nunca *se* o Executor participa.
 - **Executor como freio ativo:** o Executor critica ativamente **toda ordem**; qualquer discordância material **escala à Autoridade** — o Orquestrador **não tem overrule**. Ver [[decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]].
 - **Bootstrap do projeto no 1º startup:** o Orquestrador entrevista a Autoridade e fecha finalidade/stack/comandos/superfícies sensíveis em [[project/bootstrap-do-projeto]] antes de trabalho substantivo.
 - **Tooling de swarm é subordinado**, não o modelo de coordenação. A tríade é o modelo; **qualquer tooling de swarm/orquestração de subagentes** (e seus mecanismos de mensagem) não é o canal de governança — o canal é o **engrama versionado + `codex exec` (executor-bridge)**.

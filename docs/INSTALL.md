@@ -25,6 +25,7 @@ Defaults/heurísticas usados pelo bootstrap:
 | Chave | Como obter | |
 |---|---|---|
 | `REPO_PATH` | **INFERIR**: `git rev-parse --show-toplevel` | |
+| `ENGRAMA_VERSION` | **FONTE DE VERDADE**: `cat /caminho/do/engrama/VERSION` (fallback `0.0.0` se faltar) | |
 | `DATA` | **INFERIR**: data de hoje (`YYYY-MM-DD`) | |
 | `PROJETO` | **INFERIR** do nome do diretório / `package.json` / remote git → **confirmar** | |
 | `STACK` | **INFERIR** do repo (`package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `pom.xml`…) → **confirmar** | |
@@ -32,10 +33,10 @@ Defaults/heurísticas usados pelo bootstrap:
 | `ORQUESTRADOR` | **PADRÃO**: `Claude (Claude Code)` | |
 | `DEV_URL` | **INFERIR** de scripts/config (porta do dev) ou **PERGUNTAR** | |
 | `EXECUTOR` | **PADRÃO**: `Codex` | |
-| `EXECUTOR_CMD` | **PADRÃO**: `codex exec` | |
-| `MODELO_CRITICA` | **PADRÃO**: `gpt-5.5` | |
-| `MODELO_EXECUTOR_PESADO` | **PADRÃO**: `gpt-5.4` | |
-| `MODELO_EXECUTOR_LEVE` | **PADRÃO**: `gpt-5.4-mini` | |
+| `EXECUTOR_CMD` | **ADAPTADOR CONCRETO atual do pack**: `codex exec` | |
+| `MODELO_CRITICA` | **EXEMPLO atual do pack**: `gpt-5.5` — confirme o id real contra o seu `codex exec` | |
+| `MODELO_EXECUTOR_PESADO` | **EXEMPLO atual do pack**: `gpt-5.4` — confirme o id real contra o seu `codex exec` | |
+| `MODELO_EXECUTOR_LEVE` | **EXEMPLO atual do pack**: `gpt-5.4-mini` — confirme o id real contra o seu `codex exec` | |
 
 > O bootstrap já assume o padrão operacional atual do pack. Pergunte só quando o projeto-alvo divergir do padrão ou quando a `AUTORIDADE`/`STACK`/`DEV_URL` não estiverem claros. Glossário completo de cada placeholder: [INSTANTIATE.md](INSTANTIATE.md).
 
@@ -52,7 +53,7 @@ Esse arquivo é a trava do **primeiro startup**: enquanto estiver `proposed` ou 
 bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-alvo [/tmp/override.values]
 ```
 
-Ele: cria/inicializa o repo-alvo se necessário, infere defaults, copia `template/` → raiz do repo, substitui **todos** os placeholders, instala `.claude/settings.json`, e ativa o hook (`core.hooksPath .engrama/githooks`). **Confirme** que a saída diz `Placeholders restantes: ''` (vazio). Se sobrou algum, ajuste o arquivo de override e rode de novo (o instalador recusa sobrescrever — veja Merge).
+Ele: cria/inicializa o repo-alvo se necessário, infere defaults, copia `template/` → raiz do repo, substitui **todos** os placeholders, instala `.claude/settings.json`, registra `.engrama/VERSION`, e ativa o hook (`core.hooksPath .engrama/githooks`). **Confirme** que a saída diz `Placeholders restantes: ''` (vazio). Se sobrou algum, ajuste o arquivo de override e rode de novo (o instalador recusa sobrescrever — veja Merge).
 
 ## Passo 3 — Adaptar o gate ao domínio (SEU julgamento)
 
@@ -122,6 +123,6 @@ O agente faz **todo o trabalho mecânico** e **propõe tudo**, mas 3 coisas aind
 2. o **mapa de superfície sensível** do gate (`classify()`) — depende do domínio;
 3. a **aprovação do 1º commit** (e de toda promoção sensível dali em diante).
 
-`EXECUTOR`, `EXECUTOR_CMD` e `MODELO_*` já saem preenchidos com o padrão atual do pack; só mude se o projeto-alvo divergir.
+`EXECUTOR`, `EXECUTOR_CMD` e `MODELO_*` já saem preenchidos com os adaptadores concretos atuais do pack. Trate `MODELO_*` como **EXEMPLO** e confirme os ids reais contra o namespace do seu `codex exec`; `ENGRAMA_VERSION` sai do `VERSION` do repo-fonte (fallback `0.0.0` se faltar).
 
 Tudo o mais é automático.

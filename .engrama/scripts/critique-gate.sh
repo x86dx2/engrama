@@ -104,7 +104,7 @@ classify() {
     template/.engrama/governance/*|template/.engrama/decisions/*|template/.engrama/specs/*|template/.engrama/project/*|template/.engrama/qa/*) addcat governance ;;
 
     # Instalador, hook, settings e defaults mecanicos.
-    bin/*) addcat gate ;;
+    VERSION|template/.engrama/VERSION|bin/*) addcat gate ;;
     engrama.values.example) addcat gate ;;
     .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;

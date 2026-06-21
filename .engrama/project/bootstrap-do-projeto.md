@@ -12,7 +12,7 @@ Bootstrap inicial do projeto. Este documento registra a configuração de primei
 
 ## Decisões de bootstrap
 
-- O `engrama` e o `Ruflos` compartilham a mesma base operacional: Claude como Orquestrador, Codex como Executor Crítico, Humano como Autoridade, `codex exec` como executor-bridge, `gpt-5.5` para crítica e `gpt-5.4`/`gpt-5.4-mini` para execução.
+- O `engrama` e o `Ruflos` compartilham a mesma base operacional: Claude como Orquestrador, Codex como Executor Crítico, Humano como Autoridade e `codex exec` como executor-bridge. Os ids de modelo `gpt-5.5` / `gpt-5.4` / `gpt-5.4-mini` entram aqui como configuracao concreta atual do adaptador do pack — **confirmar contra o namespace real do `codex exec`** antes de tratá-los como fato universal.
 - O que veio do `Ruflos` como regra universal fica no Engrama: gate mecânico, handshake, crítica independente, tiers de modelo, `.claude/settings.json`, proteção contra `.env`, e bootstrap de primeira abertura.
 - O que era específico do `Ruflos` não entra na instância central nem no template: stack Cloudflare/Next/D1, pasta `web/`, rotas `/api/v1`, superfícies financeiras concretas, ADRs de domínio e roadmap de migração.
 - A raiz deste repo é a **instância viva**. O diretório `template/` é o **artefato distribuível** para novos projetos.

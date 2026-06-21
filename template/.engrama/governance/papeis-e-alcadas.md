@@ -29,9 +29,13 @@ Operam por **validação cruzada**: o Executor não se autoaprova; o Orquestrado
 
 > Template: defina em `{{ORQUESTRADOR}}` / `{{EXECUTOR}}` / `{{AUTORIDADE}}` quem ocupa cada papel no seu projeto. Pode ser qualquer combinação de agentes/pessoas, desde que o **separador escritor≠auditor** e a **arbitragem humana de impasse** se mantenham.
 
+## Camada de adaptadores de vendor
+
+`EXECUTOR_CMD` (neste projeto, `{{EXECUTOR_CMD}}`), os ids de modelo/tier e o `.claude/settings.json` sao o **adaptador concreto**, trocavel. O nucleo (`Orquestrador` / `Executor` / `Autoridade`, alçadas, handshake e gate) continua **vendor-agnostico**. Quando um comando ou id de modelo aparecer na prosa, leia como configuracao concreta ou exemplo do adaptador atual — nao como namespace universal verificado.
+
 ## Como o Orquestrador aciona o Executor (executor-bridge)
 
-O Orquestrador **invoca o Executor diretamente** via {{EXECUTOR_CMD}} (sem relay humano de rotina), passando a **ordem mínima** (ver [[governance/continuidade-de-sessao]]). O **roteamento pesado/leve** define o **modelo do Executor** (leve → {{MODELO_EXECUTOR_LEVE}}; pesado → {{MODELO_EXECUTOR_PESADO}}), nunca se o Executor participa. O Executor devolve a **resposta crítica** (leitura/crítica/ajustes/execução/evidências/pendências). O Orquestrador **sempre audita** antes de comitar. Detalhe em [[decisions/0003-executor-bridge-orquestrador-invoca-executor]].
+O Orquestrador **invoca o Executor diretamente** via {{EXECUTOR_CMD}} (sem relay humano de rotina), passando a **ordem mínima** (ver [[governance/continuidade-de-sessao]]). O **roteamento pesado/leve** define o **modelo do Executor** (leve → {{MODELO_EXECUTOR_LEVE}}; pesado → {{MODELO_EXECUTOR_PESADO}}; trate os ids como exemplo/configuracao concreta e confirme o namespace real do adaptador), nunca se o Executor participa. O Executor devolve a **resposta crítica** (leitura/crítica/ajustes/execução/evidências/pendências). O Orquestrador **sempre audita** antes de comitar. Detalhe em [[decisions/0003-executor-bridge-orquestrador-invoca-executor]].
 
 > Nota: qualquer tooling de swarm/orquestração de subagentes é **subordinado**, não o canal de governança. O canal de governança é **o engrama versionado + {{EXECUTOR_CMD}} (executor-bridge)**.
 
