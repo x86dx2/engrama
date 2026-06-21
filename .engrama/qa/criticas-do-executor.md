@@ -120,3 +120,10 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Auditoria (ADR 0005):** backward-compat (249 asserts verdes, suites existentes intactas); 5 casos do diff-binding reproduzidos do zero (hash bate->libera; editar apos critica->bloqueia; estrito sem hash->bloqueia; legado->libera); shellcheck/lint limpos; ADR honesto (cobre o diff, NAO prova independencia de identidade).
 - **Esta propria entrada usa o caminho forte:** o `sha256:` acima vincula a critica a este diff exato.
 - **Consenso.** R1 mitigado (nao eliminado); teto = identidade verificavel externa (documentado no ADR 0011).
+
+## [2026-06-21] fix/ci-portabilidade | [governance][gate][contract] CI verde: lint portavel (EX4) + markdownlint tolerante | confirmo | executor codex + auditoria orquestrador
+- **Licao (loop falha->regra):** o 1o CI no GitHub falhou; causa = EX4 (source_refs ABSOLUTOS quebram fora desta maquina) + nome invalido do config do markdownlint.
+- **Executor (codex, ajuste-menor):** `lint.sh` ancora na raiz do script (nao no pwd) e resolve source_refs RELATIVO ao repo (sufixo existente sob REPO_ROOT) -> portavel; caso `L8` (clone p/ outro path, origem apagada) prova; renomeou o config p/ `.markdownlint-cli2.yaml` (auto-descoberto).
+- **Auditoria + ajuste do Orquestrador:** reproduzi o clone-sem-origem (lint exit 0); rodei o **markdownlint REAL** (npx) e achei 544 nits de estilo + falso-positivo MD052 nos wikilinks que o config nao cobria -> tornei o config tolerante ao estilo da casa + wikilinks, mantendo regras de problema-real (sanity: pegou MD009). markdownlint = **0 erros em 67 arquivos**. suite verde; shellcheck limpo.
+- **Destino duravel:** lint portavel + teste L8 (a regra que impede a reincidencia). EX4 (migrar source_refs p/ relativos) segue aberto, mas o lint deixou de ser nao-portavel.
+- **Consenso.**

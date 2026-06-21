@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] fix | CI verde no GitHub — lint portavel (licao EX4) + markdownlint tolerante
+- Repo publicado (privado) em github.com/x86dx2/engrama; 1o CI falhou -> consertado nesta fatia (loop falha->regra).
+- **lint.sh portavel:** source_refs resolvidos relativo a raiz do repo (antes: caminhos absolutos /Users/... quebravam em /home/runner/...). Caso L8 (clone p/ outro path) trava a regressao.
+- **markdownlint:** config renomeado p/ `.markdownlint-cli2.yaml` + tolerante ao estilo da casa e aos wikilinks (MD052 falso-positivo). Rodado o tool REAL: 0 erros em 67 arquivos.
+- gitleaks ja passava. shellcheck/lint/suite verdes (249 asserts).
+- **PROXIMO:** branch protection na main esta BLOQUEADA pelo plano (privado em conta free exige GitHub Pro) -> reportar opcoes a Autoridade.
+
 ## [2026-06-20] feat | T3 (absorcao walrus) — diff-binding: atestacao verificavel (mitiga R1)
 - Branch `absorcao/t3-atestacao`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (backward-compat + 5 casos do zero + honestidade do ADR).
 - **diff-binding:** o ledger pode carregar `sha256:<hex>` (via `engrama-diff-hash.sh`, fingerprint estavel do `git diff --cached --raw` excluindo o ledger). Hash bate -> libera; arquivo editado apos a critica -> BLOQUEIA (vinculo obsoleto); modo estrito `ENGRAMA_REQUIRE_DIFF_BIND=1` (CI) exige o hash. Entradas sem hash = legado (backward-compat: G1-G7/R2-R5/fuzz intactas).

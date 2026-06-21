@@ -27,7 +27,13 @@ new_repo() {
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
   mkdir -p "$d/.engrama/decisions" "$d/.engrama/governance" "$d/.engrama/project" "$d/.engrama/qa" "$d/.engrama/specs"
+  cp "$LINT_SRC" "$d/lint.sh"
+  chmod +x "$d/lint.sh"
   printf '%s' "$d"
+}
+
+new_temp_dir() {
+  mktemp -d 2>/dev/null || mktemp -d -t engrama-lint-test
 }
 
 write_file() {
@@ -39,7 +45,7 @@ write_file() {
 run_lint() {
   (
     cd "$1" || exit 2
-    bash "$LINT_SRC" >/dev/null 2>&1
+    bash lint.sh >/dev/null 2>&1
     echo $?
   )
 }
@@ -47,7 +53,7 @@ run_lint() {
 run_lint_report() {
   (
     cd "$1" || exit 2
-    bash "$LINT_SRC" --report >/dev/null 2>&1
+    bash lint.sh --report >/dev/null 2>&1
     echo $?
   )
 }
@@ -178,6 +184,42 @@ check L6 CORRETO "$_r" "--report nunca falha o processo"
 rc="$(run_lint "$REPO_ROOT")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
 check L7 CORRETO "$_r" "repo real passa no proprio lint"
+
+# L8: clone em outro path continua valido mesmo com source_ref absoluto legado
+R_SRC="$(new_repo)"
+write_file "$R_SRC/.engrama/governance/index.md" <<'EOF'
+# indice
+
+Ver [[log]].
+EOF
+write_file "$R_SRC/.engrama/log.md" <<'EOF'
+# log
+EOF
+write_file "$R_SRC/.engrama/governance/p.md" <<EOF
+---
+type: governance
+status: active
+date: 2026-06-20
+source_refs:
+  - $R_SRC/.engrama/log.md
+---
+
+Ver [[governance/index]] e [[log]].
+EOF
+git -C "$R_SRC" add . >/dev/null 2>&1
+git -C "$R_SRC" commit -qm "seed" >/dev/null 2>&1
+R_CLONE_PARENT="$(new_temp_dir)"
+R_CLONE="$R_CLONE_PARENT/clone"
+git clone -q "$R_SRC" "$R_CLONE"
+rm -rf "$R_SRC"
+rc="$(
+  cd "$R_CLONE" || exit 2
+  bash lint.sh >/dev/null 2>&1
+  echo $?
+)"
+if is_zero "$rc"; then _r=0; else _r=1; fi
+check L8 CORRETO "$_r" "clone em outro path passa com source_ref absoluto resolvido via repo atual"
+rm -rf "$R_CLONE_PARENT"
 
 printf '%b\n' "$RESULTS"
 echo ""
