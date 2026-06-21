@@ -34,6 +34,10 @@ Todas as mudanças relevantes deste pack. Formato baseado em
   - `classify()` passou a cobrir `tests/gate/`, `tests/contract/`, `.github/` e
     `.engrama/{gaps,roadmap,domain}/`.
 - **Hook (`critique-gate-hook.sh`):** fail-closed quando `python3` falta ou o parse falha.
+- **Diff-binding / CI:** o fingerprint foi unificado entre local e CI pela mesma
+  fonte única (`engrama-diff-hash.sh`): local usa o diff staged; CI usa
+  `--range <base>...HEAD` sobre o **diff real do PR** e volta a rodar com
+  `ENGRAMA_REQUIRE_DIFF_BIND=1`.
 
 ### Documentação
 - README e ADR 0006: linguagem de enforcement alinhada à verdade — o hook local é um
@@ -48,9 +52,9 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 - **R1 (identidade do crítico):** o gate prova **cobertura do diff**, não **identidade
   independente** do crítico (teto: assinatura/chave que o `codex exec` não expõe). O
   *required check* na CI mitiga o lado server-side. Ver ADR 0006/0011.
-- **Diff-binding — modo estrito DESLIGADO:** o fingerprint diverge entre o gate local
-  (`git diff --cached`) e o gate-CI (repo sintético). Até unificar, o estrito fica off;
-  o gate-contra-PR exige a crítica registrada, não o `sha256` exato. Ver ADR 0011.
+- **Diff-binding em PR multi-commit:** o binding da CI cobre o **diff cumulativo**
+  de `base...HEAD`, não cada commit isoladamente. O fluxo recomendado continua sendo
+  squash/PR de 1 commit. Ver ADR 0011.
 - **EX4 (portabilidade/vendor):** `source_refs` absolutos; nomes de modelo `gpt-5.x`
   e o canal `codex exec` hardcoded (vs "por função, não por vendor").
 

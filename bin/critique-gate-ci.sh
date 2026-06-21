@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Reexecuta o critique-gate local contra o diff real de um PR em CI.
 #
-# Honestidade: o wrapper nao inventa o fingerprint. Ele reconstrui um repo
-# sintetico com a base real (`--base-ref`) e os arquivos atuais do PR para que
-# o proprio critique-gate local rode sobre um diff equivalente e chame a mesma
-# fonte unica de hash (engrama-diff-hash.sh).
+# Honestidade: o wrapper calcula o fingerprint sobre o diff REAL do PR via
+# engrama-diff-hash.sh --range "<base-ref>...HEAD". O repo sintetico segue
+# existindo apenas para reusar classify() + parsing do ledger/staging do gate
+# local sem duplicar logica.
 set -u
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -16,6 +16,7 @@ BRANCH=""
 BASE_REF=""
 FILES_FROM=""
 TMPDIR_CI=""
+PR_DIFF_HASH=""
 declare -a CHANGED_FILES=()
 
 usage() {
@@ -23,8 +24,8 @@ usage() {
 Uso: bash bin/critique-gate-ci.sh --branch <nome-da-branch> --base-ref <gitish> --files-from <arquivo-nul>
 
 Recebe a branch do PR, um gitish da base e um arquivo com a lista NUL-delimited
-de paths mudados. Monta um repo sintetico com a base real e reaplica o
-critique-gate local contra esse diff.
+de paths mudados. Calcula o fingerprint do diff REAL do PR e reaplica o
+critique-gate local num repo sintetico equivalente.
 EOF
 }
 
@@ -76,6 +77,17 @@ load_changed_files() {
   while IFS= read -r -d '' path; do
     CHANGED_FILES+=("$path")
   done < "$FILES_FROM"
+}
+
+compute_pr_diff_hash() {
+  PR_DIFF_HASH="$(
+    cd "$REPO_ROOT" &&
+      bash "$REPO_ROOT/$DIFF_HASH_REL" --range "$BASE_REF...HEAD"
+  )" || fail "nao consegui calcular o fingerprint do diff real do PR"
+
+  [[ "$PR_DIFF_HASH" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+    fail "fingerprint invalido retornado por $DIFF_HASH_REL: ${PR_DIFF_HASH:-<vazio>}"
+  }
 }
 
 ensure_parent_dir() {
@@ -165,7 +177,7 @@ stage_head_snapshot() {
 run_gate() {
   (
     cd "$TMPDIR_CI" || exit 2
-    bash "$GATE_REL"
+    ENGRAMA_DIFF_HASH="$PR_DIFF_HASH" bash "$GATE_REL"
   )
 }
 
@@ -184,6 +196,7 @@ main() {
 
   [ "${#CHANGED_FILES[@]}" -gt 0 ] || exit 0
 
+  compute_pr_diff_hash
   init_temp_repo
   seed_base_snapshot
   stage_head_snapshot

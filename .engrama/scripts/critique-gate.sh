@@ -4,14 +4,16 @@
 # Bloqueia (exit 2) commit que toca SUPERFÍCIE SENSÍVEL sem registro de crítica
 # CONCLUÍDA em .engrama/qa/criticas-do-executor.md, por CATEGORIA, referenciando
 # a branch. O campo 4 (ref) pode carregar opcionalmente um `sha256:<hex>` que
-# vincula a crítica ao diff staged atual (via engrama-diff-hash.sh).
+# vincula a crítica ao diff alvo atual (via engrama-diff-hash.sh no local, ou
+# via ENGRAMA_DIFF_HASH quando a CI injeta o fingerprint do diff real do PR).
 #
 # A crítica é feita por um agente/modelo INDEPENDENTE do Orquestrador (o Executor
 # no papel de crítica, read-only). O gate exige o REGISTRO da crítica antes do
 # commit — ele NÃO prova que um modelo independente de fato a produziu, e é um
 # freio COOPERATIVO LOCAL (burlável por --no-verify / fora do harness). A CI
-# reexecuta este gate contra o PR (critique-gate-ci.sh); falta marcar o check
-# como required no repo para bloquear o merge — ver ADR 0006.
+# reexecuta este gate contra o PR (critique-gate-ci.sh), calculando o
+# fingerprint sobre o diff real do PR e reusando o repo sintético só para
+# classify() + parsing do ledger — ver ADR 0006.
 #
 # ── COMO ADAPTAR AO SEU PROJETO ───────────────────────────────────────────────
 # 1. Ajuste as variáveis EXECUTOR_CMD / CRITIQUE_MODEL abaixo.
@@ -149,7 +151,11 @@ if [ ! -f "$DIFF_HASH_SCRIPT" ]; then
   exit 2
 fi
 
-CURRENT_DIFF_HASH="$(bash "$DIFF_HASH_SCRIPT" 2>/dev/null || true)"
+CURRENT_DIFF_HASH="${ENGRAMA_DIFF_HASH:-}"
+if [[ ! "$CURRENT_DIFF_HASH" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+  CURRENT_DIFF_HASH="$(bash "$DIFF_HASH_SCRIPT" 2>/dev/null || true)"
+fi
+
 if [[ ! "$CURRENT_DIFF_HASH" =~ ^sha256:[0-9a-f]{64}$ ]]; then
   {
     echo "──────────────────────────────────────────────────────────────"

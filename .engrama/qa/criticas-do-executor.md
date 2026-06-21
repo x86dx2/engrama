@@ -13,7 +13,7 @@ Registro **append-only** de toda **crítica do Executor no papel de crítica** (
 
 **Verificado mecanicamente** por `.engrama/scripts/critique-gate.sh` (git pre-commit + PreToolUse do harness). Um commit que toca superfície sensível é **bloqueado** se faltar, para CADA categoria tocada, uma entrada CONCLUÍDA referenciando a **branch**. O gate lê a versão **staged/HEAD** do ledger (não o working-tree), rejeita `<pendente>` e bloqueia `objeção` sem `waiver`.
 
-**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh`. Quando presente, o gate compara esse token ao fingerprint atual do diff staged (excluindo o próprio ledger):
+**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh`. Quando presente, o gate compara esse token ao fingerprint atual do diff alvo (staged no local; `ENGRAMA_DIFF_HASH` quando a CI injeta o hash do diff real do PR), sempre excluindo o próprio ledger:
 - **match forte** (`sha256` bate) — a crítica cobre **este diff**;
 - **hash obsoleto** (`sha256` não bate) — a crítica fica vinculada a **outro diff** e não satisfaz o gate;
 - **sem `sha256:`** — caminho **legado** (branch+categoria+veredito), preservado por compatibilidade.
@@ -37,7 +37,7 @@ O gate (`.engrama/scripts/critique-gate.sh`) lê **por campo**, não por substri
 - **campo 1** → a `<branch>` (após o prefixo `## [data] `) precisa ser **igual** à branch atual (igualdade exata — fecha o bypass cross-branch R5);
 - **campo 2** → precisa conter a tag literal `[<categoria>]`;
 - **campo 3** → o `<veredito>`, validado por **igualdade/prefixo de enum**, não substring (fecha R2: `nao confirmo` ≠ `confirmo`);
-- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh`.
+- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh` (local: diff staged; CI: `--range <base>...HEAD`).
 
 Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensada` (igualdade) · `N/A: <motivo>` · `waiver <quem/quando>` (prefixo). `pendente` é rejeitado. Uma objeção (`objeção`/`discordo` no campo 3) só passa se o campo 3 também contiver `waiver` (arbitragem da Autoridade registrada).
 
@@ -139,3 +139,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Orquestrador autorou:** reconciliou README/ADR 0006/CHANGELOG/gaps ao estado real (required check ATIVO; modo estrito do diff-binding DESLIGADO por bug); dormencia 0007/0010; tetos consolidados; template ADR 0011 + limitacao.
 - **Executor (codex, critica read-only): ajuste-menor, incorporado:** (1) SECURITY.md afirmava `.env` gitignored (era falso) -> adicionei `.env`/`.env.*` ao `.gitignore` (torna verdade + protecao real); (2) SECURITY.md/GHSA -> confirmei repo PUBLIC e **habilitei** o private vulnerability reporting (claim agora solido; o Executor leu um log stale dizendo 'private'); (3) gaps stale ("falta marcar required") -> atualizado para "ativo"; (4) precisao README/ADR -> "job `test` que embute o gate e required" (o required e o job, nao o step).
 - **Consenso por incorporacao** (ADR 0006). lint/markdownlint/suite verdes.
+
+## [2026-06-21] fix/diffbind-fingerprint | [governance][gate][contract] PR2: fingerprint unificado (--range) + estrito religado | confirmo | sha256:b7723d1fdc6cc8bcba557a5ce43f33f7c398ca948dd88299d9dc4026500df1e1 executor codex + auditoria orquestrador
+- **Item 4 fechado.** Executor (codex, ajuste-menor): `engrama-diff-hash.sh --range`; `bin/critique-gate-ci.sh` computa o hash sobre o diff REAL do PR e injeta via `ENGRAMA_DIFF_HASH`; gate respeita o override; `ENGRAMA_REQUIRE_DIFF_BIND=1` religado no CI.
+- **Auditoria (ADR 0005):** provei do zero `--cached == --range` (inclusive com rename); suite verde (diffbind 9, ci 4, +todas); shellcheck/lint limpos; e2e estrito (match->libera, mutacao->bloqueia).
+- **Esta entrada dogfooda o caminho forte:** o `sha256` acima vincula a critica a ESTE diff do PR — local e CI computam o mesmo valor.
+- **Consenso.** Borda documentada: PR multi-commit -> diff cumulativo; fluxo recomendado = squash.

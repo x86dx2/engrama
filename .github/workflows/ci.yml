@@ -53,12 +53,8 @@ jobs:
 
       - name: Re-run critique gate against pull request diff
         if: github.event_name == 'pull_request'
-        # NB: ENGRAMA_REQUIRE_DIFF_BIND (modo estrito do diff-binding) esta DESLIGADO
-        # ate o fingerprint ser unificado entre o gate local (git diff --cached) e o
-        # gate-CI (repo sintetico) — eles divergem hoje (ver licao em
-        # .engrama/qa/criticas-do-executor.md e ADR 0011). O gate-contra-PR segue
-        # exigindo a critica registrada (nucleo do R1), so sem a amarracao exata-do-hash.
         env:
+          ENGRAMA_REQUIRE_DIFF_BIND: "1"
           PR_BRANCH: ${{ github.head_ref }}
           PR_BASE_REF: origin/${{ github.base_ref }}
           PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
