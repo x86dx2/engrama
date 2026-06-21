@@ -13,7 +13,7 @@ Registro **append-only** de toda **crítica do Executor no papel de crítica** (
 
 **Verificado mecanicamente** por `.engrama/scripts/critique-gate.sh` (git pre-commit + PreToolUse do harness). Um commit que toca superfície sensível é **bloqueado** se faltar, para CADA categoria tocada, uma entrada CONCLUÍDA referenciando a **branch**. O gate lê a versão **staged/HEAD** do ledger (não o working-tree), rejeita `<pendente>` e bloqueia `objeção` sem `waiver`.
 
-**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh`. Quando presente, o gate compara esse token ao fingerprint atual do diff alvo (staged no local; `ENGRAMA_DIFF_HASH` quando a CI injeta o hash do diff real do PR), sempre excluindo o próprio ledger:
+**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh` e/ou um marcador `codex-session:<id>` emitido por `.engrama/scripts/exec-bridge.sh`. Quando o `sha256` estiver presente, o gate compara esse token ao fingerprint atual do diff alvo (staged no local; `ENGRAMA_DIFF_HASH` quando a CI injeta o hash do diff real do PR), sempre excluindo o próprio ledger:
 - **match forte** (`sha256` bate) — a crítica cobre **este diff**;
 - **hash obsoleto** (`sha256` não bate) — a crítica fica vinculada a **outro diff** e não satisfaz o gate;
 - **sem `sha256:`** — caminho **legado** (branch+categoria+veredito), preservado por compatibilidade.
@@ -37,11 +37,11 @@ O gate (`.engrama/scripts/critique-gate.sh`) lê **por campo**, não por substri
 - **campo 1** → a `<branch>` (após o prefixo `## [data] `) precisa ser **igual** à branch atual (igualdade exata — fecha o bypass cross-branch R5);
 - **campo 2** → precisa conter a tag literal `[<categoria>]`;
 - **campo 3** → o `<veredito>`, validado por **igualdade/prefixo de enum**, não substring (fecha R2: `nao confirmo` ≠ `confirmo`);
-- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh` (local: diff staged; CI: `--range <base>...HEAD`).
+- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh` (local: diff staged; CI: `--range <base>...HEAD`) e/ou `codex-session:<id>` como evidência fraca de que um Codex real rodou via executor-bridge.
 
 Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensada` (igualdade) · `N/A: <motivo>` · `waiver <quem/quando>` (prefixo). `pendente` é rejeitado. Uma objeção (`objeção`/`discordo` no campo 3) só passa se o campo 3 também contiver `waiver` (arbitragem da Autoridade registrada).
 
-> Exemplo com diff-binding forte: `## [2026-06-20] main | [gate] enforcement | confirmo | saída do codex sha256:abc123...`
+> Exemplo com diff-binding forte: `## [2026-06-20] main | [gate] enforcement | confirmo | saída do codex sha256:abc123... codex-session:019ec...`
 
 > Cada entrada precisa ter os 4 campos (incluindo `<ref>`). Linhas que não casam a gramática (bullets `-`, etc.) são ignoradas pelo gate. O `waiver` ainda é detectado por substring **dentro do campo 3** — escreva-o no positivo (`waiver <quem/quando>`).
 
@@ -155,3 +155,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Itens 7 e 8 fechados.** Executor (codex, concordo): `VERSION`=0.1.0 + `{{ENGRAMA_VERSION}}` no template (alvo registra a versao); model-ids relabelados como exemplos-a-confirmar; secao "camada de adaptadores de vendor" (nucleo vendor-agnostico); CHANGELOG release 0.1.0.
 - **Auditoria (ADR 0005):** smoke -> alvo com `.engrama/VERSION`=0.1.0, 0 placeholders; suite verde (C10 novo); shellcheck/lint limpos; vendor honesto verificado.
 - **Caminho forte:** sha256 vinculado. **Consenso.** Apos merge: tag `v0.1.0`.
+
+## [2026-06-21] feat/transparencia-executor-bridge | [governance][gate][contract] PR-A: transparencia do executor-bridge + session-id (itens 1,3) | confirmo | sha256:b5069024df2bcd0735ffce9a519455580534bb4f3ff15980be5ec8fe96c976ff executor codex + auditoria orquestrador
+- **Itens 1 e 3.** Executor (codex, ajuste-menor): `exec-bridge.sh` (salva ordem+resposta+`codex-session` real de `~/.codex/sessions`; fallback derived) + teste com stub (6 asserts); ADR 0003 mecanizado; `codex-session:<id>` como evidencia fraca (teto R1).
+- **Correcao de layout pelo Orquestrador (licao):** minha ordem pos em `bin/` (source-only); movido p/ `.engrama/scripts/` (mantem `.engrama/` autocontido; `bin/` so source). `transcripts/` excluido do markdownlint (evidencia verbatim). ~33 transcripts desta sessao preservados em `transcripts/sessao-01-...`.
+- **Auditoria (ADR 0005):** suite 267 verde (exec-bridge 6); smoke -> alvo recebe `.engrama/scripts/exec-bridge.sh`, sem `bin/`; markdownlint 0 erros; shellcheck/lint limpos.
+- **Caminho forte:** sha256 vinculado. **Consenso.**

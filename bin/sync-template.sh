@@ -2,7 +2,7 @@
 # sync-template.sh -- sincroniza artefatos mecanicos do template a partir da
 # raiz canonica do Engrama.
 #
-# Escopo intencional: scripts do harness/gate e settings mecanicos. Nao faz
+# Escopo intencional: scripts do harness/gate/bridge e settings mecanicos. Nao faz
 # reverse-substituicao cega em prosa de governanca/READMEs, porque valores
 # livres podem aparecer em texto e a operacao seria fragil.
 set -eu
@@ -14,12 +14,14 @@ ROOT_HOOK="$REPO_ROOT/.engrama/scripts/critique-gate-hook.sh"
 ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
 ROOT_LINT="$REPO_ROOT/.engrama/scripts/lint.sh"
 ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
 TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/scripts/critique-gate-hook.sh"
 TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.sh"
 TEMPLATE_LINT="$REPO_ROOT/template/.engrama/scripts/lint.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
+TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
 
@@ -76,7 +78,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json|.engrama/scripts/exec-bridge.sh) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
@@ -137,6 +139,7 @@ main() {
   need_file "$ROOT_SESSION_CONTEXT"
   need_file "$ROOT_LINT"
   need_file "$ROOT_DIFF_HASH"
+  need_file "$ROOT_EXEC_BRIDGE"
   need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
   need_file "$TEMPLATE_HOOK"
@@ -153,6 +156,7 @@ main() {
   cp "$ROOT_SESSION_CONTEXT" "$TMPDIR_SYNC/session-context.sh"
   cp "$ROOT_LINT" "$TMPDIR_SYNC/lint.sh"
   cp "$ROOT_DIFF_HASH" "$TMPDIR_SYNC/engrama-diff-hash.sh"
+  cp "$ROOT_EXEC_BRIDGE" "$TMPDIR_SYNC/exec-bridge.sh"
   cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"
 
   write_if_changed "$TMPDIR_SYNC/critique-gate.sh" "$TEMPLATE_GATE"
@@ -160,9 +164,10 @@ main() {
   write_if_changed "$TMPDIR_SYNC/session-context.sh" "$TEMPLATE_SESSION_CONTEXT"
   write_if_changed "$TMPDIR_SYNC/lint.sh" "$TEMPLATE_LINT"
   write_if_changed "$TMPDIR_SYNC/engrama-diff-hash.sh" "$TEMPLATE_DIFF_HASH"
+  write_if_changed "$TMPDIR_SYNC/exec-bridge.sh" "$TEMPLATE_EXEC_BRIDGE"
   write_if_changed "$TMPDIR_SYNC/settings.json" "$TEMPLATE_SETTINGS"
 
-  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" 2>/dev/null || true
+  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" "$TEMPLATE_EXEC_BRIDGE" 2>/dev/null || true
 }
 
 main "$@"

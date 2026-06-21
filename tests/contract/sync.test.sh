@@ -15,6 +15,8 @@ ROOT_LINT="$REPO_ROOT/.engrama/scripts/lint.sh"
 TEMPLATE_LINT="$REPO_ROOT/template/.engrama/scripts/lint.sh"
 ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
+ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
+TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 SYNC_SCRIPT="$REPO_ROOT/bin/sync-template.sh"
@@ -73,18 +75,28 @@ check S3B CORRETO "$_r" "lint.sh do template identico ao da raiz"
 if cmp -s "$ROOT_DIFF_HASH" "$TEMPLATE_DIFF_HASH"; then _r=0; else _r=1; fi
 check S3C CORRETO "$_r" "engrama-diff-hash.sh do template identico ao da raiz"
 
+if cmp -s "$ROOT_EXEC_BRIDGE" "$TEMPLATE_EXEC_BRIDGE"; then _r=0; else _r=1; fi
+check S3CA CORRETO "$_r" "exec-bridge.sh do template identico ao da raiz"
+
 if cmp -s "$ROOT_SETTINGS" "$TEMPLATE_SETTINGS"; then _r=0; else _r=1; fi
 check S3D CORRETO "$_r" "settings.json do template identico ao da raiz"
 
 if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template preserva placeholders do gate"
 
-if grep -Fq '.engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;' "$TEMPLATE_GATE"; then
+if grep -Fq '.engrama/VERSION' "$TEMPLATE_GATE"; then
   _r=0
 else
   _r=1
 fi
 check S4A CORRETO "$_r" "gate do template classifica .engrama/VERSION como gate"
+
+if grep -Fq '.engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json|.engrama/scripts/exec-bridge.sh) addcat gate ;;' "$TEMPLATE_GATE"; then
+  _r=0
+else
+  _r=1
+fi
+check S4B CORRETO "$_r" "gate do template classifica .engrama/scripts/exec-bridge.sh como gate"
 
 if grep -Fq '# src/server/services/agreements.*|src/server/services/ledger.*)    addcat financial ;;' "$TEMPLATE_GATE" \
   && grep -Fq '# src/server/permissions.*|src/server/services/users.*)             addcat rbac ;;' "$TEMPLATE_GATE" \
