@@ -167,3 +167,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Licao da transparencia:** o wrapper de PR-A nao capturava o corpo da resposta (so session-id). Orquestrador (break-glass: a ferramenta de capturar a resposta do Executor estava quebrada) corrigiu o `exec-bridge.sh` (fallback p/ o session file) + caso E7 (provado: falha sem o fix). Resposta desta run recuperada e versionada.
 - **Auditoria (ADR 0005):** suite 282 verde; lint sensibilidade provada (TODO/status injetados -> exit 1); E7 pega a regressao; shellcheck/lint/markdownlint limpos; o TODO-fix preserva o sentido normativo.
 - **Atestacao dogfoodada:** esta entrada leva `sha256` (caminho forte) E `codex-session` (evidencia de execucao real via bridge). **Consenso.**
+
+## [2026-06-21] feat/quickstart-diffbind-gitleaks | [governance][gate] PR-C: quickstart + diff-binding multi-commit acionavel + gitleaks sem Node | confirmo | sha256:66d3536aff5c98cbfc672f45f9f3708a818c1f905ecf807fb54a918ce1a92d8f codex-session:019eeb2e-1b7d-7261-9cdd-1460ab4e57ee executor codex via exec-bridge + auditoria orquestrador
+- **Itens 5-7 (pendencias triviais), veredito do Executor `concordo`.** README quickstart de adocao; `::notice::` nao-bloqueante p/ PR multi-commit + recomendacao de squash; gitleaks por binario fixado v8.30.1 (checksum-verified) no lugar da action Node, sem `GITHUB_TOKEN`.
+- **Executor como freio honesto:** cortou um overclaim proprio no quickstart (prometia `tests/run.sh` num repo-alvo que so recebeu `template/`) e confirmou release/asset do gitleaks em fonte primaria antes de fixar a URL.
+- **Auditoria (ADR 0005):** suite verde; lint exit 0; shellcheck exit 0; `ci.yml` YAML valido; release v8.30.1 + assets confirmados via `gh api`. Parte de download/scan do gitleaks so e exercivel na CI (required-check).
+- **Transparencia de ponta a ponta:** o wrapper consertado no PR-B capturou o corpo completo da resposta desta run. **Consenso.**

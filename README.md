@@ -7,6 +7,19 @@ Este diretório é um **template auto-contido** para replicar, em **qualquer pro
 - **[`docs/INSTANTIATE.md`](docs/INSTANTIATE.md)** — passo a passo manual de adoção.
 - **este `README.md`** — a análise do padrão e como o pack o encarna.
 
+## Quickstart (TL;DR)
+
+Atalho de adoção do template, não de "subir um app":
+
+```bash
+cp -R /caminho/do/engrama/template/. /caminho/do/projeto-novo/
+cd /caminho/do/projeto-novo
+# troque os placeholders e adapte o gate ao dominio
+grep -rno '{{[A-Z_]*}}' . --include='*.md' --include='*.sh' --include='VERSION' | sort -u
+bash ./.engrama/scripts/lint.sh
+# docs no repo-fonte: /caminho/do/engrama/docs/INSTALL.md e INSTANTIATE.md
+```
+
 ---
 
 ## 1. A ideia do LLM Wiki (análise do gist)
