@@ -85,3 +85,5 @@ A cada **20–30 chamadas** (ou fim de ciclo), medir e logar: **distribuição T
 - Custo/latência por chamada maior que "conservador-pra-baixo", mas qualidade máxima por chamada — alinhado a "errar sai caro". Paralelização ganha wall-clock; economia vem do T1 (trivial → modelo leve).
 - "Risco define piso" + "xhigh só por gatilho" mantêm a postura **conservador-pra-cima sem degenerar** em T4-universal.
 - A política **se auto-aplica**: a crítica desta própria ADR (e da governança inicial) já roda sob ela — no papel de crítica, modelo máximo (`gpt-5.5`), pegando contradições internas e guardrails ausentes antes do commit.
+
+> **Dormente/mínima nesta instância (2026-06-21).** O roteamento de 5 tiers é cerimônia para um repo Markdown+Bash sem deploy; mantido como **referência portável** e exercido de forma mínima (na prática, `codex exec` direto). Os ids de modelo (`gpt-5.x`) são **placeholders a confirmar** contra o CLI real — ver EX4 em [[gaps/auditoria-e-plano-de-remediacao]].

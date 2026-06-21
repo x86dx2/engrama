@@ -19,3 +19,5 @@ Computer-use/controle de UI com potencial de mutação (`mutating_ui_task`) é d
 ## Consequências
 - Sem mutação de UI sem reconhecimento + escopo aprovado.
 - Gates de produção preservados (quando houver deploy): mutação de prod via UI exige ordem + 2ª confirmação.
+
+> **Dormente nesta instância (2026-06-21).** O Engrama central é Markdown+Bash, sem UI/computer-use; este ADR é **referência portável** que ativa quando o projeto-alvo tiver superfície de UI mutável. Mantido `active` como decisão; exercício prático aqui = nenhum.

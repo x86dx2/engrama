@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] docs | PR1 — honestidade: required check ATIVO + estrito off; higiene de docs
+- Repo **publicado como PUBLIC** em github.com/x86dx2/engrama (a entrada de criacao registrou 'private'; tornei publico com autorizacao da Autoridade — registrado aqui para a memoria nao ficar stale). **Branch protection ATIVA**: required checks (job `test` que embute o gate-contra-PR, + markdown, gitleaks) → enforcement vinculante no merge. **GHSA private vulnerability reporting habilitado**.
+- README/ADR 0006/CHANGELOG/gaps: reconciliados (required check ATIVO, nao "pendente"); ressalva do **modo estrito do diff-binding desligado** (bug de fingerprint). ADR 0007/0010 marcados dormentes; tetos (R1/EX4/diff-binding) consolidados no gaps. template ADR 0011 ganhou a limitacao conhecida.
+- SECURITY.md corrigido (canal GHSA real; `.env` agora gitignored de fato + negado no harness). `.gitignore` += `.env`/`.env.*`.
+- **Executor (codex) criticou (ajuste-menor): incorporado** — pegou 2 overclaims novos no SECURITY.md (.env nao-gitignored; GHSA) e o stale no gaps. lint/markdownlint/suite verdes.
+- **PROXIMO:** PR2 (fix do fingerprint do diff-binding + religar estrito), PR3 (source_refs portaveis/EX4), PR4 (vendor/model-names + {{ENGRAMA_VERSION}}).
+
 ## [2026-06-21] reorg | Estrutura reorganizada (padrao ai-memory/Akita) — root limpo
 - Branch `reorg/estrutura-akita` (via PR — branch protection ativa). Executor (`codex exec`) moveu; Orquestrador auditou (root limpo, suite 250 verde, smoke de install independente passou).
 - **Root** agora so metadados/manifests. **`bin/`**: install/bootstrap/sync-template/critique-gate-ci. **`docs/`**: INSTALL/INSTANTIATE. **`.engrama/scripts/`**: gate+hook+session-context+lint+engrama-diff-hash (autocontido e distribuivel).
