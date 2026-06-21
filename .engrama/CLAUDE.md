@@ -7,14 +7,14 @@ Este engrama é a **memória institucional** do projeto. Ele NÃO é o código n
 ## Source of truth (não duplicar — referenciar)
 
 ```
-SOURCE_OF_TRUTH_REPO: /Users/x86/git-projects/engrama
+SOURCE_OF_TRUTH_REPO: .
 - CLAUDE.md / AGENTS.md       → gates de governança (entry-points)
 - .engrama/governance/*          → processo entre agentes (papéis, alçadas, handoff)
 - .engrama/decisions/*           → ADRs (por quê de cada decisão)
 - (domínio/arquitetura)       → criados conforme o projeto avança
 ```
 
-Regra: páginas que referenciam código/schema linkam **caminho absoluto** via `source_refs`, nunca copiam. Precisa do schema atualizado? Leia o arquivo no repo.
+Regra: páginas que referenciam código/schema linkam **caminho relativo à raiz do repo** via `source_refs`, nunca copiam. Precisa do schema atualizado? Leia o arquivo no repo.
 
 ## Papel do engrama
 
@@ -57,8 +57,8 @@ type: decision | domain | workflow | roadmap | gap | governance | spec
 status: active | proposed | superseded | resolved
 touches: [slug-relacionado, outro-slug]
 date: 2026-06-20
-source_refs:                       # caminhos absolutos no repo
-  - /Users/x86/git-projects/engrama/...
+source_refs:                       # caminhos relativos à raiz do repo
+  - .engrama/...
 critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   # só em gaps de superfície sensível (ADR 0006/item 7)
 ---
 ```

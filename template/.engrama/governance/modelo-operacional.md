@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/cadeia-de-comando, governance/continuidade-de-sessao, 0001-governanca-tres-papeis, 0003-executor-bridge-orquestrador-invoca-executor, 0004-executor-critica-ativa-discordancia-escala-a-autoridade]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 Princípios **inegociáveis** da operação entre agentes e a separação entre direção, execução crítica, auditoria e autoridade. Curto e operacional — detalhe de papéis em [[governance/papeis-e-alcadas]]; protocolo em [[governance/cadeia-de-comando]].

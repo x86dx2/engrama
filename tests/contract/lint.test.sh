@@ -82,7 +82,7 @@ rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
 check L1 CORRETO "$_r" "wikilink orfao derruba o lint"
 
-# L2: source_ref quebrado => BLOQUEIA
+# L2: source_ref relativo quebrado => BLOQUEIA
 R="$(new_repo)"
 write_file "$R/.engrama/project/p.md" <<'EOF'
 ---
@@ -90,14 +90,14 @@ type: governance
 status: active
 date: 2026-06-20
 source_refs:
-  - /nao/existe/no/disco
+  - .engrama/nao-existe.md
 ---
 
 Texto.
 EOF
 rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
-check L2 CORRETO "$_r" "source_ref inexistente derruba o lint"
+check L2 CORRETO "$_r" "source_ref relativo inexistente derruba o lint"
 
 # L3: frontmatter ausente em area obrigatoria => BLOQUEIA
 R="$(new_repo)"
@@ -139,7 +139,7 @@ type: governance
 status: active
 date: 2026-06-20
 source_refs:
-  - $R/.engrama/log.md
+  - .engrama/log.md
 ---
 
 Ver [[governance/index]] e [[log]].
@@ -164,7 +164,7 @@ Substituida por [[decisions/0002-nova]].
 EOF
 rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
-check L5 CORRETO "$_r" "fixture limpo passa"
+check L5 CORRETO "$_r" "fixture limpo passa com source_ref relativo"
 
 # L6: --report so reporta (exit 0)
 R="$(new_repo)"
@@ -186,7 +186,43 @@ rc="$(run_lint "$REPO_ROOT")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
 check L7 CORRETO "$_r" "repo real passa no proprio lint"
 
-# L8: clone em outro path continua valido mesmo com source_ref absoluto legado
+# L8: clone em outro path continua valido com source_ref relativo
+R_SRC="$(new_repo)"
+write_file "$R_SRC/.engrama/governance/index.md" <<'EOF'
+# indice
+
+Ver [[log]].
+EOF
+write_file "$R_SRC/.engrama/log.md" <<'EOF'
+# log
+EOF
+write_file "$R_SRC/.engrama/governance/p.md" <<EOF
+---
+type: governance
+status: active
+date: 2026-06-20
+source_refs:
+  - .engrama/log.md
+---
+
+Ver [[governance/index]] e [[log]].
+EOF
+git -C "$R_SRC" add . >/dev/null 2>&1
+git -C "$R_SRC" commit -qm "seed" >/dev/null 2>&1
+R_CLONE_PARENT="$(new_temp_dir)"
+R_CLONE="$R_CLONE_PARENT/clone"
+git clone -q "$R_SRC" "$R_CLONE"
+rm -rf "$R_SRC"
+rc="$(
+  cd "$R_CLONE" || exit 2
+  bash ./.engrama/scripts/lint.sh >/dev/null 2>&1
+  echo $?
+)"
+if is_zero "$rc"; then _r=0; else _r=1; fi
+check L8 CORRETO "$_r" "clone em outro path passa com source_ref relativo"
+rm -rf "$R_CLONE_PARENT"
+
+# L9: source_ref absoluto legado segue compativel
 R_SRC="$(new_repo)"
 write_file "$R_SRC/.engrama/governance/index.md" <<'EOF'
 # indice
@@ -219,7 +255,7 @@ rc="$(
   echo $?
 )"
 if is_zero "$rc"; then _r=0; else _r=1; fi
-check L8 CORRETO "$_r" "clone em outro path passa com source_ref absoluto resolvido via repo atual"
+check L9 CORRETO "$_r" "source_ref absoluto legado segue valido por compatibilidade"
 rm -rf "$R_CLONE_PARENT"
 
 printf '%b\n' "$RESULTS"

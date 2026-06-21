@@ -4,8 +4,8 @@ status: proposed
 touches: [governance/index, governance/continuidade-de-sessao, governance/modelo-operacional]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
-  - {{REPO_PATH}}/.engrama/scripts/critique-gate.sh
+  - CLAUDE.md
+  - .engrama/scripts/critique-gate.sh
 ---
 
 Bootstrap inicial do projeto. Este documento existe para a **primeira abertura útil** depois que o Engrama é instalado. Enquanto ele estiver com `status: proposed` ou contiver marcadores `TODO`, o **Orquestrador** interrompe o trabalho de produto e conduz a entrevista de bootstrap com a Autoridade.

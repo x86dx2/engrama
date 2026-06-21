@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/cadeia-de-comando, 0002-orquestrador-dono-do-git-executor-escreve]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 O **Orquestrador é QA**: antes de aceitar/comitar uma fatia, **re-executa** os gates por conta própria e anexa a saída real. **"Verde reportado pelo Executor ≠ verde verificado."** O Orquestrador **define e é dono das métricas de qualidade**; o Executor **escreve** os testes/tooling sob a spec do Orquestrador.

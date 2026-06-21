@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, 0001-governanca-tres-papeis, 0003-executor-bridge-orquestrador-invoca-executor]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 O **Orquestrador é dono do ciclo git e não escreve código de fatia**; o **Executor escreve todo o código**. Decisão de commit/branch/MR é do Orquestrador, derivada da auditoria.

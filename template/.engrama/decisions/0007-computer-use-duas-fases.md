@@ -4,8 +4,8 @@ status: active
 touches: [governance/cadeia-de-comando, governance/papeis-e-alcadas]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/governance/cadeia-de-comando.md
-  - {{REPO_PATH}}/.engrama/governance/papeis-e-alcadas.md
+  - .engrama/governance/cadeia-de-comando.md
+  - .engrama/governance/papeis-e-alcadas.md
 ---
 
 Computer-use/controle de UI com potencial de mutação (`mutating_ui_task`) é do **Executor, nunca cego**, em **duas fases**: reconhecimento read-only → aprovação do Orquestrador → execução do exatamente-aprovado.

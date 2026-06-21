@@ -7,6 +7,12 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] fix | PR3 — EX4(parte 1): source_refs absolutos -> relativos (portabilidade)
+- Branch `fix/source-refs-relativos`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (zero absolutos, portabilidade por clone, smoke com refs relativos).
+- Migrou os `source_refs` de TODOS os `.engrama/**/*.md` (raiz: `/Users/...`-><X>; template: `{{REPO_PATH}}/`-><X>) para **relativos à raiz**; corrigiu 3 paths fora de source_refs (`SOURCE_OF_TRUTH_REPO: .`, regra/exemplo do schema, prosa do infra-runbook); `lint.sh` valida relativo (compat com absoluto legado).
+- **Prova:** `grep /Users` e `{{REPO_PATH}}/` em `.engrama/**.md` = vazio; lint exit 0 no repo e em clone p/ outro path; suite verde; smoke (bootstrap) -> projeto-alvo com source_refs relativos, lint exit 0.
+- **PROXIMO:** PR4 (EX4 parte 2: vendor/model-names honestos + {{ENGRAMA_VERSION}}/release).
+
 ## [2026-06-21] fix | PR2 — diff-binding: fingerprint unificado (local==CI) + modo estrito RELIGADO
 - Branch `fix/diffbind-fingerprint`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (igualdade --cached==--range provada do zero, inclusive com rename; estrito ponta-a-ponta).
 - **Bug do item 4 fechado:** `engrama-diff-hash.sh` ganhou `--range <gitrange>`; o `bin/critique-gate-ci.sh` computa o fingerprint sobre o **diff REAL do PR** (`--range base...HEAD`) e injeta no gate via `ENGRAMA_DIFF_HASH`; o gate respeita esse override. Local (`--cached`) e CI (`--range`) agora produzem o MESMO hash.

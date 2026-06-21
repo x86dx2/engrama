@@ -4,8 +4,8 @@ status: active
 touches: [decisions/0006-governanca-nao-se-autoaprova, qa/criticas-do-executor, governance/modelo-operacional]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/scripts/critique-gate.sh
-  - {{REPO_PATH}}/.engrama/scripts/engrama-diff-hash.sh
+  - .engrama/scripts/critique-gate.sh
+  - .engrama/scripts/engrama-diff-hash.sh
 ---
 
 **A crítica registrada no ledger pode ser vinculada ao conteúdo exato do diff staged.** O objetivo é fechar o furo da branch inteira: uma crítica antiga não deve mais liberar automaticamente um diff novo quando houver prova verificável melhor disponível.

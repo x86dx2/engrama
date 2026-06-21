@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/modelo-operacional, governance/continuidade-de-sessao, decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade, decisions/0006-governanca-nao-se-autoaprova]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 Protocolo explícito **Orquestrador ↔ Executor ↔ Autoridade**, incluindo o **executor-bridge** (o Orquestrador invoca o Executor diretamente). Existe para impedir que o Orquestrador seja reduzido a "revisor" e que o Executor seja reduzido a "executor cego".

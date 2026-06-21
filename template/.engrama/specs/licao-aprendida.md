@@ -4,8 +4,8 @@ status: active
 touches: [governance/modelo-operacional, decisions/0006-governanca-nao-se-autoaprova, qa/criticas-do-executor, specs/README]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/qa/criticas-do-executor.md
-  - {{REPO_PATH}}/.engrama/log.md
+  - .engrama/qa/criticas-do-executor.md
+  - .engrama/log.md
 ---
 
 Playbook do **loop falha→regra**: como toda falha relevante vira uma **regra durável** (gate, lint, teste, ADR ou princípio), para que a memória institucional **componha** em vez de só acumular. Operacionaliza o princípio 12 de [[governance/modelo-operacional]] (honestidade de claims).

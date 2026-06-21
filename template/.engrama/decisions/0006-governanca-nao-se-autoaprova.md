@@ -4,8 +4,8 @@ status: active
 touches: [governance/cadeia-de-comando, governance/papeis-e-alcadas, decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/scripts/critique-gate.sh
-  - {{REPO_PATH}}/.engrama/qa/criticas-do-executor.md
+  - .engrama/scripts/critique-gate.sh
+  - .engrama/qa/criticas-do-executor.md
 ---
 
 **Governança não se autoaprova.** Toda edição de governança passa por **crítica independente do Executor antes do commit**: consenso → comita; discordância/impasse → escala à Autoridade (o Executor tem voz, não veto; a Autoridade pode dispensar).

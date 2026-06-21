@@ -4,8 +4,8 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/cadeia-de-comando, governance/modelo-operacional, governance/continuidade-de-sessao]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/CLAUDE.md
-  - /Users/x86/git-projects/engrama/AGENTS.md
+  - CLAUDE.md
+  - AGENTS.md
 ---
 
 Porta de entrada da **governança operacional entre agentes** do projeto. Define como o **Orquestrador (Orquestrador/Auditor/QA/Arquiteto/Guardião de Produção)**, o **Executor (Executor Crítico)** e a **Autoridade (Autoridade de Mudança)** trabalham, fazem handoff e retomam trabalho sem depender de prompt longo nem de memória informal. O modelo é definido por **papéis por função, não por vendor**: os nomes canônicos (Orquestrador, Executor, Autoridade) são a voz correta, independentemente de qual ferramenta/modelo encarne cada papel.

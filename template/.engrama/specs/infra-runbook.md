@@ -4,7 +4,7 @@ status: active
 touches: [specs/test-writing, specs/README]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/specs/infra-runbook.md
+  - .engrama/specs/infra-runbook.md
 ---
 
 Runbook de **infraestrutura/ops** do seu projeto (provisionar ambiente local, subir/derrubar o dev server, seedar dados, recriar golden/baseline). Operações **locais** são livres; **remoto/produção** é gated (ADR 0009). Este arquivo é um **esqueleto agnóstico de stack**: a estrutura (contextos, golden, portas, teardown, remoto) vale para qualquer projeto; os **comandos concretos** você preenche com a `{{STACK}}` do seu projeto.

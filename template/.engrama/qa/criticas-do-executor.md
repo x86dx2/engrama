@@ -4,7 +4,7 @@ status: active
 touches: [decisions/0006-governanca-nao-se-autoaprova, decisions/0010-roteamento-modelo-effort-do-executor, decisions/0011-diff-binding-atestacao-verificavel, governance/modelo-operacional]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/scripts/critique-gate.sh
+  - .engrama/scripts/critique-gate.sh
 ---
 
 # Ledger de críticas do Executor ({{MODELO_CRITICA}}) — gate de superfície sensível

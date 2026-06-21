@@ -33,7 +33,7 @@ case "${1:-}" in
 esac
 
 REPO_ROOT="$(
-  CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd
+  CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd -P
 )"
 ROOT="$REPO_ROOT"
 TMP_REPORT="$(mktemp 2>/dev/null || mktemp -t engrama-lint)"
@@ -214,7 +214,7 @@ check_frontmatter_requirements() {
 }
 
 resolve_source_ref_path() {
-  local ref="$1" suffix candidate
+  local ref="$1" suffix candidate dir base resolved_dir
 
   case "$ref" in
     /*)
@@ -234,7 +234,17 @@ resolve_source_ref_path() {
       return 1
       ;;
     *)
-      candidate="$ROOT/$ref"
+      dir="${ref%/*}"
+      base="${ref##*/}"
+      [ "$dir" = "$ref" ] && dir="."
+      resolved_dir="$(
+        CDPATH='' cd -- "$ROOT/$dir" 2>/dev/null && pwd -P
+      )" || return 1
+      case "$resolved_dir" in
+        "$ROOT"|"$ROOT"/*) ;;
+        *) return 1 ;;
+      esac
+      candidate="$resolved_dir/$base"
       [ -e "$candidate" ] || return 1
       printf '%s\n' "$candidate"
       return 0

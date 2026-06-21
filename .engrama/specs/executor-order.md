@@ -4,8 +4,8 @@ status: active
 touches: [governance/continuidade-de-sessao, decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions/0010-roteamento-modelo-effort-do-executor]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/governance/continuidade-de-sessao.md
-  - /Users/x86/git-projects/engrama/.engrama/decisions/0010-roteamento-modelo-effort-do-executor.md
+  - .engrama/governance/continuidade-de-sessao.md
+  - .engrama/decisions/0010-roteamento-modelo-effort-do-executor.md
 ---
 
 Template da **ordem ao Executor** (executor-bridge). Toda invocação `codex exec` segue isto. Detalhe normativo: [[governance/continuidade-de-sessao]] (ordem mínima) + [[decisions/0010-roteamento-modelo-effort-do-executor]] (tier).

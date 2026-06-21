@@ -14,7 +14,7 @@ SOURCE_OF_TRUTH_REPO: {{REPO_PATH}}
 - (domínio/arquitetura)       → criados conforme o projeto avança
 ```
 
-Regra: páginas que referenciam código/schema linkam **caminho absoluto** via `source_refs`, nunca copiam. Precisa do schema atualizado? Leia o arquivo no repo.
+Regra: páginas que referenciam código/schema linkam **caminho relativo à raiz do repo** via `source_refs`, nunca copiam. Precisa do schema atualizado? Leia o arquivo no repo.
 
 ## Papel do engrama
 
@@ -57,8 +57,8 @@ type: decision | domain | workflow | roadmap | gap | governance | spec
 status: active | proposed | superseded | resolved
 touches: [slug-relacionado, outro-slug]
 date: {{DATA}}
-source_refs:                       # caminhos absolutos no repo
-  - {{REPO_PATH}}/...
+source_refs:                       # caminhos relativos à raiz do repo
+  - .engrama/...
 critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   # só em gaps de superfície sensível (ADR 0006/item 7)
 ---
 ```
