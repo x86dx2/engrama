@@ -1,2 +1,4 @@
 .DS_Store
 .engrama.values
+.env
+.env.*

@@ -25,7 +25,7 @@ Auditoria imparcial do Engrama (3 fontes independentes — leitura manual, workf
 | P2 sync-template + propaga fixes ao template + drift (EX2) | ✅ | 9b8da4e |
 | P2b CI reexecuta o gate contra o PR (`critique-gate-ci.sh`) | ✅ | (esta fatia) |
 
-**Furos:** 7 dos 8 fechados e travados por teste (C5/C6/C7 · R2/R3/R4/R5). **R1** (auto-aprovação local) **mitigado server-side** pela P2b — falta só marcar o check da CI como *required* no *branch protection* (config de repositório, fora do código) para o bloqueio de merge ser vinculante. Suíte: 30 asserts (gate 12 · contract 9 · sync 5 · ci 4). O modelo de governança foi dogfoodado em cada fatia (Executor escreve, Orquestrador audita, ledger registra, gate ao vivo) e **pegou erros reais no trabalho do Orquestrador 3×**.
+**Furos:** 7 dos 8 fechados e travados por teste (C5/C6/C7 · R2/R3/R4/R5). **R1** (auto-aprovação local) **mitigado server-side**: a CI reexecuta o gate contra o PR e o job `test` (que embute esse gate) **está marcado como *required*** no *branch protection* — o bloqueio de merge é **vinculante**. *(Ressalva: o modo estrito do diff-binding está desligado por bug de fingerprint — ver "tetos" abaixo.)* O modelo de governança foi dogfoodado em cada fatia (Executor escreve, Orquestrador audita, ledger registra, gate ao vivo) e **pegou erros reais no trabalho do Orquestrador 3×**.
 
 ## Método (por que confiar)
 
@@ -111,5 +111,15 @@ Esta sessão rodou o **executor-bridge real**: o Orquestrador autorou, o Executo
 - [x] Suítes `tests/` verdes, shellcheck-limpas e fail-fast (20 asserts, 8 furos caracterizados).
 - [ ] Decisão da Autoridade sobre este commit (governança não se autoaprova; Executor `discordo` incorporado).
 - [ ] P0–P2: cada FURO promovido (assert FURO vira CORRETO) com crítica registrada por commit.
-- [ ] `sync-template.sh` + CI required check; referência fantasma resolvida.
+- [x] `sync-template.sh` + CI que reexecuta o gate; referência fantasma resolvida.
+- [x] Required check ativo no *branch protection* (job `test` embute o gate-contra-PR) → enforcement vinculante.
 - [ ] ADRs 0011+ formalizando vínculo-ao-diff, enforcement server-side, fonte única, testes portáveis.
+
+## Pendências aceitas / tetos (2026-06-21)
+
+Itens que permanecem abertos por **limitação inerente** ou decisão consciente (não são regressões):
+
+- **R1 — identidade do crítico (teto inerente):** o diff-binding prova *cobertura do diff*, não *identidade independente* do crítico. Fechar exigiria assinatura/chave que o `codex exec` não expõe. **Aceito**; mitigado server-side pelo *required check*.
+- **Diff-binding — modo estrito desligado (bug a corrigir):** fingerprint local (`git diff --cached`) ≠ gate-CI (repo sintético). Estrito off até unificar (gate-CI computar sobre `git diff base...HEAD --raw`). Ver [[decisions/0011-diff-binding-atestacao-verificavel]].
+- **EX4 — portabilidade/vendor:** `source_refs` absolutos (migrar p/ relativos) e ids de modelo `gpt-5.x` + canal `codex exec` hardcoded (separar núcleo de adaptadores). Em correção.
+- **Cerimônia/dormência:** ADR 0007 (computer-use) e ADR 0010 (5 tiers) dormentes nesta instância; ADR 0009 (produção) `proposed` até existir deploy.

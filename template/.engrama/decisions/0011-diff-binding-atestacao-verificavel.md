@@ -43,3 +43,7 @@ Rejeitado. O patch textual (`git diff`) é mais sensível a formatação e conte
 ## Relações
 - Complementa [[decisions/0006-governanca-nao-se-autoaprova]]: o ledger continua sendo o artefato do gate, mas agora pode carregar prova verificável melhor do que a convenção branch+categoria.
 - Se o seu projeto usar um gap/plano de auditoria equivalente, ligue-o aqui para registrar a origem da remediação.
+
+## Limitação conhecida
+
+O **fingerprint pode divergir entre o gate local e o gate-CI**: o local usa `git diff --cached --raw` (com detecção de rename), o gate-CI reconstrói um repo sintético. Para o mesmo PR (sobretudo com renames) os hashes diferem, tornando o **modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) insatisfazível**. Recomendação: manter o estrito **desligado no CI** até o gate-CI computar o fingerprint sobre o diff REAL do PR (`git diff <base>...HEAD --raw`, excluindo o ledger), idêntico ao caminho local. O gate-contra-PR segue exigindo a crítica registrada (núcleo do "escritor ≠ auditor").
