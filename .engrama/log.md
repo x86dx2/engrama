@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] fix | PR2 — diff-binding: fingerprint unificado (local==CI) + modo estrito RELIGADO
+- Branch `fix/diffbind-fingerprint`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (igualdade --cached==--range provada do zero, inclusive com rename; estrito ponta-a-ponta).
+- **Bug do item 4 fechado:** `engrama-diff-hash.sh` ganhou `--range <gitrange>`; o `bin/critique-gate-ci.sh` computa o fingerprint sobre o **diff REAL do PR** (`--range base...HEAD`) e injeta no gate via `ENGRAMA_DIFF_HASH`; o gate respeita esse override. Local (`--cached`) e CI (`--range`) agora produzem o MESMO hash.
+- **`ENGRAMA_REQUIRE_DIFF_BIND=1` RELIGADO no CI.** ADR 0011/template + ledger-doc + README/SECURITY/CHANGELOG/gaps atualizados ("Corrigido"). Borda honesta: PR multi-commit liga ao diff cumulativo `base...HEAD`; fluxo recomendado = squash.
+- Suíte verde (diffbind 9, ci 4, +todas); shellcheck/lint limpos. **Esta entrada usa o caminho forte** (sha256 vinculado).
+- **PROXIMO:** PR3 (source_refs portaveis/EX4), PR4 (vendor/model-names + {{ENGRAMA_VERSION}}).
+
 ## [2026-06-21] docs | PR1 — honestidade: required check ATIVO + estrito off; higiene de docs
 - Repo **publicado como PUBLIC** em github.com/x86dx2/engrama (a entrada de criacao registrou 'private'; tornei publico com autorizacao da Autoridade — registrado aqui para a memoria nao ficar stale). **Branch protection ATIVA**: required checks (job `test` que embute o gate-contra-PR, + markdown, gitleaks) → enforcement vinculante no merge. **GHSA private vulnerability reporting habilitado**.
 - README/ADR 0006/CHANGELOG/gaps: reconciliados (required check ATIVO, nao "pendente"); ressalva do **modo estrito do diff-binding desligado** (bug de fingerprint). ADR 0007/0010 marcados dormentes; tetos (R1/EX4/diff-binding) consolidados no gaps. template ADR 0011 ganhou a limitacao conhecida.

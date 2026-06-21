@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Suite do modo CI do critique gate.
 # Valida o wrapper server-side com a mesma prova de hash do gate local: dado um
-# base-ref real, uma branch e os arquivos mudados, ele reconstrui um repo
-# sintetico equivalente e reaplica o critique-gate local.
+# base-ref real, uma branch e os arquivos mudados, ele calcula o fingerprint do
+# diff REAL do PR e reaplica o critique-gate local num repo sintetico
+# equivalente para classify() + parsing do ledger.
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -40,11 +41,13 @@ write_ledger() {
   printf '%s\n' "$2" > "$1/.engrama/qa/criticas-do-executor.md"
 }
 
-write_files_list() {
-  local repo="$1"
+write_files_list_from_range() {
+  local repo="$1" base_ref="$2"
   local out="$repo/pr-files.zlist"
-  shift
-  printf '%s\0' "$@" > "$out"
+  (
+    cd "$repo" || exit 2
+    git diff --name-only -z "$base_ref...HEAD" > "$out"
+  )
   printf '%s' "$out"
 }
 
@@ -62,10 +65,10 @@ run_ci_gate() {
   )
 }
 
-run_diff_hash() {
+run_diff_hash_cached() {
   (
     cd "$1" || exit 2
-    bash ./.engrama/scripts/engrama-diff-hash.sh
+    bash ./.engrama/scripts/engrama-diff-hash.sh --cached
   )
 }
 
@@ -83,35 +86,48 @@ check() {
 }
 
 # C1: governanca sem entrada no ledger => BLOQUEIA
-r="$(new_repo pr/ci-1)"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-files="$(write_files_list "$r" ".engrama/governance/p.md")"
-check C1 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-1" "HEAD" "$files")" "governanca do PR sem critica registrada bloqueia"
-
-# C2: modo estrito na CI exige hash e libera quando o diff bate
-r="$(new_repo pr/ci-2)"
+r="$(new_repo main)"
+git -C "$r" checkout -q -b pr/ci-1
 printf 'x\n' > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md
-hash="$(run_diff_hash "$r")"
+git -C "$r" commit -qm pr
+files="$(write_files_list_from_range "$r" "main")"
+check C1 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-1" "main" "$files" 1)" "governanca do PR sem critica registrada bloqueia"
+
+# C2: modo estrito na CI exige hash e libera quando o diff real do PR bate
+r="$(new_repo main)"
+git -C "$r" checkout -q -b pr/ci-2
+printf 'x\n' > "$r/.engrama/governance/p.md"
+git -C "$r" add .engrama/governance/p.md
+hash="$(run_diff_hash_cached "$r")"
 write_ledger "$r" "## [2026-06-20] pr/ci-2 | [governance] x | confirmo | ref $hash"
-files="$(write_files_list "$r" ".engrama/governance/p.md" ".engrama/qa/criticas-do-executor.md")"
-check C2 CORRETO 0 "$(run_ci_gate "$r" "pr/ci-2" "HEAD" "$files" 1)" "modo estrito da CI libera quando sha256 bate o diff do PR"
+git -C "$r" add .engrama/qa/criticas-do-executor.md
+git -C "$r" commit -qm pr
+files="$(write_files_list_from_range "$r" "main")"
+check C2 CORRETO 0 "$(run_ci_gate "$r" "pr/ci-2" "main" "$files" 1)" "modo estrito da CI libera quando sha256 bate o diff real do PR"
 
 # C3: arquivo alterado depois da critica => hash obsoleto => BLOQUEIA em modo estrito
-r="$(new_repo pr/ci-3)"
+r="$(new_repo main)"
+git -C "$r" checkout -q -b pr/ci-3
 printf 'v1\n' > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md
-hash="$(run_diff_hash "$r")"
+hash="$(run_diff_hash_cached "$r")"
 write_ledger "$r" "## [2026-06-20] pr/ci-3 | [governance] x | confirmo | ref $hash"
+git -C "$r" add .engrama/qa/criticas-do-executor.md
 printf 'v2\n' > "$r/.engrama/governance/p.md"
-files="$(write_files_list "$r" ".engrama/governance/p.md" ".engrama/qa/criticas-do-executor.md")"
-check C3 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-3" "HEAD" "$files" 1)" "modo estrito da CI bloqueia critica vinculada a diff antigo"
+git -C "$r" add .engrama/governance/p.md
+git -C "$r" commit -qm pr
+files="$(write_files_list_from_range "$r" "main")"
+check C3 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-3" "main" "$files" 1)" "modo estrito da CI bloqueia critica vinculada a diff antigo"
 
 # C4: arquivo fora da superficie sensivel => LIBERA
-r="$(new_repo pr/ci-4)"
+r="$(new_repo main)"
+git -C "$r" checkout -q -b pr/ci-4
 printf 'x\n' > "$r/README-do-produto.txt"
-files="$(write_files_list "$r" "README-do-produto.txt")"
-check C4 CORRETO 0 "$(run_ci_gate "$r" "pr/ci-4" "HEAD" "$files" 1)" "diff nao sensivel nao vira burocracia na CI"
+git -C "$r" add README-do-produto.txt
+git -C "$r" commit -qm pr
+files="$(write_files_list_from_range "$r" "main")"
+check C4 CORRETO 0 "$(run_ci_gate "$r" "pr/ci-4" "main" "$files" 1)" "diff nao sensivel nao vira burocracia na CI"
 
 printf '%b\n' "$RESULTS"
 echo ""

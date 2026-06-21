@@ -18,7 +18,7 @@ O gate do ADR [[decisions/0006-governanca-nao-se-autoaprova]] já impõe branch 
 Se o seu projeto mantiver um gap/plano de auditoria equivalente, ligue este ADR a essa página para registrar a origem da remediação.
 
 ## Decisão
-1. Introduzir `engrama-diff-hash.sh` como **fonte única** do fingerprint do diff staged. O cálculo usa `git diff --cached --raw -z -- . ':(exclude).engrama/qa/criticas-do-executor.md'` e o passa por SHA-256.
+1. Introduzir `engrama-diff-hash.sh` como **fonte única** do fingerprint do diff alvo. Sem flags, ele usa `git diff --cached --raw -z -- . ':(exclude).engrama/qa/criticas-do-executor.md'`; com `--range <gitrange>`, usa `git diff --raw -z <gitrange> -- . ':(exclude).engrama/qa/criticas-do-executor.md'`. Em ambos os casos, a saída é SHA-256 no formato `sha256:<hex>`.
 2. Estender a gramática do ledger: o campo 4 (`ref`) continua livre, mas pode conter opcionalmente um token `sha256:<hex>`.
 3. Quando o token `sha256:<hex>` estiver presente, o gate compara esse valor ao fingerprint atual:
    - **match forte**: a crítica conta para este diff;
@@ -38,12 +38,16 @@ Rejeitado. O patch textual (`git diff`) é mais sensível a formatação e conte
 - Editar um arquivo não-ledger após a crítica invalida o binding e exige nova crítica (ou novo waiver).
 - O caminho legado continua funcionando por padrão, para não quebrar o histórico existente nem as suítes antigas.
 - O modo estrito permite endurecer CI/enforcement sem forçar uma migração big-bang do ledger.
+- Na CI, o repo sintético continua útil para reaplicar `classify()` + parsing do ledger, mas o fingerprint passa a vir do **diff real do PR** (`--range <base>...HEAD`), não da reconstrução sintética.
+- Em PRs com **múltiplos commits**, o binding cobre o **diff cumulativo** de `base...HEAD`; o fluxo recomendado continua sendo squash/PR de 1 commit quando a intenção é manter a correspondência "uma crítica ↔ uma fatia".
 - **Teto honesto:** este mecanismo prova que a crítica registrada cobre **este diff**. Ele **não prova independência de identidade do crítico**. Para isso, seria necessária uma identidade verificável externa ao conteúdo do repo (assinatura/chave/atestado do executor-bridge).
 
 ## Relações
 - Complementa [[decisions/0006-governanca-nao-se-autoaprova]]: o ledger continua sendo o artefato do gate, mas agora pode carregar prova verificável melhor do que a convenção branch+categoria.
 - Se o seu projeto usar um gap/plano de auditoria equivalente, ligue-o aqui para registrar a origem da remediação.
 
-## Limitação conhecida
+## Corrigido
 
-O **fingerprint pode divergir entre o gate local e o gate-CI**: o local usa `git diff --cached --raw` (com detecção de rename), o gate-CI reconstrói um repo sintético. Para o mesmo PR (sobretudo com renames) os hashes diferem, tornando o **modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) insatisfazível**. Recomendação: manter o estrito **desligado no CI** até o gate-CI computar o fingerprint sobre o diff REAL do PR (`git diff <base>...HEAD --raw`, excluindo o ledger), idêntico ao caminho local. O gate-contra-PR segue exigindo a crítica registrada (núcleo do "escritor ≠ auditor").
+O **fingerprint do diff-binding pode ser unificado entre local e CI** usando a própria fonte única (`engrama-diff-hash.sh`) em dois modos: local = diff staged padrão; CI = `--range <base>...HEAD` sobre o **diff real do PR**. O repo sintético permanece apenas para reaplicar `classify()` + parsing do ledger. Com isso, o **modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) volta a ser satisfazível na CI**.
+
+A borda honesta que permanece é outra: em PRs com **múltiplos commits**, o binding cobre o **diff cumulativo** de `base...HEAD`, não cada commit isoladamente. O fluxo recomendado continua sendo squash/PR de 1 commit quando se quer a correspondência mais direta entre crítica e fatia.
