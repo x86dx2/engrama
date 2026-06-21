@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-C — quickstart + diff-binding multi-commit acionavel + gitleaks sem Node
+- Branch `feat/quickstart-diffbind-gitleaks`. Executor via `exec-bridge.sh` (codex-session 019eeb2e, veredito `concordo`). Orquestrador auditou e reexecutou os gates.
+- **Transparencia provada de ponta a ponta:** o wrapper consertado no PR-B capturou o **corpo completo** da resposta do Executor desta run (nao so o session-id). A correcao saiu da teoria.
+- **Item 5 (quickstart):** `## Quickstart (TL;DR)` no topo do README — atalho honesto de *adocao* do template (cp `template/.` -> raiz; lint), nao "subir um app". O Executor pegou um overclaim proprio (prometia `tests/run.sh`, que `template/` nao entrega) e cortou.
+- **Item 6 (diff-binding multi-commit):** caveat virou **acionavel** — `::notice::` nao-bloqueante na CI quando o PR tem >1 commit + recomendacao explicita de squash no `CONTRIBUTING.md`. A logica do gate nao foi tocada.
+- **Item 7 (gitleaks sem Node):** troquei `gitleaks/gitleaks-action@v2` por binario **fixado (v8.30.1) + verificado por checksum** e scan sem `GITHUB_TOKEN` — mata o warning de deprecacao do Node 20. Release/asset confirmados em fonte primaria (gh api) antes de fixar.
+- **QA (ADR 0005):** suite verde; lint exit 0; shellcheck exit 0; `ci.yml` YAML valido. Download do gitleaks so roda na CI (nao exercitavel local) — sera provado pelo required-check.
+- Encerra a lista de pendencias triviais (itens 5-7). Atestacao dogfoodada: ledger leva `sha256` + `codex-session`.
+
 ## [2026-06-21] feat | PR-B — teste do hook + lint completo + FIX do wrapper (resposta nao capturada)
 - Branch `feat/hook-test-lint-completo`. Executor invocado **via `exec-bridge.sh`** (codex-session 019eeb13). Orquestrador auditou.
 - **Item 2:** `tests/gate/hook.test.sh` (6 casos: git commit, --no-verify, status, ls, sem python3 fail-closed, JSON malformado).

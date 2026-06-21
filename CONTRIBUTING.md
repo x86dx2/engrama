@@ -4,8 +4,9 @@ Fluxo de contribuição:
 
 1. Abra uma branch para a fatia.
 2. Envie a mudança via PR.
-3. Mantenha a CI verde antes do merge.
-4. Faça o merge só depois da auditoria e do veredito do Orquestrador.
+3. Prefira squash/1 commit por PR: o diff-binding ata o `sha256` do diff cumulativo do PR; multi-commit segue válido, mas o fingerprint cobre o conjunto, não cada commit.
+4. Mantenha a CI verde antes do merge.
+5. Faça o merge só depois da auditoria e do veredito do Orquestrador.
 
 Resumo de governança:
 
