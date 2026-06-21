@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-A — transparencia do executor-bridge (ADR 0003 mecanizado) + session-id
+- Branch `feat/transparencia-executor-bridge`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (test stub, smoke, markdownlint).
+- **Transparencia (item 1):** `.engrama/scripts/exec-bridge.sh` invoca o codex e SALVA ordem+resposta+`codex-session` em `transcripts/` (versionado, publico — decisao da Autoridade). Captura o session-id real de `~/.codex/sessions/*.jsonl` (fallback `derived`). Os ~33 transcripts DESTA sessao foram preservados de `/tmp` em `transcripts/sessao-01-.../`.
+- **Atestacao (item 3):** o ledger (campo 4) aceita `codex-session:<id>` como evidencia fraca de execucao real (NAO prova identidade — teto do R1). ADR 0003/0011 atualizados.
+- **Licao (loop falha->regra):** minha ORDEM pos o wrapper em `bin/` (que e source-only pela reorg); o Executor seguiu e distribuiu via `template/bin/`, quebrando o "`.engrama/` autocontido". Corrigi: movido p/ `.engrama/scripts/` (com o gate/hook/lint/diff-hash) — `bin/` volta a ser so source-only. `transcripts/` excluido do markdownlint (evidencia, nao doc autoral).
+- Suite 267 asserts verde (exec-bridge.test 6); shellcheck/lint/markdownlint limpos.
+- **PROXIMO:** PR-B (teste do hook + lint completo) e PR-C (quickstart + multi-commit + node), agora invocando o Executor VIA exec-bridge (dogfood da transparencia).
+
 ## [2026-06-21] feat | PR4 — versionamento 0.1.0 + vendor/model-names honestos (EX4 parte 2)
 - Branch `feat/versionamento-vendor`. Executor (`codex exec`, concordo); Orquestrador auditou (smoke com VERSION, vendor honesto, suite verde).
 - **Versionamento (item 8):** `VERSION`=0.1.0 (fonte de verdade); `bin/bootstrap.sh` semeia `ENGRAMA_VERSION`; `template/.engrama/VERSION`={{ENGRAMA_VERSION}} -> projeto-alvo registra a versao instalada; teste C10 prova. CHANGELOG cortado em release `[0.1.0] - 2026-06-21`.

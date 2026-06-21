@@ -32,3 +32,7 @@ globs:
 ignores:
   - "node_modules"
   - ".git"
+  # transcripts/ guarda registros VERBATIM do executor-bridge (ordem + resposta do
+  # codex). Sao evidencia, nao docs autorais — nao se aplica estilo de markdown a eles.
+  - "transcripts"
+  - "template/transcripts"

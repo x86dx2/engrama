@@ -127,6 +127,14 @@ else
 fi
 check C10 CORRETO "$_r" ".engrama/VERSION instalado com a versao do pack e sem placeholder cru"
 
+# C11: bootstrap instala o wrapper do executor-bridge e a pasta versionada de transcripts.
+if [ -x "$T8/.engrama/scripts/exec-bridge.sh" ] && [ -f "$T8/transcripts/README.md" ]; then
+  _r=0
+else
+  _r=1
+fi
+check C11 CORRETO "$_r" "bootstrap instala .engrama/scripts/exec-bridge.sh e transcripts/README.md no projeto-alvo"
+
 printf '%b\n' "$RESULTS"
 echo ""
 echo "Resumo: $PASS asserts batidos, $FAIL divergentes | $HOLES casos marcados FURO (a corrigir)"

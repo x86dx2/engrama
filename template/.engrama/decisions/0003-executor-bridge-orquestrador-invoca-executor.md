@@ -48,12 +48,22 @@ Para ganhar throughput (ex.: uma frente com muitas fatias independentes), a for�
 
 ## Transparência para a Autoridade
 
-Todo I/O do executor-bridge é **exposto à Autoridade**, sempre:
-- A **ordem enviada** ao Executor (`{{EXECUTOR_CMD}}`) é colada **na íntegra (verbatim)** no canal com a Autoridade **ao ser enviada** — não parafraseada.
-- A **resposta do Executor** é colada **na íntegra** quando retorna, para a Autoridade conferir.
-- Vale para **ordens de execução E pedidos de crítica** (qualquer invocação do Executor).
+Todo I/O do executor-bridge continua **exposto à Autoridade**, mas agora isso é
+**mecanizado**:
+- `.engrama/scripts/exec-bridge.sh` invoca `{{EXECUTOR_CMD}} --json`, salva a **ordem
+  verbatim** em `transcripts/<data>-<label>-order.md` e a **resposta íntegra**
+  em `transcripts/<data>-<label>-response.md`.
+- O transcript da resposta registra `codex-session`, modelo, sandbox e `label`
+  no cabeçalho YAML.
+- O wrapper imprime `codex-session:<id>` para que o Orquestrador o cole no
+  ledger como rastro de execução; quando o stream do executor não expõe um id de
+  sessão, o wrapper deriva um identificador determinístico da resposta e o marca
+  como `derived`.
 
-Isto reforça a "apresentação fiel" ([[decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]]): a Autoridade vê o que o Executor recebeu e o que devolveu, sem intermediação opaca do Orquestrador.
+Isto reforça a "apresentação fiel"
+([[decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]]): a
+Autoridade audita o que o Executor recebeu e devolveu por artefato versionado,
+sem depender de `/tmp` nem de relay manual do Orquestrador.
 
 ## Pendência de design (a confirmar ao construir o harness)
 - Flag exata de modelo por invocação (`--model` vs `-c model=`) — o esforço de raciocínio por flag (`model_reasoning_effort`) é o caminho confirmado.

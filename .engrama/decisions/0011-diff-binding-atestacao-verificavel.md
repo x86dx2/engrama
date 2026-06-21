@@ -20,7 +20,7 @@ O plano de remediação já apontava o próximo passo: vincular a prova ao diff,
 
 ## Decisão
 1. Introduzir `engrama-diff-hash.sh` como **fonte única** do fingerprint do diff alvo. Sem flags, ele usa `git diff --cached --raw -z -- . ':(exclude).engrama/qa/criticas-do-executor.md'`; com `--range <gitrange>`, usa `git diff --raw -z <gitrange> -- . ':(exclude).engrama/qa/criticas-do-executor.md'`. Em ambos os casos, a saída é SHA-256 no formato `sha256:<hex>`.
-2. Estender a gramática do ledger: o campo 4 (`ref`) continua livre, mas pode conter opcionalmente um token `sha256:<hex>`.
+2. Estender a gramática do ledger: o campo 4 (`ref`) continua livre, mas pode conter opcionalmente um token `sha256:<hex>` e/ou um marcador `codex-session:<id>` emitido pelo executor-bridge.
 3. Quando o token `sha256:<hex>` estiver presente, o gate compara esse valor ao fingerprint atual:
    - **match forte**: a crítica conta para este diff;
    - **mismatch**: a crítica fica explicitamente vinculada a outro diff e não satisfaz o gate.
@@ -42,6 +42,7 @@ Rejeitado. O patch textual (`git diff`) é mais sensível a formatação e conte
 - Na CI, o repo sintético continua útil para reaplicar `classify()` + parsing do ledger, mas o fingerprint passa a vir do **diff real do PR** (`--range <base>...HEAD`), não da reconstrução sintética.
 - Em PRs com **múltiplos commits**, o binding cobre o **diff cumulativo** de `base...HEAD`; o fluxo recomendado continua sendo squash/PR de 1 commit quando a intenção é manter a correspondência "uma crítica ↔ uma fatia".
 - **Teto honesto:** este mecanismo prova que a crítica registrada cobre **este diff**. Ele **não prova independência de identidade do crítico**. Para isso, seria necessária uma identidade verificável externa ao conteúdo do repo (assinatura/chave/atestado do executor-bridge).
+- `codex-session:<id>` é **evidência fraca** de que um Codex observável pelo executor-bridge realmente rodou: melhora o rastro factual, mas **não** eleva o teto de identidade independente do crítico.
 
 ## Relações
 - Complementa [[decisions/0006-governanca-nao-se-autoaprova]]: o ledger continua sendo o artefato do gate, mas agora pode carregar prova verificável melhor do que a convenção branch+categoria.
