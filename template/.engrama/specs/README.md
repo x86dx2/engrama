@@ -23,6 +23,7 @@ Biblioteca de **specs operacionais** — playbooks/checklists reaproveitáveis p
 | [[specs/commit]] | checklist de commit | Orquestrador |
 | [[specs/test-writing]] | convenções do harness de teste do seu projeto (framework de unit/integração/e2e, golden files, ciclo RED→GREEN) | Executor (sob spec) |
 | [[specs/infra-runbook]] | ops: provisionar/seedar ambiente, subir/matar o dev server local (`{{DEV_URL}}`), recriar golden/baseline | Orquestrador/Executor |
+| [[specs/licao-aprendida]] | loop **falha→regra**: toda falha relevante vira regra durável (gate/lint/teste/ADR) | Orquestrador |
 
 > Template: as linhas `test-writing` e `infra-runbook` são **agnósticas de stack** no pack. Preencha-as com as ferramentas concretas do seu projeto (runner de teste, banco/migrations, comando de dev server, host de CI/git) sem alterar os papéis nem o princípio spec ≠ subagente.
 

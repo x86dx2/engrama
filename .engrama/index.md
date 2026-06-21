@@ -29,6 +29,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 - [[specs/orquestrador]] · [[specs/executor]] — papéis (Orquestrador / Executor nas variações).
 - [[specs/executor-order]] — template da ordem ao Executor · [[specs/commit]] — checklist de commit.
 - [[specs/test-writing]] — convenções do harness · [[specs/infra-runbook]] — infra/stack/N/A (sem servidor local).
+- [[specs/licao-aprendida]] — loop falha→regra (a memória que compõe).
 
 ## Processo
 - [[qa/criticas-do-executor]] — ledger de críticas do Executor (gpt-5.5) + gate mecânico de commit (ADR 0006/0010).

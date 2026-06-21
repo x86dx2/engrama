@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-20] feat | T2c (absorcao headroom) — loop falha->regra + principio 12 (metricas honestas)
+- Branch `absorcao/t2c-governanca`. Orquestrador autorou; Executor (`codex exec`) criticou (`ajuste-menor`, 4 achados) -> incorporados.
+- **Principio 12** (honestidade de claims/metricas) em modelo-operacional + spec **licao-aprendida** (toda falha relevante vira regra duravel: gate/lint/teste/ADR). Propagado ao template.
+- **Ironia incorporada:** o Executor pegou meu doc de honestidade caindo no proprio overclaim ("vira"/"impede") -> suavizado para o verificavel. Virou exemplo vivo na propria spec.
+- Tambem fechei 2 drifts de prosa raiz<->template (Estrutura do schema em ambos agora bate com a arvore real).
+- lint limpo; suite verde (gate 12 + fuzz 200 + contract 9 + lint 7 + session 3 + sync 8 + ci 4).
+- **PROXIMO:** T3 (atestacao verificavel do R1: diff-binding + artefato de critica + doc honesta do limite).
+
 ## [2026-06-20] feat | T2a (absorcao ai-memory) — auto-surface do checkpoint por hooks
 - Branch `absorcao/t2a-hooks`. Executor (`codex exec`, concordo); Orquestrador auditou (degradacao segura, settings valido, suite verde).
 - **session-context.sh** + hooks `SessionStart`/`PreCompact`: ao abrir/compactar a sessao, auto-surge o checkpoint (topo do log), status do bootstrap e lembrete do handshake — reduz a cerimonia manual de "ler o topo do log".
