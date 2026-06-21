@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-B — teste do hook + lint completo + FIX do wrapper (resposta nao capturada)
+- Branch `feat/hook-test-lint-completo`. Executor invocado **via `exec-bridge.sh`** (codex-session 019eeb13). Orquestrador auditou.
+- **Item 2:** `tests/gate/hook.test.sh` (6 casos: git commit, --no-verify, status, ls, sem python3 fail-closed, JSON malformado).
+- **Item 4:** lint estendido — paginas orfas, gaps de numeracao de ADR, status invalido, TODO/FIXME/XXX em doc normativo. Sensibilidade provada; o Executor achou+corrigiu um TODO real em continuidade-de-sessao.
+- **Licao (loop falha->regra) da PROPRIA transparencia:** o `exec-bridge.sh` (PR-A) capturava o session-id mas **NAO o corpo da resposta** (o output_text final do assistant nao vem no stream --json, so no session file). Recuperei a resposta desta run do session file; **corrigi o wrapper** (fallback que extrai do `~/.codex/sessions/<id>.jsonl`); adicionei o caso **E7** que pega a regressao (provado: falha sem o fix). O stub do teste antigo nao replicava o formato real -> por isso o bug passou.
+- Suite 282 asserts verde; shellcheck/lint/markdownlint limpos. Transcripts desta run versionados.
+- **PROXIMO:** PR-C (quickstart + diff-binding multi-commit + node gitleaks).
+
 ## [2026-06-21] feat | PR-A — transparencia do executor-bridge (ADR 0003 mecanizado) + session-id
 - Branch `feat/transparencia-executor-bridge`. Executor (`codex exec`, ajuste-menor); Orquestrador auditou (test stub, smoke, markdownlint).
 - **Transparencia (item 1):** `.engrama/scripts/exec-bridge.sh` invoca o codex e SALVA ordem+resposta+`codex-session` em `transcripts/` (versionado, publico — decisao da Autoridade). Captura o session-id real de `~/.codex/sessions/*.jsonl` (fallback `derived`). Os ~33 transcripts DESTA sessao foram preservados de `/tmp` em `transcripts/sessao-01-.../`.

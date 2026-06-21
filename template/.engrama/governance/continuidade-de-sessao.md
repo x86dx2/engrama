@@ -21,7 +21,7 @@ Protocolos de **continuidade operacional**: como abrir, trabalhar e encerrar uma
 
 O agente declara: (1) papel assumido; (2) alçada; (3) estado factual lido no topo do [[log]]; (4) próximo passo seguro dentro da alçada; (5) o que depende de aprovação da Autoridade. **Sem o handshake, a sessão não está corretamente aberta.**
 
-Se [[project/bootstrap-do-projeto]] estiver `proposed` ou com `TODO`, o próximo passo seguro do Orquestrador é **entrevistar a Autoridade e concluir o bootstrap**, não avançar no produto.
+Se [[project/bootstrap-do-projeto]] estiver `proposed` ou com **campos pendentes**, o próximo passo seguro do Orquestrador é **entrevistar a Autoridade e concluir o bootstrap**, não avançar no produto.
 
 ## Ordem mínima do Orquestrador para o Executor (executor-bridge)
 

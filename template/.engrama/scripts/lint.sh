@@ -12,6 +12,10 @@ Valida a saude mecanica do Engrama:
 - source_refs no frontmatter
 - frontmatter minimo nas areas obrigatorias
 - ADR superseded sem ponteiro para substituta
+- paginas orfas nas areas indexadas do Engrama
+- gaps de numeracao em ADRs
+- status de frontmatter fora do enum permitido
+- TODO/FIXME/XXX em documentacao normativa
 EOF
 }
 
@@ -81,6 +85,46 @@ requires_frontmatter() {
       return 1
       ;;
   esac
+}
+
+list_markdown_files() {
+  find .engrama -type f -name '*.md' | sort
+  [ -f CLAUDE.md ] && printf '%s\n' CLAUDE.md
+  [ -f AGENTS.md ] && printf '%s\n' AGENTS.md
+}
+
+list_orphan_candidates() {
+  local file base
+  for file in \
+    .engrama/decisions/*.md \
+    .engrama/governance/*.md \
+    .engrama/specs/*.md \
+    .engrama/gaps/*.md \
+    .engrama/project/*.md
+  do
+    [ -f "$file" ] || continue
+    base="$(basename "$file")"
+    case "$base" in
+      index.md|log.md|CLAUDE.md)
+        continue
+        ;;
+      *)
+        printf '%s\n' "$file"
+        ;;
+    esac
+  done
+}
+
+extract_wikilinks() {
+  awk '
+    {
+      rest = $0
+      while (match(rest, /\[\[[^][]+\]\]/)) {
+        print FNR "\t" substr(rest, RSTART + 2, RLENGTH - 4)
+        rest = substr(rest, RSTART + RLENGTH)
+      }
+    }
+  ' "$1"
 }
 
 resolve_wikilink_target() {
@@ -175,23 +219,13 @@ parse_frontmatter() {
 check_wikilinks() {
   local file="$1" line_no slug target
 
-  while IFS=: read -r line_no slug; do
+  while IFS='	' read -r line_no slug; do
     [ -n "${line_no:-}" ] || continue
     target="$(resolve_wikilink_target "$slug")" || continue
     if [ ! -e "$target" ]; then
       report_problem "$file" "$line_no" "wikilink orfao: [[${slug}]] -> ${target#"$ROOT"/}"
     fi
-  done < <(
-    awk '
-      {
-        rest = $0
-        while (match(rest, /\[\[[^][]+\]\]/)) {
-          print FNR ":" substr(rest, RSTART + 2, RLENGTH - 4)
-          rest = substr(rest, RSTART + RLENGTH)
-        }
-      }
-    ' "$file"
-  )
+  done < <(extract_wikilinks "$file")
 }
 
 check_frontmatter_requirements() {
@@ -211,6 +245,22 @@ check_frontmatter_requirements() {
   [ -n "$FRONTMATTER_TYPE_VALUE" ] || report_problem "$file" 1 "frontmatter obrigatorio ausente: type"
   [ -n "$FRONTMATTER_STATUS_VALUE" ] || report_problem "$file" 1 "frontmatter obrigatorio ausente: status"
   [ -n "$FRONTMATTER_DATE_VALUE" ] || report_problem "$file" 1 "frontmatter obrigatorio ausente: date"
+}
+
+check_status_value() {
+  local file="$1" status_value
+
+  requires_frontmatter "$file" || return 0
+  [ -n "$FRONTMATTER_STATUS_VALUE" ] || return 0
+
+  status_value="$(strip_quotes "$(trim "$FRONTMATTER_STATUS_VALUE")")"
+  case "$status_value" in
+    active|proposed|superseded|resolved)
+      ;;
+    *)
+      report_problem "$file" "${FRONTMATTER_STATUS_LINE:-1}" "status invalido: $status_value (esperado: active|proposed|superseded|resolved)"
+      ;;
+  esac
 }
 
 resolve_source_ref_path() {
@@ -283,7 +333,7 @@ check_superseded_pointer() {
   self_slug="${self_slug%.md}"
   self_target="$ROOT/.engrama/${self_slug}.md"
 
-  while IFS=: read -r line_no slug; do
+  while IFS='	' read -r line_no slug; do
     [ -n "${line_no:-}" ] || continue
     [ "$line_no" -gt "$FRONTMATTER_END_LINE" ] || continue
     target="$(resolve_wikilink_target "$slug")" || continue
@@ -297,21 +347,117 @@ check_superseded_pointer() {
       *)
         ;;
     esac
-  done < <(
-    awk '
-      {
-        rest = $0
-        while (match(rest, /\[\[[^][]+\]\]/)) {
-          print FNR ":" substr(rest, RSTART + 2, RLENGTH - 4)
-          rest = substr(rest, RSTART + RLENGTH)
-        }
-      }
-    ' "$file"
-  )
+  done < <(extract_wikilinks "$file")
 
   if [ "$found" -eq 0 ]; then
     report_problem "$file" "${FRONTMATTER_STATUS_LINE:-1}" "ADR superseded sem ponteiro para substituta"
   fi
+}
+
+check_normative_markers() {
+  local file="$1" line_no line_text marker
+
+  case "$file" in
+    .engrama/governance/*.md|.engrama/decisions/*.md) ;;
+    *) return 0 ;;
+  esac
+
+  while IFS=: read -r line_no line_text; do
+    [ -n "${line_no:-}" ] || continue
+    marker="TODO"
+    case "$line_text" in
+      *FIXME*) marker="FIXME" ;;
+      *XXX*) marker="XXX" ;;
+      *TODO*) marker="TODO" ;;
+    esac
+    report_problem "$file" "$line_no" "marcador cru em doc normativo: $marker"
+  done < <(grep -nE '(^|[^[:alnum:]_])(TODO|FIXME|XXX)([^[:alnum:]_]|$)' "$file" || true)
+}
+
+has_inbound_wikilink() {
+  local target_file="$1" target_abs source_file line_no slug resolved
+  target_abs="$ROOT/$target_file"
+
+  while IFS= read -r source_file; do
+    [ -n "$source_file" ] || continue
+    [ "$source_file" = "$target_file" ] && continue
+
+    while IFS='	' read -r line_no slug; do
+      [ -n "${line_no:-}" ] || continue
+      resolved="$(resolve_wikilink_target "$slug")" || continue
+      if [ "$resolved" = "$target_abs" ]; then
+        return 0
+      fi
+    done < <(extract_wikilinks "$source_file")
+  done < <(list_markdown_files)
+
+  return 1
+}
+
+is_listed_in_primary_indexes() {
+  local target_file="$1" target_abs index_file line_no slug resolved
+  target_abs="$ROOT/$target_file"
+
+  for index_file in .engrama/index.md .engrama/governance/index.md; do
+    [ -f "$index_file" ] || continue
+    while IFS='	' read -r line_no slug; do
+      [ -n "${line_no:-}" ] || continue
+      resolved="$(resolve_wikilink_target "$slug")" || continue
+      if [ "$resolved" = "$target_abs" ]; then
+        return 0
+      fi
+    done < <(extract_wikilinks "$index_file")
+  done
+
+  return 1
+}
+
+check_orphan_pages() {
+  local file
+
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    is_listed_in_primary_indexes "$file" && continue
+    has_inbound_wikilink "$file" && continue
+    report_problem "$file" 1 "pagina orfa: sem wikilink em outro .md e fora de .engrama/index.md/.engrama/governance/index.md"
+  done < <(list_orphan_candidates)
+}
+
+check_adr_numbering_gaps() {
+  local file base adr_number adr_number_dec max_number=0 found_numbers="" expected missing_numbers=""
+
+  for file in .engrama/decisions/*.md; do
+    [ -f "$file" ] || continue
+    base="$(basename "$file")"
+    case "$base" in
+      [0-9][0-9][0-9][0-9]-*.md)
+        adr_number="${base%%-*}"
+        adr_number_dec=$((10#$adr_number))
+        if [ "$adr_number_dec" -gt "$max_number" ]; then
+          max_number="$adr_number_dec"
+        fi
+        found_numbers="$found_numbers $adr_number"
+        ;;
+      *)
+        ;;
+    esac
+  done
+
+  [ "$max_number" -gt 0 ] || return 0
+
+  expected=1
+  while [ "$expected" -le "$max_number" ]; do
+    adr_number="$(printf '%04d' "$expected")"
+    case " $found_numbers " in
+      *" $adr_number "*) ;;
+      *) missing_numbers="$missing_numbers $adr_number" ;;
+    esac
+    expected=$((expected + 1))
+  done
+
+  [ -n "$missing_numbers" ] || return 0
+  missing_numbers="${missing_numbers# }"
+  report_problem ".engrama/decisions" 1 "gap na numeracao de ADRs: faltando $missing_numbers"
 }
 
 lint_file() {
@@ -319,18 +465,19 @@ lint_file() {
   check_wikilinks "$file"
   parse_frontmatter "$file"
   check_frontmatter_requirements "$file"
+  check_status_value "$file"
   check_source_refs "$file"
   check_superseded_pointer "$file"
+  check_normative_markers "$file"
 }
 
 while IFS= read -r file; do
   [ -n "$file" ] || continue
   lint_file "$file"
-done < <(
-  find .engrama -type f -name '*.md' | sort
-  [ -f CLAUDE.md ] && printf '%s\n' CLAUDE.md
-  [ -f AGENTS.md ] && printf '%s\n' AGENTS.md
-)
+done < <(list_markdown_files)
+
+check_orphan_pages
+check_adr_numbering_gaps
 
 if [ "$ERRORS" -gt 0 ]; then
   cat "$TMP_REPORT"

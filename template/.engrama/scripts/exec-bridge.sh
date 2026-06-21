@@ -195,6 +195,27 @@ extract_response_text() {
   ' "$events_file"
 }
 
+# Fallback: o stdout --json do codex nem sempre carrega o output_text final do
+# assistant; o session file (~/.codex/sessions/.../<id>.jsonl) sempre carrega.
+find_session_file() {
+  local sid="$1"
+  local home="${CODEX_HOME:-$HOME/.codex}"
+  [ -n "$sid" ] || return 1
+  find "$home/sessions" -type f -name "*${sid}*.jsonl" 2>/dev/null | sort | tail -1
+}
+
+extract_response_from_session() {
+  local sf="$1"
+  [ -f "$sf" ] || return 1
+  jq -Rr '
+    fromjson? |
+    select((.payload.type? == "message") and (.payload.role? == "assistant")) |
+    .payload.content[]? |
+    select(.type == "output_text") |
+    .text
+  ' "$sf"
+}
+
 sha256_short() {
   local input="$1"
 
@@ -263,14 +284,22 @@ main() {
     codex_rc=$?
   fi
 
+  codex_session="$(extract_session_id "$events_file")"
+
   response_text="$(extract_response_text "$events_file")"
+  # Fallback robusto: se o stream nao trouxe a resposta, le do session file.
+  if [ -z "$response_text" ] && [ -n "$codex_session" ]; then
+    session_file="$(find_session_file "$codex_session" 2>/dev/null || true)"
+    if [ -n "$session_file" ]; then
+      response_text="$(extract_response_from_session "$session_file" 2>/dev/null || true)"
+    fi
+  fi
   if [ -z "$response_text" ] && [ -s "$stderr_file" ]; then
     response_text="(sem output_text do assistant)
 
 $(cat "$stderr_file")"
   fi
 
-  codex_session="$(extract_session_id "$events_file")"
   if [ -z "$codex_session" ]; then
     codex_session_source="derived"
     codex_session="$(sha256_short "$response_text")"
