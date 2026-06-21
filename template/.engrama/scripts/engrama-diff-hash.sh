@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<'EOF'
-Uso: bash engrama-diff-hash.sh
+Uso: bash ./.engrama/scripts/engrama-diff-hash.sh
 
 Imprime um fingerprint estavel do diff staged, excluindo o ledger
 .engrama/qa/criticas-do-executor.md.

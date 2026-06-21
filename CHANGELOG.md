@@ -6,7 +6,16 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 
 ## [Não lançado]
 
+### Mudado
+- **Estrutura reorganizada (padrão do ai-memory/Akita):** o root passou a conter
+  só metadados/manifests; o tooling e os guias foram para pastas por preocupação.
+  `install.sh`/`bootstrap.sh`/`sync-template.sh`/`critique-gate-ci.sh` → **`bin/`**;
+  `lint.sh`/`engrama-diff-hash.sh` → **`.engrama/scripts/`** (junto do gate, deixando
+  o `.engrama/` autocontido e distribuível); `INSTALL.md`/`INSTANTIATE.md` → **`docs/`**.
+  Comandos de instalação agora usam `bash bin/install.sh` / `bash bin/bootstrap.sh`.
+
 ### Adicionado
+- `CONTRIBUTING.md` (fluxo branch→PR→CI→merge + modelo de governança) e `SECURITY.md`.
 - Suíte de testes portável (zero-dep) em `tests/`: `tests/gate/` (comportamento do
   gate de crítica) e `tests/contract/` (instalador/bootstrap), com runner `tests/run.sh`.
 - CI em `.github/workflows/ci.yml` (matriz ubuntu + macOS): `shellcheck` + `tests/run.sh`.

@@ -5,7 +5,7 @@ touches: [decisions/0006-governanca-nao-se-autoaprova, qa/criticas-do-executor, 
 date: 2026-06-20
 source_refs:
   - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate.sh
-  - /Users/x86/git-projects/engrama/engrama-diff-hash.sh
+  - /Users/x86/git-projects/engrama/.engrama/scripts/engrama-diff-hash.sh
   - /Users/x86/git-projects/engrama/.engrama/gaps/auditoria-e-plano-de-remediacao.md
 ---
 
@@ -44,3 +44,7 @@ Rejeitado. O patch textual (`git diff`) é mais sensível a formatação e conte
 ## Relações
 - Complementa [[decisions/0006-governanca-nao-se-autoaprova]]: o ledger continua sendo o artefato do gate, mas agora pode carregar prova verificável melhor do que a convenção branch+categoria.
 - Fecha a etapa de diff-binding prevista em [[gaps/auditoria-e-plano-de-remediacao]].
+
+## Limitação conhecida (descoberta no 1º PR real, 2026-06-21)
+
+O **fingerprint diverge entre o gate local e o gate-CI**: o local usa `git diff --cached --raw` (com detecção de rename), o gate-CI reconstrói um repo sintético — e os dois produzem hashes diferentes para o mesmo PR (agravado por renames). Logo, **o modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) é insatisfazível localmente** e foi **desligado no CI** até a correção. O gate-contra-PR continua exigindo a **crítica registrada** (o núcleo do "escritor ≠ auditor"/R1), só sem a amarração exata-do-hash. **Correção pendente:** o gate-CI deve computar o fingerprint sobre o diff REAL do PR (`git diff <base>...HEAD --raw`, excluindo o ledger), idêntico ao caminho local — ou ambos adotarem `--no-renames` e a mesma fonte. Registrado como lição em [[qa/criticas-do-executor]] (princípio 12: honestidade de claims).

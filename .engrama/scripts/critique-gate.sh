@@ -90,7 +90,8 @@ classify() {
   local f="$1"
   case "$f" in
     # Governanca ativa da instancia viva.
-    CLAUDE.md|AGENTS.md|README.md|INSTALL.md|INSTANTIATE.md) addcat governance ;;
+    CLAUDE.md|AGENTS.md|README.md|CONTRIBUTING.md|SECURITY.md) addcat governance ;;
+    docs/*) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
@@ -101,10 +102,11 @@ classify() {
     template/.engrama/governance/*|template/.engrama/decisions/*|template/.engrama/specs/*|template/.engrama/project/*|template/.engrama/qa/*) addcat governance ;;
 
     # Instalador, hook, settings e defaults mecanicos.
-    bootstrap.sh|install.sh|lint.sh|sync-template.sh|critique-gate-ci.sh|engrama-diff-hash.sh|engrama.values.example) addcat gate ;;
+    bin/*) addcat gate ;;
+    engrama.values.example) addcat gate ;;
     .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
-    template/engrama-diff-hash.sh|template/.engrama/scripts/*.sh|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
+    template/.engrama/scripts/*.sh|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
 
     # Contrato verificavel do bootstrap/template.
     tests/gate/*|*/tests/gate/*) addcat gate ;;
@@ -134,7 +136,7 @@ if [ -z "$BRANCH" ]; then
   exit 2
 fi
 
-DIFF_HASH_SCRIPT="$REPO_ROOT/engrama-diff-hash.sh"
+DIFF_HASH_SCRIPT="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 if [ ! -f "$DIFF_HASH_SCRIPT" ]; then
   {
     echo "──────────────────────────────────────────────────────────────"
@@ -283,7 +285,7 @@ done
   echo "  e, quando quiser vincular a crítica a ESTE diff, acrescente o token:"
   echo "    $CURRENT_DIFF_HASH"
   echo "Fonte unica do fingerprint:"
-  echo "  bash ./engrama-diff-hash.sh"
+  echo "  bash ./.engrama/scripts/engrama-diff-hash.sh"
   echo "Rode a crítica (read-only, modelo independente):"
   echo "  $EXECUTOR_CMD -m $CRITIQUE_MODEL \"<ordem de crítica>\"   (sem auto-aplicar)"
   echo "──────────────────────────────────────────────────────────────"

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # install.sh — instalador MECÂNICO do Engrama (parte determinística).
 # Copia o template para a raiz do repo-alvo, substitui placeholders e ativa o gate.
-# O playbook completo é o INSTALL.md; as partes de JULGAMENTO (mapa do gate em
+# O playbook completo é o docs/INSTALL.md; as partes de JULGAMENTO (mapa do gate em
 # classify(), ritual de bootstrap e crítica) são do AGENTE, não deste script.
 #
 # Uso recomendado:
-#   bash ./install.sh /caminho/do/repo-alvo [/caminho/do/values]
+#   bash ./bin/install.sh /caminho/do/repo-alvo [/caminho/do/values]
 #
 # Compatibilidade (legado):
-#   cd /repo-alvo && bash /caminho/do/engrama/install.sh [/caminho/do/values]
+#   cd /repo-alvo && bash /caminho/do/engrama/bin/install.sh [/caminho/do/values]
 set -u
 
 escape_sed_replacement() {
@@ -27,7 +27,7 @@ report_remaining_placeholders() {
 usage() {
   cat <<'EOF'
 Uso:
-  bash ./install.sh /caminho/do/repo-alvo [/caminho/do/values]
+  bash ./bin/install.sh /caminho/do/repo-alvo [/caminho/do/values]
 
 Se o arquivo de valores não for informado, o instalador procura:
   /caminho/do/repo-alvo/.engrama.values
@@ -35,7 +35,7 @@ EOF
 }
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-TEMPLATE="$HERE/template"
+TEMPLATE="$HERE/../template"
 
 [ -d "$TEMPLATE" ] || { echo "ERRO: não achei $TEMPLATE"; exit 1; }
 
@@ -67,17 +67,17 @@ echo "Repo-alvo: $ROOT"
 
 if [ ! -f "$VALUES" ]; then
   echo "ERRO: arquivo de valores não encontrado: $VALUES"
-  echo "  Use o bootstrap.sh para inferir defaults ou forneça um arquivo override."
+  echo "  Use o bin/bootstrap.sh para inferir defaults ou forneça um arquivo override."
   exit 1
 fi
 
 # 1) colisões — não sobrescrever governança/config canônica existente
 coll=0
 for p in CLAUDE.md AGENTS.md .engrama; do
-  if [ -e "$ROOT/$p" ]; then echo "AVISO: $ROOT/$p já existe — não vou sobrescrever (faça merge; ver INSTALL.md)"; coll=1; fi
+  if [ -e "$ROOT/$p" ]; then echo "AVISO: $ROOT/$p já existe — não vou sobrescrever (faça merge; ver docs/INSTALL.md)"; coll=1; fi
 done
 [ -f "$ROOT/.claude/settings.json" ] && {
-  echo "AVISO: $ROOT/.claude/settings.json já existe — não vou sobrescrever (faça merge; ver INSTALL.md)"
+  echo "AVISO: $ROOT/.claude/settings.json já existe — não vou sobrescrever (faça merge; ver docs/INSTALL.md)"
   coll=1
 }
 [ "$coll" = 1 ] && { echo "Resolva as colisões e rode de novo."; exit 2; }
@@ -138,7 +138,7 @@ if ! report_remaining_placeholders "$ROOT"; then
   echo "ERRO: substituição incompleta; abortando."
   exit 1
 fi
-echo "PRÓXIMO (julgamento do AGENTE — ver INSTALL.md):"
+echo "PRÓXIMO (julgamento do AGENTE — ver docs/INSTALL.md):"
 echo "  Passo 3) concluir o bootstrap do projeto em .engrama/project/bootstrap-do-projeto.md"
 echo "  Passo 4) adaptar classify() em .engrama/scripts/critique-gate.sh às superfícies sensíveis deste projeto"
 echo "  Passo 5) revisar/mesclar .claude/settings.json se o projeto já tiver config própria do Claude Code"

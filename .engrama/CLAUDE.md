@@ -39,7 +39,7 @@ NÃO replica: estrutura de pastas do código, assinaturas/tipos/schemas, estado 
 ├── project/       # bootstrap do projeto: finalidade, stack, comandos, superfícies sensíveis
 ├── specs/         # playbooks operacionais (o "como"): orquestrador, executor, commit, testes…
 ├── qa/            # ledger de críticas do Executor (lido pelo gate mecânico)
-├── scripts/       # critique-gate.sh + critique-gate-hook.sh + session-context.sh (o gate + hooks)
+├── scripts/       # critique-gate.sh + critique-gate-hook.sh + session-context.sh + lint.sh + engrama-diff-hash.sh
 ├── githooks/      # pre-commit que delega ao gate
 ├── domain/        # (criada conforme o projeto) invariantes/conceitos de negócio em prosa
 ├── gaps/          # (criada conforme o projeto) trade-offs em aberto, dúvidas, débitos

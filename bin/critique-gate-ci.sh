@@ -8,9 +8,10 @@
 set -u
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$HERE/.." && pwd)"
 GATE_REL=".engrama/scripts/critique-gate.sh"
 LEDGER_REL=".engrama/qa/criticas-do-executor.md"
-DIFF_HASH_REL="engrama-diff-hash.sh"
+DIFF_HASH_REL=".engrama/scripts/engrama-diff-hash.sh"
 BRANCH=""
 BASE_REF=""
 FILES_FROM=""
@@ -19,7 +20,7 @@ declare -a CHANGED_FILES=()
 
 usage() {
   cat <<'EOF'
-Uso: bash critique-gate-ci.sh --branch <nome-da-branch> --base-ref <gitish> --files-from <arquivo-nul>
+Uso: bash bin/critique-gate-ci.sh --branch <nome-da-branch> --base-ref <gitish> --files-from <arquivo-nul>
 
 Recebe a branch do PR, um gitish da base e um arquivo com a lista NUL-delimited
 de paths mudados. Monta um repo sintetico com a base real e reaplica o
@@ -87,7 +88,7 @@ path_exists_in_ref() {
 }
 
 path_exists_in_worktree() {
-  [ -e "$HERE/$1" ] || [ -L "$HERE/$1" ]
+  [ -e "$REPO_ROOT/$1" ] || [ -L "$REPO_ROOT/$1" ]
 }
 
 set_mode_from_ref() {
@@ -110,7 +111,7 @@ materialize_from_ref() {
 materialize_from_worktree() {
   local rel="$1"
   ensure_parent_dir "$rel"
-  cp -p "$HERE/$rel" "$TMPDIR_CI/$rel" || fail "nao consegui copiar $rel da worktree atual"
+  cp -p "$REPO_ROOT/$rel" "$TMPDIR_CI/$rel" || fail "nao consegui copiar $rel da worktree atual"
 }
 
 init_temp_repo() {
@@ -174,8 +175,8 @@ main() {
   [ -n "$BRANCH" ] || fail "branch do PR obrigatoria (--branch)"
   [ -n "$BASE_REF" ] || fail "base do PR obrigatoria (--base-ref)"
   [ -n "$FILES_FROM" ] || fail "arquivo com lista de arquivos obrigatorio (--files-from)"
-  need_file "$HERE/$GATE_REL"
-  need_file "$HERE/$DIFF_HASH_REL"
+  need_file "$REPO_ROOT/$GATE_REL"
+  need_file "$REPO_ROOT/$DIFF_HASH_REL"
   need_file "$FILES_FROM"
   git rev-parse --verify "$BASE_REF" >/dev/null 2>&1 || fail "base-ref invalida: $BASE_REF"
 

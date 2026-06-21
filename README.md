@@ -3,7 +3,8 @@
 Este diretório é um **template auto-contido** para replicar, em **qualquer projeto novo**, o modelo de governança entre agentes que amadurecemos no Ruflos — estruturado no **mesmo padrão do "LLM Wiki" de Andrej Karpathy** ([gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)).
 
 - **`template/`** — a árvore que você **copia para a raiz** do projeto novo (gates + `.engrama/`).
-- **`INSTANTIATE.md`** — passo a passo de adoção (placeholders, ativação do gate, ritual de bootstrap).
+- **[`docs/INSTALL.md`](docs/INSTALL.md)** — playbook do agente para bootstrap/install.
+- **[`docs/INSTANTIATE.md`](docs/INSTANTIATE.md)** — passo a passo manual de adoção.
 - **este `README.md`** — a análise do padrão e como o pack o encarna.
 
 ---
@@ -50,7 +51,7 @@ O mapeamento é direto:
 
 > Em uma frase: o Karpathy resolve *"humanos abandonam wikis porque manter cansa"*; este pack aplica isso à governança — **o modelo operacional não apodrece** porque o agente o mantém, e o **gate** lembra/impõe a crítica no caminho cooperativo do commit.
 
-> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exige **enforcement server-side**. A CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) **reexecuta o gate contra o diff do PR** via [critique-gate-ci.sh](critique-gate-ci.sh) — o controle passa a existir num lugar **não-burlável pelo autor** (reusa a mesma `classify()` + parsing do ledger por campo). Falta **um** passo, que é configuração do repositório e não código: marcar esse check como **required** no *branch protection* para ele **bloquear o merge**. Hoje, portanto: hook local = atrito útil + registro; **CI reexecuta o gate**; o que falta para o enforcement ser vinculante é o *required check* ligado (config de repo). O furo **R1** (auto-aprovação local) fica **mitigado server-side** quando o required check estiver ativo. O gate garante que a crítica esteja **registrada** — **não** que um agente independente de fato a tenha produzido (ver [plano de remediação](.engrama/gaps/auditoria-e-plano-de-remediacao.md)).
+> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exige **enforcement server-side**. A CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) **reexecuta o gate contra o diff do PR** via [bin/critique-gate-ci.sh](bin/critique-gate-ci.sh) — o controle passa a existir num lugar **não-burlável pelo autor** (reusa a mesma `classify()` + parsing do ledger por campo). Falta **um** passo, que é configuração do repositório e não código: marcar esse check como **required** no *branch protection* para ele **bloquear o merge**. Hoje, portanto: hook local = atrito útil + registro; **CI reexecuta o gate**; o que falta para o enforcement ser vinculante é o *required check* ligado (config de repo). O furo **R1** (auto-aprovação local) fica **mitigado server-side** quando o required check estiver ativo. O gate garante que a crítica esteja **registrada** — **não** que um agente independente de fato a tenha produzido (ver [plano de remediação](.engrama/gaps/auditoria-e-plano-de-remediacao.md)).
 
 ---
 
@@ -77,33 +78,38 @@ O mapeamento é direto:
 ## 4. O que tem no pack
 
 ```
-template/
-├── CLAUDE.md                      # gate do Orquestrador (entry-point)
-├── AGENTS.md                      # gate neutro (qualquer agente)
-└── .engrama/                      # memória institucional + scripts (o "Engrama")
-    ├── CLAUDE.md                  # SCHEMA do Engrama (frontmatter, ingest/query/lint)
-    ├── index.md                   # catálogo navegável
-    ├── log.md                     # factual append-only (+ checkpoint vivo no topo)
-    ├── governance/                # papéis, alçadas, cadeia de comando, continuidade
-    │   ├── index.md
-    │   ├── papeis-e-alcadas.md
-    │   ├── cadeia-de-comando.md
-    │   ├── modelo-operacional.md
-    │   └── continuidade-de-sessao.md
-    ├── decisions/                 # ADRs de PROCESSO (0001–0010) — o "porquê"
-    │   ├── 0001-governanca-tres-papeis.md
-    │   ├── … (0002–0009)
-    │   └── 0010-roteamento-modelo-effort-do-executor.md
-    ├── specs/                     # playbooks operacionais — o "como"
-    │   ├── README.md
-    │   ├── orquestrador.md · executor.md · executor-order.md · commit.md
-    │   └── test-writing.md · infra-runbook.md   (esqueletos por-stack)
-    ├── qa/
-    │   └── criticas-do-executor.md   # ledger de críticas (lido pelo gate)
-    ├── scripts/
-    │   ├── critique-gate.sh       # gate mecânico (bloqueia commit sem crítica)
-    │   └── critique-gate-hook.sh  # wrapper PreToolUse do harness
-    └── githooks/pre-commit        # ativa o gate de crítica no git
+.
+├── README.md / CONTRIBUTING.md / SECURITY.md / CHANGELOG.md / LICENSE
+├── CLAUDE.md / AGENTS.md / engrama.values.example
+├── bin/                           # tooling do pack (repo-fonte)
+│   ├── bootstrap.sh
+│   ├── install.sh
+│   ├── sync-template.sh
+│   └── critique-gate-ci.sh
+├── docs/                          # guias detalhados do repo-fonte
+│   ├── INSTALL.md
+│   └── INSTANTIATE.md
+├── .engrama/                      # instância viva (governança + scripts da instância)
+│   ├── CLAUDE.md
+│   ├── governance/ · decisions/ · project/ · specs/ · qa/
+│   ├── scripts/
+│   │   ├── critique-gate.sh
+│   │   ├── critique-gate-hook.sh
+│   │   ├── session-context.sh
+│   │   ├── lint.sh
+│   │   └── engrama-diff-hash.sh
+│   └── githooks/pre-commit
+└── template/                      # artefato distribuível para projetos novos
+    ├── CLAUDE.md / AGENTS.md
+    └── .engrama/
+        ├── governance/ · decisions/ · project/ · specs/ · qa/
+        ├── scripts/
+        │   ├── critique-gate.sh
+        │   ├── critique-gate-hook.sh
+        │   ├── session-context.sh
+        │   ├── lint.sh
+        │   └── engrama-diff-hash.sh
+        └── githooks/pre-commit
 ```
 
 > Os ADRs de **domínio/stack/sequenciamento** do projeto original (stack, ordem de migração) **não entram** no template — são específicos. No projeto novo eles nascem a partir de `0011+`, ao lado das pastas `domain/`, `roadmap/` e `gaps/` que você cria conforme o trabalho avança.
@@ -114,7 +120,7 @@ template/
 
 Dois caminhos:
 
-- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bootstrap.sh /caminho/do/projeto-novo`. O **[INSTALL.md](INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` na raiz e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
-- **Manual (referência):** **[INSTANTIATE.md](INSTANTIATE.md)** — os mesmos passos feitos à mão, com o glossário completo dos 12 placeholders.
+- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` na raiz e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
+- **Manual (referência):** **[docs/INSTANTIATE.md](docs/INSTANTIATE.md)** — os mesmos passos feitos à mão, com o glossário completo dos 12 placeholders.
 
 Em ambos vale o **ritual de bootstrap** (ADR 0006): a governança se aplica a si mesma — o Engrama inicial vai à crítica do Executor e à aprovação da Autoridade antes do 1º commit.

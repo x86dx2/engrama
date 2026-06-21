@@ -1,0 +1,19 @@
+# Contributing
+
+Fluxo de contribuição:
+
+1. Abra uma branch para a fatia.
+2. Envie a mudança via PR.
+3. Mantenha a CI verde antes do merge.
+4. Faça o merge só depois da auditoria e do veredito do Orquestrador.
+
+Resumo de governança:
+
+- O Executor Crítico critica a ordem antes de qualquer commit de código.
+- O gate exige registro de crítica para superfícies sensíveis.
+- O Orquestrador audita e reexecuta os gates antes de aceitar a mudança.
+
+Validações locais:
+
+- `bash tests/run.sh`
+- `bash ./.engrama/scripts/lint.sh`

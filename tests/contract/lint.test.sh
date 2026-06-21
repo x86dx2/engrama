@@ -4,7 +4,7 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-LINT_SRC="$REPO_ROOT/lint.sh"
+LINT_SRC="$REPO_ROOT/.engrama/scripts/lint.sh"
 [ -f "$LINT_SRC" ] || { echo "FATAL: lint nao encontrado em $LINT_SRC"; exit 1; }
 
 _probe="$(mktemp -d 2>/dev/null)" || { echo "FATAL: mktemp indisponivel — abortando"; exit 3; }
@@ -27,8 +27,9 @@ new_repo() {
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
   mkdir -p "$d/.engrama/decisions" "$d/.engrama/governance" "$d/.engrama/project" "$d/.engrama/qa" "$d/.engrama/specs"
-  cp "$LINT_SRC" "$d/lint.sh"
-  chmod +x "$d/lint.sh"
+  mkdir -p "$d/.engrama/scripts"
+  cp "$LINT_SRC" "$d/.engrama/scripts/lint.sh"
+  chmod +x "$d/.engrama/scripts/lint.sh"
   printf '%s' "$d"
 }
 
@@ -45,7 +46,7 @@ write_file() {
 run_lint() {
   (
     cd "$1" || exit 2
-    bash lint.sh >/dev/null 2>&1
+    bash ./.engrama/scripts/lint.sh >/dev/null 2>&1
     echo $?
   )
 }
@@ -53,7 +54,7 @@ run_lint() {
 run_lint_report() {
   (
     cd "$1" || exit 2
-    bash lint.sh --report >/dev/null 2>&1
+    bash ./.engrama/scripts/lint.sh --report >/dev/null 2>&1
     echo $?
   )
 }
@@ -214,7 +215,7 @@ git clone -q "$R_SRC" "$R_CLONE"
 rm -rf "$R_SRC"
 rc="$(
   cd "$R_CLONE" || exit 2
-  bash lint.sh >/dev/null 2>&1
+  bash ./.engrama/scripts/lint.sh >/dev/null 2>&1
   echo $?
 )"
 if is_zero "$rc"; then _r=0; else _r=1; fi

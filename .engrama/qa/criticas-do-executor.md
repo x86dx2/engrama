@@ -13,7 +13,7 @@ Registro **append-only** de toda **crítica do Executor no papel de crítica** (
 
 **Verificado mecanicamente** por `.engrama/scripts/critique-gate.sh` (git pre-commit + PreToolUse do harness). Um commit que toca superfície sensível é **bloqueado** se faltar, para CADA categoria tocada, uma entrada CONCLUÍDA referenciando a **branch**. O gate lê a versão **staged/HEAD** do ledger (não o working-tree), rejeita `<pendente>` e bloqueia `objeção` sem `waiver`.
 
-**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./engrama-diff-hash.sh`. Quando presente, o gate compara esse token ao fingerprint atual do diff staged (excluindo o próprio ledger):
+**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh`. Quando presente, o gate compara esse token ao fingerprint atual do diff staged (excluindo o próprio ledger):
 - **match forte** (`sha256` bate) — a crítica cobre **este diff**;
 - **hash obsoleto** (`sha256` não bate) — a crítica fica vinculada a **outro diff** e não satisfaz o gate;
 - **sem `sha256:`** — caminho **legado** (branch+categoria+veredito), preservado por compatibilidade.
@@ -37,7 +37,7 @@ O gate (`.engrama/scripts/critique-gate.sh`) lê **por campo**, não por substri
 - **campo 1** → a `<branch>` (após o prefixo `## [data] `) precisa ser **igual** à branch atual (igualdade exata — fecha o bypass cross-branch R5);
 - **campo 2** → precisa conter a tag literal `[<categoria>]`;
 - **campo 3** → o `<veredito>`, validado por **igualdade/prefixo de enum**, não substring (fecha R2: `nao confirmo` ≠ `confirmo`);
-- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./engrama-diff-hash.sh`.
+- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./.engrama/scripts/engrama-diff-hash.sh`.
 
 Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensada` (igualdade) · `N/A: <motivo>` · `waiver <quem/quando>` (prefixo). `pendente` é rejeitado. Uma objeção (`objeção`/`discordo` no campo 3) só passa se o campo 3 também contiver `waiver` (arbitragem da Autoridade registrada).
 
@@ -127,3 +127,10 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Auditoria + ajuste do Orquestrador:** reproduzi o clone-sem-origem (lint exit 0); rodei o **markdownlint REAL** (npx) e achei 544 nits de estilo + falso-positivo MD052 nos wikilinks que o config nao cobria -> tornei o config tolerante ao estilo da casa + wikilinks, mantendo regras de problema-real (sanity: pegou MD009). markdownlint = **0 erros em 67 arquivos**. suite verde; shellcheck limpo.
 - **Destino duravel:** lint portavel + teste L8 (a regra que impede a reincidencia). EX4 (migrar source_refs p/ relativos) segue aberto, mas o lint deixou de ser nao-portavel.
 - **Consenso.**
+
+## [2026-06-21] reorg/estrutura-akita | [governance][gate][contract] reorg estrutural (padrao ai-memory): bin/ + docs/ + .engrama/scripts/ | confirmo | executor codex + auditoria orquestrador
+- **Absorcao ai-memory (Akita):** root so com metadados; cada preocupacao numa pasta. Atende o feedback da Autoridade ("arquivos misturados no root").
+- **Executor (codex, ajuste-menor):** moveu tooling do pack p/ `bin/` (install/bootstrap/sync-template/critique-gate-ci), scripts da instancia p/ `.engrama/scripts/` (lint + engrama-diff-hash, com o gate), guias p/ `docs/`; espelhou no template; atualizou TODA a cascata (classify `bin/*`->gate e `docs/*`->governance, refs cruzadas, root-detection do lint via `$0/../..`, CI, ~7 suites, README/schema/docs); criou CONTRIBUTING.md + SECURITY.md.
+- **Auditoria (ADR 0005):** root LIMPO (zero .sh solto); `.engrama/scripts/` autocontido; suite 250 asserts verde; shellcheck/lint limpos; lint portavel da nova localizacao (clone-sem-origem exit 0); sync idempotente; **SMOKE INDEPENDENTE:** `bin/bootstrap.sh` em projeto novo -> scripts em `.engrama/scripts/`, 0 placeholders, lint exit 0, gate bloqueia gov sem ledger (exit 2). git detectou os renames (R).
+- **Consenso.** Primeira fatia a subir via PR (branch protection ativa).
+- **Licao (loop falha->regra) descoberta NESTE PR:** o **diff-binding (T3) tem fingerprint INCONSISTENTE entre o gate local (`git diff --cached --raw`) e o gate-CI (repo sintetico reconstruido) — divergem com renames e em geral**. O modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) ficou impossivel de satisfazer localmente. Acao: **desligado o estrito no CI** ate o fingerprint ser unificado; o gate-contra-PR segue exigindo a critica registrada (nucleo do R1). Bug a corrigir: gate-CI deve computar o fingerprint sobre o diff REAL do PR (`git diff base...HEAD`), nao sobre reconstrucao sintetica.

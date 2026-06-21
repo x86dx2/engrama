@@ -2,7 +2,7 @@
 
 Guia passo a passo (**manual / referência**) para adotar este modelo em outro repositório. Tempo típico: ~20 min + o ritual de bootstrap.
 
-> **Prefere que o agente faça sozinho?** Use **[INSTALL.md](INSTALL.md)** e rode `bash /caminho/do/engrama/bootstrap.sh /caminho/do/projeto-novo`. Este arquivo é a versão manual, útil como referência e para o glossário de placeholders.
+> **Prefere que o agente faça sozinho?** Use **[INSTALL.md](INSTALL.md)** e rode `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. Este arquivo é a versão manual, útil como referência e para o glossário de placeholders.
 
 ---
 

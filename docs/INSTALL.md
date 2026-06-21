@@ -9,12 +9,12 @@ Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.m
 ## Passo 0 — Pré-condições
 
 1. Tenha o **caminho do repo-alvo**.
-2. Se o diretório-alvo ainda não for um repo git, o `bootstrap.sh` cria `git init -b main` para você.
+2. Se o diretório-alvo ainda não for um repo git, o `bin/bootstrap.sh` cria `git init -b main` para você.
 3. Se já existirem `CLAUDE.md`, `AGENTS.md`, `.engrama/` ou `.claude/settings.json` na raiz do projeto-alvo, **não sobrescreva** — vá para a seção **Merge** no fim. Caso contrário, siga.
 
 ## Passo 1 — Coletar os valores (INFERIR + PERGUNTAR)
 
-O `bootstrap.sh` já infere defaults e instala direto na raiz do projeto-alvo. O arquivo de valores é **opcional** e serve só para override:
+O `bin/bootstrap.sh` já infere defaults e instala direto na raiz do projeto-alvo. O arquivo de valores é **opcional** e serve só para override:
 
 ```bash
 cp /caminho/do/engrama/engrama.values.example /tmp/finance.values
@@ -49,7 +49,7 @@ Esse arquivo é a trava do **primeiro startup**: enquanto estiver `proposed` ou 
 ## Passo 2 — Rodar o instalador mecânico
 
 ```bash
-bash /caminho/do/engrama/bootstrap.sh /caminho/do/projeto-alvo [/tmp/override.values]
+bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-alvo [/tmp/override.values]
 ```
 
 Ele: cria/inicializa o repo-alvo se necessário, infere defaults, copia `template/` → raiz do repo, substitui **todos** os placeholders, instala `.claude/settings.json`, e ativa o hook (`core.hooksPath .engrama/githooks`). **Confirme** que a saída diz `Placeholders restantes: ''` (vazio). Se sobrou algum, ajuste o arquivo de override e rode de novo (o instalador recusa sobrescrever — veja Merge).
@@ -112,7 +112,7 @@ O instalador **recusa sobrescrever**. Nesse caso, faça merge manual:
 - **`.engrama/` existente** → copie só o que falta (`.engrama/governance/`, `.engrama/decisions/0001-0010`, `.engrama/specs/`, `.engrama/qa/criticas-do-executor.md`, e o schema `.engrama/CLAUDE.md` se não houver um) e reconcilie a numeração de ADR.
 - **`.engrama/scripts/critique-gate.sh` existente** → reconcilie a `classify()`.
 - **`.claude/settings.json` existente** → mescle o hook `PreToolUse` que chama `.engrama/scripts/critique-gate-hook.sh`.
-- Depois, rode a substituição de placeholders à mão (ou um `install.sh` apontando para um arquivo de override) e siga do Passo 3.
+- Depois, rode a substituição de placeholders à mão (ou um `bin/install.sh` apontando para um arquivo de override) e siga do Passo 3.
 
 ## Limites honestos (não é zero-touch — por design)
 

@@ -13,7 +13,7 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-DIFF_HASH_SRC="$REPO_ROOT/engrama-diff-hash.sh"
+DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
 [ -f "$DIFF_HASH_SRC" ] || { echo "FATAL: helper de hash nao encontrado em $DIFF_HASH_SRC"; exit 1; }
 
@@ -35,7 +35,7 @@ new_repo() {
   git -C "$d" config user.email t@t; git -C "$d" config user.name t
   mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance"
   cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$DIFF_HASH_SRC" "$d/engrama-diff-hash.sh"
+  cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
   printf '%s' "$d"
 }
 
