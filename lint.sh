@@ -32,7 +32,9 @@ case "${1:-}" in
     ;;
 esac
 
-ROOT="$(pwd)"
+ROOT="$(
+  CDPATH='' cd -- "$(dirname -- "$0")" && pwd
+)"
 TMP_REPORT="$(mktemp 2>/dev/null || mktemp -t engrama-lint)"
 trap 'rm -f "$TMP_REPORT"' EXIT
 ERRORS=0
@@ -210,8 +212,37 @@ check_frontmatter_requirements() {
   [ -n "$FRONTMATTER_DATE_VALUE" ] || report_problem "$file" 1 "frontmatter obrigatorio ausente: date"
 }
 
+resolve_source_ref_path() {
+  local ref="$1" suffix candidate
+
+  case "$ref" in
+    /*)
+      suffix="${ref#/}"
+      while :; do
+        candidate="$ROOT/$suffix"
+        if [ -e "$candidate" ]; then
+          printf '%s\n' "$candidate"
+          return 0
+        fi
+
+        case "$suffix" in
+          */*) suffix="${suffix#*/}" ;;
+          *) break ;;
+        esac
+      done
+      return 1
+      ;;
+    *)
+      candidate="$ROOT/$ref"
+      [ -e "$candidate" ] || return 1
+      printf '%s\n' "$candidate"
+      return 0
+      ;;
+  esac
+}
+
 check_source_refs() {
-  local file="$1" line_no ref candidate
+  local file="$1" line_no ref
 
   [ -n "$SOURCE_REFS_DATA" ] || return 0
 
@@ -219,11 +250,7 @@ check_source_refs() {
     [ -n "${line_no:-}" ] || continue
     ref="$(strip_quotes "$(trim "$ref")")"
     [ -n "$ref" ] || continue
-    case "$ref" in
-      /*) candidate="$ref" ;;
-      *) candidate="$ROOT/$ref" ;;
-    esac
-    if [ ! -e "$candidate" ]; then
+    if ! resolve_source_ref_path "$ref" >/dev/null; then
       report_problem "$file" "$line_no" "source_ref inexistente: $ref"
     fi
   done <<EOF

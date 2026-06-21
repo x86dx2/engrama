@@ -72,7 +72,6 @@ jobs:
       - name: Markdown lint
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
-          config: .github/markdownlint-cli2.yaml
           globs: |
             **/*.md
 
