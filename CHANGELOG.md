@@ -6,6 +6,8 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 
 ## [Não lançado]
 
+## [0.1.0] - 2026-06-21
+
 ### Mudado
 - **Estrutura reorganizada (padrão do ai-memory/Akita):** o root passou a conter
   só metadados/manifests; o tooling e os guias foram para pastas por preocupação.
@@ -13,6 +15,10 @@ Todas as mudanças relevantes deste pack. Formato baseado em
   `lint.sh`/`engrama-diff-hash.sh` → **`.engrama/scripts/`** (junto do gate, deixando
   o `.engrama/` autocontido e distribuível); `INSTALL.md`/`INSTANTIATE.md` → **`docs/`**.
   Comandos de instalação agora usam `bash bin/install.sh` / `bash bin/bootstrap.sh`.
+- **Adaptadores de vendor documentados honestamente:** `EXECUTOR_CMD`, ids de modelo
+  e `.claude/settings.json` passam a ser descritos como **camada concreta e trocável**.
+  Os valores `gpt-5.x` permanecem como exemplos/configuração atual do pack, com
+  ressalva explícita para confirmar o id real no namespace do `codex exec`.
 
 ### Adicionado
 - `CONTRIBUTING.md` (fluxo branch→PR→CI→merge + modelo de governança) e `SECURITY.md`.
@@ -20,6 +26,9 @@ Todas as mudanças relevantes deste pack. Formato baseado em
   gate de crítica) e `tests/contract/` (instalador/bootstrap), com runner `tests/run.sh`.
 - CI em `.github/workflows/ci.yml` (matriz ubuntu + macOS): `shellcheck` + `tests/run.sh`.
 - `LICENSE` (MIT) e este `CHANGELOG.md`.
+- `VERSION` na raiz como fonte de verdade do pack, seed de `ENGRAMA_VERSION` no
+  bootstrap, e `.engrama/VERSION` instalado no projeto-alvo para registrar a versão
+  efetivamente adotada.
 
 ### Corrigido
 - **Instalador (`install.sh`):** substituição de placeholders deixou de quebrar com
@@ -55,8 +64,3 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 - **Diff-binding em PR multi-commit:** o binding da CI cobre o **diff cumulativo**
   de `base...HEAD`, não cada commit isoladamente. O fluxo recomendado continua sendo
   squash/PR de 1 commit. Ver ADR 0011.
-- **EX4 (portabilidade/vendor):** `source_refs` absolutos; nomes de modelo `gpt-5.x`
-  e o canal `codex exec` hardcoded (vs "por função, não por vendor").
-
-### Pendente
-- **`{{ENGRAMA_VERSION}}`** injetado no `.engrama` instalado + tag/release SemVer.

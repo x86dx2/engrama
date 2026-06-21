@@ -35,7 +35,7 @@ Toda invocação `codex exec` carrega, no mínimo:
 7. riscos já conhecidos;
 8. o que depende de aprovação da Autoridade;
 9. próximo passo seguro após a execução;
-10. **modelo/tier** escolhido (`gpt-5.4` / `gpt-5.4-mini`) e por quê.
+10. **modelo/tier** escolhido (ex.: um tier pesado e um leve do adaptador configurado; confirme os ids reais) e por quê.
 
 ## Resposta mínima obrigatória do Executor
 

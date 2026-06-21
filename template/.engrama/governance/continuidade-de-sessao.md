@@ -35,7 +35,7 @@ Toda invocação `{{EXECUTOR_CMD}}` carrega, no mínimo:
 7. riscos já conhecidos;
 8. o que depende de aprovação da Autoridade;
 9. próximo passo seguro após a execução;
-10. **modelo/tier** escolhido (`{{MODELO_EXECUTOR_PESADO}}` / `{{MODELO_EXECUTOR_LEVE}}`) e por quê.
+10. **modelo/tier** escolhido (`{{MODELO_EXECUTOR_PESADO}}` / `{{MODELO_EXECUTOR_LEVE}}` como exemplo/configuracao concreta; confirme os ids reais) e por quê.
 
 ## Resposta mínima obrigatória do Executor
 

@@ -82,6 +82,21 @@ infer_authority() {
   echo "Humano (preencher)"
 }
 
+read_pack_version() {
+  local version_file version
+  version_file="$HERE/../VERSION"
+
+  if [ -f "$version_file" ]; then
+    version="$(sed -n '1{s/\r$//;p;q;}' "$version_file" 2>/dev/null || true)"
+    if [ -n "$version" ]; then
+      printf '%s\n' "$version"
+      return
+    fi
+  fi
+
+  printf '0.0.0\n'
+}
+
 infer_dev_url() {
   local guess
   guess="$(rg -o --no-filename --max-count 1 'localhost:[0-9]+' "$ROOT" \
@@ -140,6 +155,7 @@ apply_overrides() {
     case "$key" in
       PROJETO) PROJETO="$val" ;;
       REPO_PATH) REPO_PATH="$val" ;;
+      ENGRAMA_VERSION) ENGRAMA_VERSION="$val" ;;
       ORQUESTRADOR) ORQUESTRADOR="$val" ;;
       AUTORIDADE) AUTORIDADE="$val" ;;
       DATA) DATA="$val" ;;
@@ -162,6 +178,7 @@ apply_overrides() {
 
 PROJETO="$(infer_project)"
 REPO_PATH="$ROOT"
+ENGRAMA_VERSION="$(read_pack_version)"
 ORQUESTRADOR="${ENGRAMA_ORQUESTRADOR:-Claude (Claude Code)}"
 AUTORIDADE="$(infer_authority)"
 DATA="${ENGRAMA_DATA:-$(date +%F)}"
@@ -189,6 +206,7 @@ trap 'rm -f "$VALUES_TMP"' EXIT
 cat > "$VALUES_TMP" <<EOF
 PROJETO=$PROJETO
 REPO_PATH=$REPO_PATH
+ENGRAMA_VERSION=$ENGRAMA_VERSION
 ORQUESTRADOR=$ORQUESTRADOR
 AUTORIDADE=$AUTORIDADE
 DATA=$DATA
@@ -213,6 +231,7 @@ cat <<EOF
 Bootstrap concluído com os defaults:
 - PROJETO=$PROJETO
 - REPO_PATH=$REPO_PATH
+- ENGRAMA_VERSION=$ENGRAMA_VERSION
 - ORQUESTRADOR=$ORQUESTRADOR
 - AUTORIDADE=$AUTORIDADE
 - DATA=$DATA
@@ -224,10 +243,10 @@ Bootstrap concluído com os defaults:
 - CMD_TEST=$CMD_TEST
 - CMD_E2E=$CMD_E2E
 - EXECUTOR=$EXECUTOR
-- EXECUTOR_CMD=$EXECUTOR_CMD
-- MODELO_CRITICA=$MODELO_CRITICA
-- MODELO_EXECUTOR_PESADO=$MODELO_EXECUTOR_PESADO
-- MODELO_EXECUTOR_LEVE=$MODELO_EXECUTOR_LEVE
+- EXECUTOR_CMD=$EXECUTOR_CMD  (adaptador concreto do ambiente)
+- MODELO_CRITICA=$MODELO_CRITICA  (EXEMPLO — confirme o id real contra o seu codex exec)
+- MODELO_EXECUTOR_PESADO=$MODELO_EXECUTOR_PESADO  (EXEMPLO — confirme o id real contra o seu codex exec)
+- MODELO_EXECUTOR_LEVE=$MODELO_EXECUTOR_LEVE  (EXEMPLO — confirme o id real contra o seu codex exec)
 
 Próximo passo:
 - adaptar .engrama/scripts/critique-gate.sh ao domínio do projeto;

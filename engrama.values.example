@@ -5,6 +5,7 @@
 # --- INFERÍVEIS / OVERRIDE OPCIONAL ---
 PROJETO=MeuProjeto
 REPO_PATH=/caminho/absoluto/do/repo
+ENGRAMA_VERSION=0.1.0
 ORQUESTRADOR=Claude (Claude Code)
 AUTORIDADE=Humano (voce@exemplo.com)
 DATA=2026-01-01
@@ -16,7 +17,7 @@ CMD_BUILD=npm run build
 CMD_TEST=npm test
 CMD_E2E=N/A
 
-# --- PADRAO ATUAL DO PACK (sobrescreva só se divergir) ---
+# --- ADAPTADORES CONCRETOS / EXEMPLOS DO PACK (CONFIRME NO SEU AMBIENTE) ---
 EXECUTOR=Codex
 EXECUTOR_CMD=codex exec
 MODELO_CRITICA=gpt-5.5

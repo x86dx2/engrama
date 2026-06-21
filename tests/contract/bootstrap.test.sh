@@ -32,6 +32,7 @@ mk_values() { # <file> <projeto> <autoridade>
   cat > "$1" <<EOF
 PROJETO=$2
 REPO_PATH=/tmp/x
+ENGRAMA_VERSION=0.1.0
 ORQUESTRADOR=Claude (Claude Code)
 AUTORIDADE=$3
 DATA=2026-06-20
@@ -115,6 +116,16 @@ if git -C "$T8" rev-parse --is-inside-work-tree >/dev/null 2>&1 && [ -f "$T8/CLA
   if [ -z "$rem8" ]; then _r=0; else _r=1; fi
 else _r=1; fi
 check C8 CORRETO "$_r" "bin/bootstrap.sh (caminho canonico) em dir nao-git: git-init + instala + zero placeholders"
+
+# C10: bootstrap instala .engrama/VERSION com a versao do pack, sem placeholder cru.
+pack_version="$(sed -n '1{s/\r$//;p;q;}' "$REPO_ROOT/VERSION" 2>/dev/null)"
+installed_version="$(sed -n '1{s/\r$//;p;q;}' "$T8/.engrama/VERSION" 2>/dev/null || true)"
+if [ -n "$pack_version" ] && [ "$installed_version" = "$pack_version" ] && ! grep -q '{{' "$T8/.engrama/VERSION" 2>/dev/null; then
+  _r=0
+else
+  _r=1
+fi
+check C10 CORRETO "$_r" ".engrama/VERSION instalado com a versao do pack e sem placeholder cru"
 
 printf '%b\n' "$RESULTS"
 echo ""

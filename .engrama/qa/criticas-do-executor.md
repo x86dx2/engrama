@@ -150,3 +150,8 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **EX4 (parte 1) fechado.** Executor (codex, ajuste-menor): migrou source_refs de 28 .md raiz + 27 template para relativos; corrigiu 3 paths fora de source_refs; lint valida relativo (compat legado).
 - **Auditoria (ADR 0005):** zero `/Users`/`{{REPO_PATH}}/` nos .md; lint exit 0 no repo + clone p/ outro path; suite verde; shellcheck limpo; smoke -> projeto-alvo com refs relativos + lint exit 0.
 - **Caminho forte:** sha256 vinculado a ESTE diff. **Consenso.**
+
+## [2026-06-21] feat/versionamento-vendor | [governance][gate][contract] PR4: versionamento 0.1.0 + vendor honesto (EX4 parte 2) | confirmo | sha256:5745018e75647aef5654c00d507da5fa9ffb0a9609d1f4f83d2d81de42f5e61a executor codex + auditoria orquestrador
+- **Itens 7 e 8 fechados.** Executor (codex, concordo): `VERSION`=0.1.0 + `{{ENGRAMA_VERSION}}` no template (alvo registra a versao); model-ids relabelados como exemplos-a-confirmar; secao "camada de adaptadores de vendor" (nucleo vendor-agnostico); CHANGELOG release 0.1.0.
+- **Auditoria (ADR 0005):** smoke -> alvo com `.engrama/VERSION`=0.1.0, 0 placeholders; suite verde (C10 novo); shellcheck/lint limpos; vendor honesto verificado.
+- **Caminho forte:** sha256 vinculado. **Consenso.** Apos merge: tag `v0.1.0`.
