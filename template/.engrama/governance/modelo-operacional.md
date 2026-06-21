@@ -42,6 +42,8 @@ Evoluir o produto **sem degradar o fluxo principal** e **sem incidente em produ�
 
 11. **Produção é intocável (ativa quando houver deploy).** Staging valida antes de prod; escrita em produção exige ordem da Autoridade **+ segunda confirmação**; o Orquestrador **nunca aprova** MR de produção. Enquanto não houver deploy, marcado para ativar. Ver [[decisions/0009-producao-intocavel-dupla-confirmacao]].
 
+12. **Honestidade de claims e métricas.** Não afirmar garantia, enforcement ou resultado que não se possa **medir ou provar** pelo código versionado. A prosa (README/ADRs/docs/comentários) descreve o que o sistema **entrega hoje**, não a aspiração — o que for pendente, cooperativo ou parcial deve ser dito como tal. Reportar incerteza em vez de falsa precisão. Toda falha desse tipo **deve virar lição** ([[specs/licao-aprendida]]).
+
 ## Separação de funções
 
 - **Orquestrador** — Orquestrador/Auditor/QA/Arquiteto/Guardião de Produção. Dirige, decompõe, **invoca o Executor**, audita, dono do ciclo git. **Não escreve código de fatia.**

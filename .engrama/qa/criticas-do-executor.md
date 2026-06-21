@@ -97,3 +97,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Auditoria (ADR 0005):** script imprime o checkpoint real e DEGRADA sem quebrar (exit 0 mesmo sem `.engrama/`); settings.json valido, PreToolUse e `.env` deny preservados; suite verde (243 asserts); shellcheck limpo.
 - **Honestidade:** e auto-surface + lembrete, NAO auto-write (atualizar log/ledger segue manual — exige julgamento). Documentado no script e na saida.
 - **Consenso.**
+
+## [2026-06-20] absorcao/t2c-governanca | [governance] T2c loop falha->regra + principio 12 (metricas honestas) | confirmo | executor codex ajuste-menor incorporado
+- **Absorcao headroom:** aprender com a falha (`learn`) + metricas honestas (intervalo de confianca, sem falsa precisao).
+- **Orquestrador autorou:** principio 12 (honestidade de claims/metricas) em `governance/modelo-operacional`; spec `specs/licao-aprendida` (loop falha->regra). Propagado ao template (genericizado) + corrigi a Estrutura defasada do `template/.engrama/CLAUDE.md`.
+- **Executor (codex, critica read-only): ajuste-menor, 4 achados -> TODOS incorporados:** (1) suavizei absolutos auto-inflados ("vira"->"deve virar"; "impede a reincidencia"->"reduz e torna detectavel") -- o doc de honestidade caira no proprio overclaim que proibe; (2) separei `discordo` de `ajuste-menor` nos gatilhos (ajuste-menor nao e objecao material); (3) o destino da licao vive no commit/log, NAO num campo do ledger (gramatica fixa de 4 campos); (4) corrigi a Estrutura defasada tambem na RAIZ (.engrama/CLAUDE.md omitia session-context.sh).
+- **Consenso por incorporacao** (ADR 0006). lint limpo; suite verde. *(Meta-licao: a propria fatia de "metricas honestas" foi pega overclaimando -- registrada como exemplo vivo em [[specs/licao-aprendida]].)*

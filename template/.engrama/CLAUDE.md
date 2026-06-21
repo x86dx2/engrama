@@ -37,12 +37,16 @@ NÃO replica: estrutura de pastas do código, assinaturas/tipos/schemas, estado 
 ├── governance/    # processo entre agentes: papéis, alçadas, handoff, continuidade
 ├── decisions/     # ADRs — uma decisão por arquivo, numeradas (começam em 0001)
 ├── project/       # bootstrap do projeto: finalidade, stack, comandos, superfícies sensíveis
-├── domain/        # invariantes/conceitos de negócio em prosa (conforme construirmos)
-├── gaps/          # trade-offs em aberto, dúvidas, débitos
-└── roadmap/       # WPs / fatias com histórico
+├── specs/         # playbooks operacionais (o "como"): orquestrador, executor, commit, testes…
+├── qa/            # ledger de críticas do Executor (lido pelo gate mecânico)
+├── scripts/       # critique-gate.sh + critique-gate-hook.sh + session-context.sh (o gate + hooks)
+├── githooks/      # pre-commit que delega ao gate
+├── domain/        # (criada conforme o projeto) invariantes/conceitos de negócio em prosa
+├── gaps/          # (criada conforme o projeto) trade-offs em aberto, dúvidas, débitos
+└── roadmap/       # (criada conforme o projeto) WPs / fatias com histórico
 ```
 
-> **Template:** `governance/`, `decisions/`, `project/`, `CLAUDE.md`, `index.md` e `log.md` vêm preenchidos neste pack. As pastas `domain/`, `gaps/` e `roadmap/` são específicas do seu projeto — crie-as e popule conforme o produto for sendo construído.
+> **Template:** vêm preenchidos neste pack: `governance/`, `decisions/`, `project/`, `specs/`, `qa/`, `scripts/`, `githooks/`, `CLAUDE.md`, `index.md` e `log.md`. As pastas `domain/`, `gaps/` e `roadmap/` são específicas do seu projeto — crie-as e popule conforme o produto for sendo construído.
 
 ## Convenções de página
 
