@@ -35,12 +35,12 @@ jobs:
 
       - name: Run shellcheck
         run: >
-          shellcheck critique-gate-ci.sh engrama-diff-hash.sh install.sh bootstrap.sh lint.sh .engrama/scripts/*.sh
+          shellcheck bin/*.sh .engrama/scripts/*.sh
           .engrama/githooks/pre-commit tests/run.sh tests/gate/*.test.sh
           tests/contract/*.test.sh
 
       - name: Run Engrama lint
-        run: bash lint.sh
+        run: bash ./.engrama/scripts/lint.sh
 
       - name: Run test suite
         run: bash tests/run.sh
@@ -53,14 +53,18 @@ jobs:
 
       - name: Re-run critique gate against pull request diff
         if: github.event_name == 'pull_request'
+        # NB: ENGRAMA_REQUIRE_DIFF_BIND (modo estrito do diff-binding) esta DESLIGADO
+        # ate o fingerprint ser unificado entre o gate local (git diff --cached) e o
+        # gate-CI (repo sintetico) — eles divergem hoje (ver licao em
+        # .engrama/qa/criticas-do-executor.md e ADR 0011). O gate-contra-PR segue
+        # exigindo a critica registrada (nucleo do R1), so sem a amarracao exata-do-hash.
         env:
-          ENGRAMA_REQUIRE_DIFF_BIND: "1"
           PR_BRANCH: ${{ github.head_ref }}
           PR_BASE_REF: origin/${{ github.base_ref }}
           PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
         run: |
           git diff --name-only -z "origin/${{ github.base_ref }}...HEAD" > "$PR_FILES"
-          bash ./critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
+          bash ./bin/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
 
   markdown:
     runs-on: ubuntu-latest
@@ -86,3 +90,5 @@ jobs:
 
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

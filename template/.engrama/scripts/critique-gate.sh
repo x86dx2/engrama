@@ -93,7 +93,6 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    lint.sh|engrama-diff-hash.sh) addcat gate ;;
     .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
@@ -134,7 +133,7 @@ if [ -z "$BRANCH" ]; then
   exit 2
 fi
 
-DIFF_HASH_SCRIPT="$REPO_ROOT/engrama-diff-hash.sh"
+DIFF_HASH_SCRIPT="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 if [ ! -f "$DIFF_HASH_SCRIPT" ]; then
   {
     echo "──────────────────────────────────────────────────────────────"
@@ -283,7 +282,7 @@ done
   echo "  e, quando quiser vincular a crítica a ESTE diff, acrescente o token:"
   echo "    $CURRENT_DIFF_HASH"
   echo "Fonte unica do fingerprint:"
-  echo "  bash ./engrama-diff-hash.sh"
+  echo "  bash ./.engrama/scripts/engrama-diff-hash.sh"
   echo "Rode a crítica (read-only, modelo independente):"
   echo "  $EXECUTOR_CMD -m $CRITIQUE_MODEL \"<ordem de crítica>\"   (sem auto-aplicar)"
   echo "──────────────────────────────────────────────────────────────"

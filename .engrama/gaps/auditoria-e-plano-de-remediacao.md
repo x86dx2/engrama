@@ -7,7 +7,7 @@ date: 2026-06-20
 source_refs:
   - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate.sh
   - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate-hook.sh
-  - /Users/x86/git-projects/engrama/install.sh
+  - /Users/x86/git-projects/engrama/bin/install.sh
   - /Users/x86/git-projects/engrama/tests/gate/critique-gate.test.sh
   - /Users/x86/git-projects/engrama/tests/contract/bootstrap.test.sh
 ---

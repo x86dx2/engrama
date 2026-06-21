@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # bootstrap.sh — instala o Engrama diretamente em um repo-alvo.
 # Cria/inicializa o repo se necessário, infere defaults e delega a cópia
-# mecânica ao install.sh.
+# mecânica ao bin/install.sh.
 set -eu
 
 usage() {
   cat <<'EOF'
 Uso:
-  bash ./bootstrap.sh /caminho/do/projeto [/caminho/do/override.values]
+  bash ./bin/bootstrap.sh /caminho/do/projeto [/caminho/do/override.values]
 
 Fluxo:
   1. cria o diretório-alvo se não existir;

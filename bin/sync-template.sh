@@ -8,18 +8,19 @@
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-ROOT_GATE="$HERE/.engrama/scripts/critique-gate.sh"
-ROOT_HOOK="$HERE/.engrama/scripts/critique-gate-hook.sh"
-ROOT_SESSION_CONTEXT="$HERE/.engrama/scripts/session-context.sh"
-ROOT_LINT="$HERE/lint.sh"
-ROOT_DIFF_HASH="$HERE/engrama-diff-hash.sh"
-ROOT_SETTINGS="$HERE/.claude/settings.json"
-TEMPLATE_GATE="$HERE/template/.engrama/scripts/critique-gate.sh"
-TEMPLATE_HOOK="$HERE/template/.engrama/scripts/critique-gate-hook.sh"
-TEMPLATE_SESSION_CONTEXT="$HERE/template/.engrama/scripts/session-context.sh"
-TEMPLATE_LINT="$HERE/template/lint.sh"
-TEMPLATE_DIFF_HASH="$HERE/template/engrama-diff-hash.sh"
-TEMPLATE_SETTINGS="$HERE/template/.claude/settings.json"
+REPO_ROOT="$(cd "$HERE/.." && pwd)"
+ROOT_GATE="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
+ROOT_HOOK="$REPO_ROOT/.engrama/scripts/critique-gate-hook.sh"
+ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
+ROOT_LINT="$REPO_ROOT/.engrama/scripts/lint.sh"
+ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
+TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
+TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/scripts/critique-gate-hook.sh"
+TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.sh"
+TEMPLATE_LINT="$REPO_ROOT/template/.engrama/scripts/lint.sh"
+TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
+TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
 
 fail() {
@@ -75,7 +76,6 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    lint.sh|engrama-diff-hash.sh) addcat gate ;;
     .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
@@ -103,12 +103,12 @@ write_if_changed() {
   mkdir -p "$(dirname "$dest")"
   if [ -f "$dest" ] && cmp -s "$tmp" "$dest"; then
     rm -f "$tmp"
-    echo "unchanged: ${dest#"$HERE"/}"
+    echo "unchanged: ${dest#"$REPO_ROOT"/}"
     return 0
   fi
 
   mv "$tmp" "$dest"
-  echo "synced: ${dest#"$HERE"/}"
+  echo "synced: ${dest#"$REPO_ROOT"/}"
 }
 
 compose_template_gate() {
@@ -140,6 +140,9 @@ main() {
   need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
   need_file "$TEMPLATE_HOOK"
+  need_file "$TEMPLATE_SESSION_CONTEXT"
+  need_file "$TEMPLATE_LINT"
+  need_file "$TEMPLATE_DIFF_HASH"
   need_file "$TEMPLATE_SETTINGS"
 
   TMPDIR_SYNC="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-sync)"

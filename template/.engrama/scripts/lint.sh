@@ -5,7 +5,7 @@ REPORT_ONLY=0
 
 usage() {
   cat <<'EOF'
-Uso: bash lint.sh [--report]
+Uso: bash ./.engrama/scripts/lint.sh [--report]
 
 Valida a saude mecanica do Engrama:
 - wikilinks em .engrama/**/*.md e na raiz (CLAUDE.md / AGENTS.md)
@@ -32,9 +32,10 @@ case "${1:-}" in
     ;;
 esac
 
-ROOT="$(
-  CDPATH='' cd -- "$(dirname -- "$0")" && pwd
+REPO_ROOT="$(
+  CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd
 )"
+ROOT="$REPO_ROOT"
 TMP_REPORT="$(mktemp 2>/dev/null || mktemp -t engrama-lint)"
 trap 'rm -f "$TMP_REPORT"' EXIT
 ERRORS=0

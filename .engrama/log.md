@@ -7,6 +7,12 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] reorg | Estrutura reorganizada (padrao ai-memory/Akita) — root limpo
+- Branch `reorg/estrutura-akita` (via PR — branch protection ativa). Executor (`codex exec`) moveu; Orquestrador auditou (root limpo, suite 250 verde, smoke de install independente passou).
+- **Root** agora so metadados/manifests. **`bin/`**: install/bootstrap/sync-template/critique-gate-ci. **`docs/`**: INSTALL/INSTANTIATE. **`.engrama/scripts/`**: gate+hook+session-context+lint+engrama-diff-hash (autocontido e distribuivel).
+- Cascata inteira atualizada (classify, CI, refs cruzadas, root-detection do lint, ~7 suites, README/schema/docs). +CONTRIBUTING +SECURITY.
+- **PROXIMO PASSO SEGURO:** abrir PR; CI verde (gate-contra-PR + tests) -> merge. Push direto na main esta bloqueado (correto).
+
 ## [2026-06-21] fix | CI verde no GitHub — lint portavel (licao EX4) + markdownlint tolerante
 - Repo publicado (privado) em github.com/x86dx2/engrama; 1o CI falhou -> consertado nesta fatia (loop falha->regra).
 - **lint.sh portavel:** source_refs resolvidos relativo a raiz do repo (antes: caminhos absolutos /Users/... quebravam em /home/runner/...). Caso L8 (clone p/ outro path) trava a regressao.

@@ -30,23 +30,23 @@ Bootstrap inicial do projeto. Este documento registra a configuração de primei
 
 - **Stack inferida:** Markdown + Bash + Git hooks + Claude Code settings
 - **Detalhamento arquitetural:** repo documental/operacional. Bash faz bootstrap, instalação e validação; Markdown define governança, ADRs, specs e template; Git hooks impõem crítica antes de commits sensíveis.
-- **Pasta(s) principais do produto:** raiz = instância viva; `.engrama/` = memória/governança ativa; `.claude/` = hook do Orquestrador; `template/` = template exportável; `bootstrap.sh`/`install.sh` = instaladores; `README.md`/`INSTALL.md`/`INSTANTIATE.md` = documentação.
+- **Pasta(s) principais do produto:** raiz = instância viva; `.engrama/` = memória/governança ativa; `.claude/` = hook do Orquestrador; `bin/` = tooling do pack; `docs/` = guias detalhados; `template/` = template exportável.
 - **Dependências externas relevantes:** `git`, `bash`, `rsync`, `sed`, `rg`, `jq`, `shellcheck` para validação local; `codex exec` para executor-bridge.
 
 ## Comandos canônicos (inferidos; confirmar/editar)
 
 - **Dev:** N/A
-- **Build:** shellcheck bootstrap.sh install.sh
-- **Test:** bash ./bootstrap.sh /private/tmp/engrama-bootstrap-smoke
+- **Build:** shellcheck bin/*.sh .engrama/scripts/*.sh
+- **Test:** bash ./tests/run.sh
 - **E2E:** N/A
-- **Outros comandos operacionais:** `git config core.hooksPath .engrama/githooks`; smoke de bootstrap em repo temporário; `rg '\{\{[A-Z_]+\}\}'` para checar placeholders no artefato instalado.
+- **Outros comandos operacionais:** `bash ./.engrama/scripts/lint.sh`; `bash ./bin/bootstrap.sh /private/tmp/engrama-bootstrap-smoke`; `bash ./bin/sync-template.sh`; `git config core.hooksPath .engrama/githooks`; `rg '\{\{[A-Z_]+\}\}'` para checar placeholders no artefato instalado.
 
 ## Fronteiras e superfícies sensíveis (preencher antes do 1º commit governado)
 
-- **Fronteiras explícitas:** não trazer ADRs/domínio/roadmap do `Ruflos` para o template central; não copiar `docs/engrama` para projetos novos; não sobrescrever `CLAUDE.md`, `AGENTS.md`, `.engrama/` ou `.claude/settings.json` existentes em repo-alvo.
+- **Fronteiras explícitas:** não trazer ADRs/domínio/roadmap do `Ruflos` para o template central; não copiar `docs/` da instância viva para projetos novos; não sobrescrever `CLAUDE.md`, `AGENTS.md`, `.engrama/` ou `.claude/settings.json` existentes em repo-alvo.
 - **`auth`:** não aplicável como domínio de produto neste repo; proteção relevante é bloqueio de leitura de `.env` em `.claude/settings.json`.
 - **`rbac`:** não aplicável como domínio de produto neste repo; alçada é governança entre agentes.
-- **Fluxo crítico do domínio:** instalação bootstrapavel limpa: `bootstrap.sh` deve criar/inicializar repo-alvo, instalar `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.claude/settings.json`, substituir placeholders, ativar hooks e deixar `project/bootstrap-do-projeto.md` pronto para entrevista de primeira abertura.
+- **Fluxo crítico do domínio:** instalação bootstrapavel limpa: `bin/bootstrap.sh` deve criar/inicializar repo-alvo, instalar `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.claude/settings.json`, substituir placeholders, ativar hooks e deixar `project/bootstrap-do-projeto.md` pronto para entrevista de primeira abertura.
 - **`schema`:** não há schema de dados; mudanças estruturais no schema do Engrama (`.engrama/CLAUDE.md`, frontmatter, diretórios obrigatórios) são `governance`.
 - **`contract`:** contrato do template/instalador: não copiar `docs/engrama`, não vazar estado vivo do repo central, manter placeholders no `template/`, e gerar projeto novo com bootstrap `proposed`.
 - **Client-side sensível:** não aplicável.
