@@ -4,11 +4,11 @@ status: active
 touches: [decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade, decisions/0007-computer-use-duas-fases, decisions/0010-roteamento-modelo-effort-do-executor]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/governance/papeis-e-alcadas.md
-  - /Users/x86/git-projects/engrama/.engrama/decisions/0003-executor-bridge-orquestrador-invoca-executor.md
-  - /Users/x86/git-projects/engrama/.engrama/decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade.md
-  - /Users/x86/git-projects/engrama/.engrama/decisions/0007-computer-use-duas-fases.md
-  - /Users/x86/git-projects/engrama/.engrama/decisions/0010-roteamento-modelo-effort-do-executor.md
+  - .engrama/governance/papeis-e-alcadas.md
+  - .engrama/decisions/0003-executor-bridge-orquestrador-invoca-executor.md
+  - .engrama/decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade.md
+  - .engrama/decisions/0007-computer-use-duas-fases.md
+  - .engrama/decisions/0010-roteamento-modelo-effort-do-executor.md
 ---
 
 Playbook de invocação do **Executor (Executor Crítico)** nas 3 variações. Normativo: [[governance/papeis-e-alcadas]] + ADRs 0003/0004/0007/0010. O Executor **nunca executa cego**; sempre devolve crítica técnica antes.

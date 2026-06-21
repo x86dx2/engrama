@@ -4,7 +4,7 @@ status: active
 touches: [governance/cadeia-de-comando, governance/papeis-e-alcadas, decisions/0010-roteamento-modelo-effort-do-executor, decisions/0005-orquestrador-qa-reexecucao-e-metricas]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/specs/orquestrador.md
+  - .engrama/specs/orquestrador.md
 ---
 
 Playbook operacional do **Orquestrador (Orquestrador/Auditor/QA/Arquiteto/Guardião de Produção)**. O normativo está em [[governance/cadeia-de-comando]] e [[governance/papeis-e-alcadas]]; aqui é o "como" do dia a dia.

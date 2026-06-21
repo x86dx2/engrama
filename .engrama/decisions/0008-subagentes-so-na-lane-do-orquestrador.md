@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/modelo-operacional, 0002-orquestrador-dono-do-git-executor-escreve, 0003-executor-bridge-orquestrador-invoca-executor]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/CLAUDE.md
+  - CLAUDE.md
 ---
 
 Subagentes (subagentes nativos do Orquestrador ou qualquer tooling de swarm/orquestração de subagentes) são permitidos **apenas na lane do Orquestrador** (auditoria, pesquisa, análise paralela, QA-análise). **Nunca** como executor de código de fatia.

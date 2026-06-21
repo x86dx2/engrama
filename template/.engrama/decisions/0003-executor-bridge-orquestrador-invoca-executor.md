@@ -4,7 +4,7 @@ status: active
 touches: [governance/cadeia-de-comando, governance/papeis-e-alcadas, decisions/0002-orquestrador-dono-do-git-executor-escreve, decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 O **Orquestrador invoca o Executor diretamente** (`{{EXECUTOR_CMD}}`), fechando o loop de execução **sem relay humano de rotina**. É a peça que torna o handoff autônomo até a fronteira de produção.

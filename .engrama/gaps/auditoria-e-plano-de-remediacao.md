@@ -5,11 +5,11 @@ critica_tecnica: incorporada
 touches: [decisions/0006-governanca-nao-se-autoaprova, decisions/0010-roteamento-modelo-effort-do-executor, governance/modelo-operacional, qa/criticas-do-executor]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate.sh
-  - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate-hook.sh
-  - /Users/x86/git-projects/engrama/bin/install.sh
-  - /Users/x86/git-projects/engrama/tests/gate/critique-gate.test.sh
-  - /Users/x86/git-projects/engrama/tests/contract/bootstrap.test.sh
+  - .engrama/scripts/critique-gate.sh
+  - .engrama/scripts/critique-gate-hook.sh
+  - bin/install.sh
+  - tests/gate/critique-gate.test.sh
+  - tests/contract/bootstrap.test.sh
 ---
 
 Auditoria imparcial do Engrama (3 fontes independentes — leitura manual, workflow multi-agente de 47 agentes/39 achados confirmados, crítica externa do `codex`) **validada por testes** e **revisada pela crítica do Executor** (`codex exec`, veredito `discordo` → ajustes incorporados; ver [[qa/criticas-do-executor]]). Registra o que está **comprovadamente correto**, o que é **furo comprovado por teste**, e o **plano completo de remediação** por fases. Governança → não se autoaprova: o commit depende da Autoridade.

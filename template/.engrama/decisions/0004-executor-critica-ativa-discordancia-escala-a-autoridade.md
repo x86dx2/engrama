@@ -4,8 +4,8 @@ status: active
 touches: [governance/cadeia-de-comando, governance/papeis-e-alcadas, governance/modelo-operacional, decisions/0003-executor-bridge-orquestrador-invoca-executor]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
-  - {{REPO_PATH}}/.engrama/governance/cadeia-de-comando.md
+  - CLAUDE.md
+  - .engrama/governance/cadeia-de-comando.md
 ---
 
 O **Executor critica ativamente toda ordem** antes de executar. **Discordância material → o Executor não executa, devolve objeção + justificativas ao Orquestrador, e o Orquestrador apresenta o conflito à Autoridade, que decide. O Orquestrador NÃO tem overrule.**

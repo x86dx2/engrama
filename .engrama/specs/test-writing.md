@@ -4,7 +4,7 @@ status: active
 touches: [specs/README, specs/executor, decisions/0005-orquestrador-qa-reexecucao-e-metricas]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/specs/test-writing.md
+  - .engrama/specs/test-writing.md
 ---
 
 Playbook de **escrita de teste** (aplicado pelo Executor sob spec do Orquestrador). É o **"como"** da disciplina de teste; o **"porquê/normativo"** (QA, re-execução, aceite) vive em [[decisions/0005-orquestrador-qa-reexecucao-e-metricas]]. Esta página é **agnóstica de stack**: preserva a filosofia reaproveitável e deixa as convenções concretas do harness para você preencher.

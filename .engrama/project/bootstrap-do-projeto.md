@@ -4,8 +4,8 @@ status: active
 touches: [governance/index, governance/continuidade-de-sessao, governance/modelo-operacional]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/CLAUDE.md
-  - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate.sh
+  - CLAUDE.md
+  - .engrama/scripts/critique-gate.sh
 ---
 
 Bootstrap inicial do projeto. Este documento registra a configuração de primeira abertura do **Engrama como repo central**: uma instância viva que usa a própria governança para evoluir o pack e manter um template limpo para projetos novos.
@@ -21,7 +21,7 @@ Bootstrap inicial do projeto. Este documento registra a configuração de primei
 
 - **Projeto:** Engrama
 - **Finalidade:** Repositorio central do Engrama: instancia viva de governanca entre agentes e fonte do template bootstrapavel para novos projetos.
-- **Repo:** /Users/x86/git-projects/engrama
+- **Repo:** raiz deste repositório
 - **Orquestrador padrão:** Claude (Claude Code)
 - **Executor padrão:** Codex via `codex exec`
 - **Autoridade:** Humano

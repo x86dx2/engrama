@@ -4,7 +4,7 @@ status: active
 touches: [governance/modelo-operacional, governance/cadeia-de-comando, 0001-governanca-tres-papeis, 0002-orquestrador-dono-do-git-executor-escreve, 0003-executor-bridge-orquestrador-invoca-executor, 0004-executor-critica-ativa-discordancia-escala-a-autoridade, 0009-producao-intocavel-dupla-confirmacao]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 Os **3 papéis canônicos**, o mapeamento atual para agentes concretos e a **matriz de alçadas** por ação. Papéis são definidos **por função**, não por vendor — o mapeamento pode mudar sem invalidar o modelo.

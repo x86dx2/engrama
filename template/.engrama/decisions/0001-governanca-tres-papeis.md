@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/modelo-operacional]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 Adotamos um modelo de governança operacional de **3 papéis canônicos** (por função, não por vendor) com **validação cruzada**: Orquestrador/Auditor, Executor Crítico, Autoridade de Mudança.

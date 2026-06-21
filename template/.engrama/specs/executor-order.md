@@ -4,8 +4,8 @@ status: active
 touches: [governance/continuidade-de-sessao, decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions/0010-roteamento-modelo-effort-do-executor]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/.engrama/governance/continuidade-de-sessao.md
-  - {{REPO_PATH}}/.engrama/decisions/0010-roteamento-modelo-effort-do-executor.md
+  - .engrama/governance/continuidade-de-sessao.md
+  - .engrama/decisions/0010-roteamento-modelo-effort-do-executor.md
 ---
 
 Template da **ordem ao Executor** (executor-bridge). Toda invocação `{{EXECUTOR_CMD}}` segue isto. Detalhe normativo: [[governance/continuidade-de-sessao]] (ordem mínima) + [[decisions/0010-roteamento-modelo-effort-do-executor]] (tier).

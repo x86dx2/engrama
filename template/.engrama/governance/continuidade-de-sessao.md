@@ -4,7 +4,7 @@ status: active
 touches: [governance/papeis-e-alcadas, governance/cadeia-de-comando, governance/modelo-operacional, decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
+  - CLAUDE.md
 ---
 
 Protocolos de **continuidade operacional**: como abrir, trabalhar e encerrar uma sessão; o handoff Orquestrador↔Executor pelo executor-bridge; e os pacotes mínimos que tornam a retomada independente de prompt longo.

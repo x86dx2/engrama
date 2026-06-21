@@ -4,7 +4,7 @@ status: active
 touches: [decisions/0006-governanca-nao-se-autoaprova, decisions/0010-roteamento-modelo-effort-do-executor, decisions/0011-diff-binding-atestacao-verificavel, governance/modelo-operacional]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate.sh
+  - .engrama/scripts/critique-gate.sh
 ---
 
 # Ledger de críticas do Executor (gpt-5.5) — gate de superfície sensível
@@ -145,3 +145,8 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Auditoria (ADR 0005):** provei do zero `--cached == --range` (inclusive com rename); suite verde (diffbind 9, ci 4, +todas); shellcheck/lint limpos; e2e estrito (match->libera, mutacao->bloqueia).
 - **Esta entrada dogfooda o caminho forte:** o `sha256` acima vincula a critica a ESTE diff do PR — local e CI computam o mesmo valor.
 - **Consenso.** Borda documentada: PR multi-commit -> diff cumulativo; fluxo recomendado = squash.
+
+## [2026-06-21] fix/source-refs-relativos | [governance][gate][contract] PR3: source_refs relativos (EX4 portabilidade) | confirmo | sha256:04f141271f241776ec546db6fa48a9008a11abd9d262fec78308f363b13d3edf executor codex + auditoria orquestrador
+- **EX4 (parte 1) fechado.** Executor (codex, ajuste-menor): migrou source_refs de 28 .md raiz + 27 template para relativos; corrigiu 3 paths fora de source_refs; lint valida relativo (compat legado).
+- **Auditoria (ADR 0005):** zero `/Users`/`{{REPO_PATH}}/` nos .md; lint exit 0 no repo + clone p/ outro path; suite verde; shellcheck limpo; smoke -> projeto-alvo com refs relativos + lint exit 0.
+- **Caminho forte:** sha256 vinculado a ESTE diff. **Consenso.**

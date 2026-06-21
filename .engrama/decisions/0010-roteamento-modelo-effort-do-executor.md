@@ -5,7 +5,7 @@ touches: [decisions/0003-executor-bridge-orquestrador-invoca-executor, decisions
 date: 2026-06-20
 critica_tecnica: incorporada
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/decisions/0003-executor-bridge-orquestrador-invoca-executor.md
+  - .engrama/decisions/0003-executor-bridge-orquestrador-invoca-executor.md
 ---
 
 Política de **roteamento de modelo + effort** do executor-bridge: o Orquestrador decide, por tarefa, qual modelo e esforço o `codex exec` usa — e qual a própria abordagem (solo/paralelo/profundidade de auditoria). Refina a "Escalonamento de força" da [[decisions/0003-executor-bridge-orquestrador-invoca-executor]]. Postura: **conservador-pra-cima** (default alto; descer exige justificativa). **Modelos de EXECUÇÃO para escrever código; o papel de CRÍTICA usa o maior modelo aprovado** (`gpt-5.5`) — ver "Exceção" abaixo (decisão da Autoridade).

@@ -4,9 +4,9 @@ status: active
 touches: [governance/cadeia-de-comando, governance/modelo-operacional]
 date: {{DATA}}
 source_refs:
-  - {{REPO_PATH}}/CLAUDE.md
-  - {{REPO_PATH}}/.engrama/governance/cadeia-de-comando.md
-  - {{REPO_PATH}}/.engrama/governance/modelo-operacional.md
+  - CLAUDE.md
+  - .engrama/governance/cadeia-de-comando.md
+  - .engrama/governance/modelo-operacional.md
 ---
 
 Checklist de **commit** (aplicado pelo Orquestrador — git é a lane do Orquestrador, ADR [[decisions/0002-orquestrador-dono-do-git-executor-escreve]]; **não** é subagente). O commit materializa "auditei e aceito".

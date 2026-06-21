@@ -4,7 +4,7 @@ status: active
 touches: [specs/test-writing, specs/README]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/specs/infra-runbook.md
+  - .engrama/specs/infra-runbook.md
 ---
 
 Runbook de **infraestrutura/ops** do seu projeto (provisionar ambiente local, subir/derrubar o dev server, seedar dados, recriar golden/baseline). Operações **locais** são livres; **remoto/produção** é gated (ADR 0009). Este arquivo é um **esqueleto agnóstico de stack**: a estrutura (contextos, golden, portas, teardown, remoto) vale para qualquer projeto; os **comandos concretos** você preenche com a `Markdown + Bash + Git hooks + Claude Code settings` do seu projeto.
@@ -44,7 +44,7 @@ Quando o app em construção sobe numa instância própria, **isole-a** das dema
 
 > ⚠️ Teardown que casa pelo **path/config do projeto**, nunca por nome de script compartilhado. Matar só pela porta normalmente deixa processos órfãos (`build`/`watch`/runtime) reparentados ao init, que **acumulam entre reboots**. E matar por um **nome de script genérico/compartilhado** pode derrubar uma instância de **outro** projeto que usa o mesmo script.
 >
-> Exemplo (troque pelo do seu projeto): um teardown que casava pelo nome de um script de dev compartilhado entre dois projetos derrubou junto a instância golden do projeto vizinho — o teardown precisa casar pelo **arquivo de config** ou pelo **path do projeto** (/Users/x86/git-projects/engrama), não pelo nome de script compartilhado. O incidente mostrou que `matar-pela-porta` sozinho **não basta**: sobram processos órfãos que se acumulam.
+> Exemplo (troque pelo do seu projeto): um teardown que casava pelo nome de um script de dev compartilhado entre dois projetos derrubou junto a instância golden do projeto vizinho — o teardown precisa casar pelo **arquivo de config** ou pelo **path do projeto** (ex.: `./seu-projeto`), não pelo nome de script compartilhado. O incidente mostrou que `matar-pela-porta` sozinho **não basta**: sobram processos órfãos que se acumulam.
 
 - **Restaurar o golden se cair:** `> Template: comando que rebuilda e serve o estado golden EXISTENTE` (NÃO use o comando de `reset`/`seed` — ele sobrescreveria o estado). O estado isolado normalmente sobrevive a restart se for persistido em disco.
 - **Re-point dos testes:** se os testes resolvem a base **por área**, ligue uma área nova ao app novo = adicionar a área ao mapa de base-URL + (quando precisar de dados) semear o estado isolado correspondente. Artefatos de build (`.cache`/`.build`/diretórios temporários do seu stack) devem ser gitignored.

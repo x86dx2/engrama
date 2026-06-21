@@ -4,8 +4,8 @@ status: proposed
 touches: [governance/papeis-e-alcadas, governance/modelo-operacional]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/CLAUDE.md
-  - /Users/x86/git-projects/engrama/.engrama/governance/papeis-e-alcadas.md
+  - CLAUDE.md
+  - .engrama/governance/papeis-e-alcadas.md
 ---
 
 **Produção é intocável** (quando houver deploy): escrita em produção exige ordem da Autoridade **+ segunda confirmação explícita** (AA); o Orquestrador **abre** MR de produção mas **nunca aprova/mergeia**. Status `proposed` — **inativo até existir ambiente de deploy**.

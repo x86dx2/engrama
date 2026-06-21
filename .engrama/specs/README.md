@@ -4,7 +4,7 @@ status: active
 touches: [specs/orquestrador, specs/executor, specs/executor-order, specs/commit, specs/test-writing, specs/infra-runbook]
 date: 2026-06-20
 source_refs:
-  - /Users/x86/git-projects/engrama/.engrama/specs/
+  - .engrama/specs/
 ---
 
 Biblioteca de **specs operacionais** — playbooks/checklists reaproveitáveis para tarefas recorrentes. São o **"como"**; o **"porquê/normativo"** vive em `.engrama/governance/` e `.engrama/decisions/` (ADRs). Specs **apontam** pra governança, não duplicam.
