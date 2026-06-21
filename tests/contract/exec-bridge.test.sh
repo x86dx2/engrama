@@ -152,6 +152,36 @@ else
 fi
 check E6 CORRETO "$_r" "falta de --label falha com mensagem clara"
 
+# E7: FALLBACK do session file — replica o codex REAL (o output_text final do
+# assistant NAO vem no stream --json; so no ~/.codex/sessions/.../<id>.jsonl).
+# Stub emite session_meta SEM response_item; o wrapper deve achar o session file
+# (via CODEX_HOME) e extrair a resposta de la. (Regressao que o bug de PR-A passou.)
+R7="$(new_repo)"
+STUB7="$R7/codex-stub.sh"
+cat > "$STUB7" <<'EOF'
+#!/usr/bin/env bash
+set -u
+[ "${1:-}" = "exec" ] || { echo "stub recebeu comando inesperado" >&2; exit 9; }
+cat >/dev/null
+# stream com session_meta mas SEM o output_text do assistant (como o codex real)
+printf '%s\n' '{"type":"session_meta","payload":{"id":"sessao-fb-777"}}'
+printf '%s\n' '{"type":"turn_context","payload":{"model":"gpt-5.4"}}'
+EOF
+chmod +x "$STUB7"
+HOME7="$(mktemp -d 2>/dev/null || mktemp -d -t eg-home)"
+mkdir -p "$HOME7/sessions/2026/06/21"
+printf '%s\n' '{"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"RESPOSTA-DO-SESSION-FILE-FALLBACK"}]}}' \
+  > "$HOME7/sessions/2026/06/21/rollout-2026-06-21-sessao-fb-777.jsonl"
+printf 'ORDEM\n' > "$R7/ordem.md"
+(
+  cd "$R7" || exit 2
+  CODEX_HOME="$HOME7" ENGRAMA_CODEX_BIN="$STUB7" bash ./.engrama/scripts/exec-bridge.sh --order "$R7/ordem.md" --label fallback --date 2026-06-21 >/dev/null 2>&1
+)
+RESP7="$R7/transcripts/2026-06-21-fallback-response.md"
+if [ -f "$RESP7" ] && grep -Fq 'RESPOSTA-DO-SESSION-FILE-FALLBACK' "$RESP7"; then _r=0; else _r=1; fi
+rm -rf "$HOME7"
+check E7 CORRETO "$_r" "fallback: extrai a resposta do session file quando o stream nao a traz (codex real)"
+
 printf '%b\n' "$RESULTS"
 echo ""
 echo "Resumo: $PASS asserts batidos, $FAIL divergentes | $HOLES casos marcados FURO (a corrigir)"

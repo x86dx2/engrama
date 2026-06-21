@@ -161,3 +161,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Correcao de layout pelo Orquestrador (licao):** minha ordem pos em `bin/` (source-only); movido p/ `.engrama/scripts/` (mantem `.engrama/` autocontido; `bin/` so source). `transcripts/` excluido do markdownlint (evidencia verbatim). ~33 transcripts desta sessao preservados em `transcripts/sessao-01-...`.
 - **Auditoria (ADR 0005):** suite 267 verde (exec-bridge 6); smoke -> alvo recebe `.engrama/scripts/exec-bridge.sh`, sem `bin/`; markdownlint 0 erros; shellcheck/lint limpos.
 - **Caminho forte:** sha256 vinculado. **Consenso.**
+
+## [2026-06-21] feat/hook-test-lint-completo | [governance][gate][contract] PR-B: teste do hook + lint completo + fix do wrapper | confirmo | sha256:a70288a2578e7cd592e8afae570f00a7d1b6b26b05a1c2ef5f3e1e7b045e035a codex-session:019eeb13-1795-7f40-92cf-3e02e3066e21 executor codex + auditoria orquestrador
+- **Itens 2 e 4.** Executor (codex via exec-bridge, ajuste-menor): `tests/gate/hook.test.sh` (6); lint estendido (orfas/ADR-gaps/status/TODO); achou+corrigiu TODO real.
+- **Licao da transparencia:** o wrapper de PR-A nao capturava o corpo da resposta (so session-id). Orquestrador (break-glass: a ferramenta de capturar a resposta do Executor estava quebrada) corrigiu o `exec-bridge.sh` (fallback p/ o session file) + caso E7 (provado: falha sem o fix). Resposta desta run recuperada e versionada.
+- **Auditoria (ADR 0005):** suite 282 verde; lint sensibilidade provada (TODO/status injetados -> exit 1); E7 pega a regressao; shellcheck/lint/markdownlint limpos; o TODO-fix preserva o sentido normativo.
+- **Atestacao dogfoodada:** esta entrada leva `sha256` (caminho forte) E `codex-session` (evidencia de execucao real via bridge). **Consenso.**
