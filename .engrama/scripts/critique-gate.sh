@@ -2,7 +2,9 @@
 # Gate de crítica do Executor — ADR 0006 (item 7) + ADR 0010.
 #
 # Bloqueia (exit 2) commit que toca SUPERFÍCIE SENSÍVEL sem registro de crítica
-# CONCLUÍDA em .engrama/qa/criticas-do-executor.md, por CATEGORIA, referenciando a branch.
+# CONCLUÍDA em .engrama/qa/criticas-do-executor.md, por CATEGORIA, referenciando
+# a branch. O campo 4 (ref) pode carregar opcionalmente um `sha256:<hex>` que
+# vincula a crítica ao diff staged atual (via engrama-diff-hash.sh).
 #
 # A crítica é feita por um agente/modelo INDEPENDENTE do Orquestrador (o Executor
 # no papel de crítica, read-only). O gate exige o REGISTRO da crítica antes do
@@ -38,6 +40,16 @@ trim() {
   s="${s#"${s%%[![:space:]]*}"}"
   s="${s%"${s##*[![:space:]]}"}"
   printf '%s' "$s"
+}
+
+extract_sha256_token() {
+  local ref_lc="$1"
+  ref_lc="$(printf '%s' "$ref_lc" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$ref_lc" =~ (^|[[:space:]])(sha256:[0-9a-f]{64})($|[[:space:]]) ]]; then
+    printf '%s' "${BASH_REMATCH[2]}"
+    return 0
+  fi
+  return 1
 }
 
 extract_branch_from_header() {
@@ -89,10 +101,10 @@ classify() {
     template/.engrama/governance/*|template/.engrama/decisions/*|template/.engrama/specs/*|template/.engrama/project/*|template/.engrama/qa/*) addcat governance ;;
 
     # Instalador, hook, settings e defaults mecanicos.
-    bootstrap.sh|install.sh|lint.sh|sync-template.sh|engrama.values.example) addcat gate ;;
+    bootstrap.sh|install.sh|lint.sh|sync-template.sh|critique-gate-ci.sh|engrama-diff-hash.sh|engrama.values.example) addcat gate ;;
     .engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
-    template/.engrama/scripts/*.sh|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
+    template/engrama-diff-hash.sh|template/.engrama/scripts/*.sh|template/.engrama/githooks/*|template/.claude/settings.json) addcat gate ;;
 
     # Contrato verificavel do bootstrap/template.
     tests/gate/*|*/tests/gate/*) addcat gate ;;
@@ -122,17 +134,51 @@ if [ -z "$BRANCH" ]; then
   exit 2
 fi
 
+DIFF_HASH_SCRIPT="$REPO_ROOT/engrama-diff-hash.sh"
+if [ ! -f "$DIFF_HASH_SCRIPT" ]; then
+  {
+    echo "──────────────────────────────────────────────────────────────"
+    echo "🚫 GATE DE CRÍTICA — commit BLOQUEADO"
+    echo ""
+    echo "Script obrigatorio ausente: $DIFF_HASH_SCRIPT"
+    echo "Sem a fonte unica do fingerprint do diff, o diff-binding nao e verificavel."
+    echo "──────────────────────────────────────────────────────────────"
+  } >&2
+  exit 2
+fi
+
+CURRENT_DIFF_HASH="$(bash "$DIFF_HASH_SCRIPT" 2>/dev/null || true)"
+if [[ ! "$CURRENT_DIFF_HASH" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+  {
+    echo "──────────────────────────────────────────────────────────────"
+    echo "🚫 GATE DE CRÍTICA — commit BLOQUEADO"
+    echo ""
+    echo "Fingerprint invalido retornado por engrama-diff-hash.sh:"
+    echo "  ${CURRENT_DIFF_HASH:-<vazio>}"
+    echo "Esperado: sha256:<64 hex>"
+    echo "──────────────────────────────────────────────────────────────"
+  } >&2
+  exit 2
+fi
+
 LEDGER=".engrama/qa/criticas-do-executor.md"
 # Versão durável: índice (staged) com fallback p/ HEAD. NÃO usa o working-tree.
 LEDGER_CONTENT="$(git show ":$LEDGER" 2>/dev/null || true)"
 [ -z "$LEDGER_CONTENT" ] && LEDGER_CONTENT="$(git show "HEAD:$LEDGER" 2>/dev/null || true)"
 
+REQUIRE_DIFF_BIND="${ENGRAMA_REQUIRE_DIFF_BIND:-0}"
 MISSING=""
 BLOCKED_OBJ=""
+STALE_BINDINGS=""
+LEGACY_ONLY=""
 
 for cat in $CATS; do
-  ok=""
-  obj=""
+  legacy_ok=""
+  legacy_obj=""
+  strong_ok=""
+  strong_obj=""
+  saw_hash=""
+  stale_hash=""
 
   while IFS= read -r line; do
     case "$line" in
@@ -153,12 +199,30 @@ for cat in $CATS; do
           *) continue ;;
         esac
 
+        entry_hash=""
+        if entry_hash="$(extract_sha256_token "$field4")"; then
+          saw_hash=1
+          if [ "$entry_hash" != "$CURRENT_DIFF_HASH" ]; then
+            stale_hash=1
+            continue
+          fi
+
+          if is_blocking_objection "$field3"; then
+            strong_obj=1
+          fi
+
+          if is_ok_verdict "$field3"; then
+            strong_ok=1
+          fi
+          continue
+        fi
+
         if is_blocking_objection "$field3"; then
-          obj=1
+          legacy_obj=1
         fi
 
         if is_ok_verdict "$field3"; then
-          ok=1
+          legacy_ok=1
         fi
         ;;
       *)
@@ -166,8 +230,35 @@ for cat in $CATS; do
     esac
   done < <(printf '%s\n' "$LEDGER_CONTENT")
 
-  if [ -n "$obj" ]; then BLOCKED_OBJ="$BLOCKED_OBJ $cat"; fi
-  if [ -z "$ok" ] || [ -n "$obj" ]; then MISSING="$MISSING $cat"; fi
+  cat_ok=""
+  cat_obj=""
+
+  if [ -n "$saw_hash" ]; then
+    cat_ok="$strong_ok"
+    cat_obj="$strong_obj"
+    if [ -n "$stale_hash" ] && [ -z "$strong_ok" ] && [ -z "$strong_obj" ]; then
+      STALE_BINDINGS="$STALE_BINDINGS $cat"
+    fi
+  else
+    cat_ok="$legacy_ok"
+    cat_obj="$legacy_obj"
+    if [ "$REQUIRE_DIFF_BIND" = "1" ] && [ -n "$legacy_ok" ]; then
+      LEGACY_ONLY="$LEGACY_ONLY $cat"
+    fi
+  fi
+
+  if [ "$REQUIRE_DIFF_BIND" = "1" ]; then
+    cat_ok="$strong_ok"
+    cat_obj="$strong_obj"
+  fi
+
+  if [ -n "$cat_obj" ]; then
+    BLOCKED_OBJ="$BLOCKED_OBJ $cat"
+  fi
+
+  if [ -z "$cat_ok" ] || [ -n "$cat_obj" ]; then
+    MISSING="$MISSING $cat"
+  fi
 done
 
 [ -z "$MISSING" ] && exit 0
@@ -178,11 +269,21 @@ done
   echo ""
   echo "Branch: $BRANCH"
   echo "Categorias sensíveis tocadas:$CATS"
+  echo "Fingerprint atual: $CURRENT_DIFF_HASH"
   echo "Sem crítica CONCLUÍDA (ou com objeção aberta) para:$MISSING"
   [ -n "$BLOCKED_OBJ" ] && echo "Objeção do Executor SEM waiver registrado:$BLOCKED_OBJ (escale à Autoridade)"
+  [ -n "$STALE_BINDINGS" ] && echo "Crítica vinculada a outro diff (sha256 obsoleto):$STALE_BINDINGS"
+  if [ "$REQUIRE_DIFF_BIND" = "1" ] && [ -n "$LEGACY_ONLY" ]; then
+    echo "Modo estrito ativo: entradas legadas sem sha256 nao satisfazem:$LEGACY_ONLY"
+  fi
+  [ "$REQUIRE_DIFF_BIND" = "1" ] && echo "Modo estrito ativo: ENGRAMA_REQUIRE_DIFF_BIND=1"
   echo ""
   echo "Para cada categoria acima, em $LEDGER (staged), inclua uma linha com:"
   echo "  a branch '$BRANCH' + a tag [categoria] + veredito (confirmo|ressalvas|N/A:<motivo>|waiver)"
+  echo "  e, quando quiser vincular a crítica a ESTE diff, acrescente o token:"
+  echo "    $CURRENT_DIFF_HASH"
+  echo "Fonte unica do fingerprint:"
+  echo "  bash ./engrama-diff-hash.sh"
   echo "Rode a crítica (read-only, modelo independente):"
   echo "  $EXECUTOR_CMD -m $CRITIQUE_MODEL \"<ordem de crítica>\"   (sem auto-aplicar)"
   echo "──────────────────────────────────────────────────────────────"

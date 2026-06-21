@@ -5,7 +5,9 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
+DIFF_HASH_SRC="$REPO_ROOT/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
+[ -f "$DIFF_HASH_SRC" ] || { echo "FATAL: helper de hash nao encontrado em $DIFF_HASH_SRC"; exit 1; }
 
 _probe="$(mktemp -d 2>/dev/null)" || { echo "FATAL: mktemp indisponivel — abortando"; exit 3; }
 git -C "$_probe" init -q 2>/dev/null || { echo "FATAL: git init indisponivel — abortando"; rm -rf "$_probe"; exit 3; }
@@ -49,6 +51,7 @@ new_repo() {
   git -C "$d" config user.name t
   mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance" "$d/tests/contract"
   cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
+  cp "$DIFF_HASH_SRC" "$d/engrama-diff-hash.sh"
   printf '# ledger\n' > "$d/.engrama/qa/criticas-do-executor.md"
   git -C "$d" add .engrama/scripts/critique-gate.sh .engrama/qa/criticas-do-executor.md
   git -C "$d" commit -qm base

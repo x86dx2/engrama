@@ -1,7 +1,7 @@
 ---
 type: workflow
 status: active
-touches: [decisions/0006-governanca-nao-se-autoaprova, decisions/0010-roteamento-modelo-effort-do-executor, governance/modelo-operacional]
+touches: [decisions/0006-governanca-nao-se-autoaprova, decisions/0010-roteamento-modelo-effort-do-executor, decisions/0011-diff-binding-atestacao-verificavel, governance/modelo-operacional]
 date: 2026-06-20
 source_refs:
   - /Users/x86/git-projects/engrama/.engrama/scripts/critique-gate.sh
@@ -12,6 +12,13 @@ source_refs:
 Registro **append-only** de toda **crítica do Executor no papel de crítica** (modelo independente, read-only) exigida pelo **ADR 0006 item 7** e pelo **ADR 0010**.
 
 **Verificado mecanicamente** por `.engrama/scripts/critique-gate.sh` (git pre-commit + PreToolUse do harness). Um commit que toca superfície sensível é **bloqueado** se faltar, para CADA categoria tocada, uma entrada CONCLUÍDA referenciando a **branch**. O gate lê a versão **staged/HEAD** do ledger (não o working-tree), rejeita `<pendente>` e bloqueia `objeção` sem `waiver`.
+
+**Diff-binding verificável (ADR 0011):** o campo 4 (`ref`) pode carregar um token `sha256:<hex>` calculado por `bash ./engrama-diff-hash.sh`. Quando presente, o gate compara esse token ao fingerprint atual do diff staged (excluindo o próprio ledger):
+- **match forte** (`sha256` bate) — a crítica cobre **este diff**;
+- **hash obsoleto** (`sha256` não bate) — a crítica fica vinculada a **outro diff** e não satisfaz o gate;
+- **sem `sha256:`** — caminho **legado** (branch+categoria+veredito), preservado por compatibilidade.
+
+**Modo estrito:** com `ENGRAMA_REQUIRE_DIFF_BIND=1`, só o **match forte** satisfaz; entradas legadas sem hash deixam de contar. Isto prova **cobertura do diff**, não **identidade independente do crítico** — esse teto exigiria assinatura/chave ou outra identidade que o `codex exec` não expõe hoje.
 
 **Categorias ativas neste repositório central** (a lista operacional vigente de arquivo→categoria é o `case` de `.engrama/scripts/critique-gate.sh`, não esta prosa):
 - **`governance`** — regras, ADRs, memória, bootstrap de projeto e template distribuível.
@@ -29,9 +36,12 @@ Categorias de domínio como `financial`, `rbac`, `auth` e `schema` pertencem a p
 O gate (`.engrama/scripts/critique-gate.sh`) lê **por campo**, não por substring na linha:
 - **campo 1** → a `<branch>` (após o prefixo `## [data] `) precisa ser **igual** à branch atual (igualdade exata — fecha o bypass cross-branch R5);
 - **campo 2** → precisa conter a tag literal `[<categoria>]`;
-- **campo 3** → o `<veredito>`, validado por **igualdade/prefixo de enum**, não substring (fecha R2: `nao confirmo` ≠ `confirmo`).
+- **campo 3** → o `<veredito>`, validado por **igualdade/prefixo de enum**, não substring (fecha R2: `nao confirmo` ≠ `confirmo`);
+- **campo 4** → o `<ref>`, livre, mas pode conter opcionalmente um token `sha256:<hex>` calculado por `bash ./engrama-diff-hash.sh`.
 
 Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensada` (igualdade) · `N/A: <motivo>` · `waiver <quem/quando>` (prefixo). `pendente` é rejeitado. Uma objeção (`objeção`/`discordo` no campo 3) só passa se o campo 3 também contiver `waiver` (arbitragem da Autoridade registrada).
+
+> Exemplo com diff-binding forte: `## [2026-06-20] main | [gate] enforcement | confirmo | saída do codex sha256:abc123...`
 
 > Cada entrada precisa ter os 4 campos (incluindo `<ref>`). Linhas que não casam a gramática (bullets `-`, etc.) são ignoradas pelo gate. O `waiver` ainda é detectado por substring **dentro do campo 3** — escreva-o no positivo (`waiver <quem/quando>`).
 
@@ -103,3 +113,10 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Orquestrador autorou:** principio 12 (honestidade de claims/metricas) em `governance/modelo-operacional`; spec `specs/licao-aprendida` (loop falha->regra). Propagado ao template (genericizado) + corrigi a Estrutura defasada do `template/.engrama/CLAUDE.md`.
 - **Executor (codex, critica read-only): ajuste-menor, 4 achados -> TODOS incorporados:** (1) suavizei absolutos auto-inflados ("vira"->"deve virar"; "impede a reincidencia"->"reduz e torna detectavel") -- o doc de honestidade caira no proprio overclaim que proibe; (2) separei `discordo` de `ajuste-menor` nos gatilhos (ajuste-menor nao e objecao material); (3) o destino da licao vive no commit/log, NAO num campo do ledger (gramatica fixa de 4 campos); (4) corrigi a Estrutura defasada tambem na RAIZ (.engrama/CLAUDE.md omitia session-context.sh).
 - **Consenso por incorporacao** (ADR 0006). lint limpo; suite verde. *(Meta-licao: a propria fatia de "metricas honestas" foi pega overclaimando -- registrada como exemplo vivo em [[specs/licao-aprendida]].)*
+
+## [2026-06-20] absorcao/t3-atestacao | [governance][gate][contract] T3 diff-binding: atestacao verificavel (mitiga R1) | confirmo | sha256:01975caeaa3eba13d5a5d11403e304e5479ac08bb7b69c82225a89ff3808a972
+- **Absorcao walrus:** prova verificavel > convencao. O ledger vincula a critica ao CONTEUDO do diff por sha256.
+- **Executor (codex, ajuste-menor):** `engrama-diff-hash.sh` (fingerprint estavel via `git diff --cached --raw`, exclui o ledger); gate com caminho forte (hash bate -> libera; obsoleto -> bloqueia) + modo estrito `ENGRAMA_REQUIRE_DIFF_BIND=1`; reescreveu `critique-gate-ci.sh` p/ reconstruir o diff real do PR (senao o estrito-CI seria overclaim); ADR 0011 + template + sync.
+- **Auditoria (ADR 0005):** backward-compat (249 asserts verdes, suites existentes intactas); 5 casos do diff-binding reproduzidos do zero (hash bate->libera; editar apos critica->bloqueia; estrito sem hash->bloqueia; legado->libera); shellcheck/lint limpos; ADR honesto (cobre o diff, NAO prova independencia de identidade).
+- **Esta propria entrada usa o caminho forte:** o `sha256:` acima vincula a critica a este diff exato.
+- **Consenso.** R1 mitigado (nao eliminado); teto = identidade verificavel externa (documentado no ADR 0011).

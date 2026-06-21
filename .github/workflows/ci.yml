@@ -35,7 +35,7 @@ jobs:
 
       - name: Run shellcheck
         run: >
-          shellcheck critique-gate-ci.sh install.sh bootstrap.sh lint.sh .engrama/scripts/*.sh
+          shellcheck critique-gate-ci.sh engrama-diff-hash.sh install.sh bootstrap.sh lint.sh .engrama/scripts/*.sh
           .engrama/githooks/pre-commit tests/run.sh tests/gate/*.test.sh
           tests/contract/*.test.sh
 
@@ -54,11 +54,13 @@ jobs:
       - name: Re-run critique gate against pull request diff
         if: github.event_name == 'pull_request'
         env:
+          ENGRAMA_REQUIRE_DIFF_BIND: "1"
           PR_BRANCH: ${{ github.head_ref }}
+          PR_BASE_REF: origin/${{ github.base_ref }}
           PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
         run: |
           git diff --name-only -z "origin/${{ github.base_ref }}...HEAD" > "$PR_FILES"
-          bash ./critique-gate-ci.sh --branch "$PR_BRANCH" --files-from "$PR_FILES"
+          bash ./critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
 
   markdown:
     runs-on: ubuntu-latest
