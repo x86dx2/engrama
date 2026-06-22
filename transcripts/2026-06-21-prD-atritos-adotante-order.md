@@ -1,0 +1,27 @@
+# Ordem ao Executor — PR-D (P1): atritos do adotante no bootstrap
+
+Branch já criada: `feat/p1-atritos-do-adotante`. Sandbox: workspace-write. **NÃO comitar** (Orquestrador é dono do git). Critique a ordem antes; o item 3 toca governança sensível — quero sua objeção se discordar.
+
+Contexto: uma auditoria empírica (instalação limpa real) achou 4 atritos que confundem quem adota o template. Nenhum é bloqueador, mas todos são baratos e reais. Mantenha o estilo denso da casa. As mudanças em `.engrama/scripts/critique-gate.sh` devem ir na RAIZ e ser propagadas ao template via `bash bin/sync-template.sh` (o `sync.test.sh` exige paridade).
+
+## Item 1 — `classify()`: tornar a adaptação ao domínio IMPERATIVA (hoje passa código sensível sem revisão)
+Empírico: num projeto novo, `src/financial-code.js` foi commitado com o gate em exit 0 porque o `classify()` default só tem as categorias de domínio (financial/rbac/auth/schema) COMENTADAS. Universais (governance/gate/contract) protegem; o domínio fica desprotegido até o adotante customizar — e a prosa atual ("ilustrativo, edite à vontade") não deixa claro que isso é OBRIGATÓRIO.
+- Em `.engrama/scripts/critique-gate.sh`, reescreva o comentário-cabeçalho do bloco `classify()` (hoje ~linhas 85-113) trocando o tom ilustrativo por **imperativo**: deixe explícito que **mapear os arquivos sensíveis do SEU domínio é obrigatório ANTES do 1º commit de código de domínio** e que **o que não estiver no `case` passa SEM revisão**. Não mude a lógica nem descomente exemplos (eles continuam ilustrativos), só o tom/instrução.
+- Em `docs/INSTALL.md` (Passo 3) e `docs/INSTANTIATE.md` (Passo 3): transforme em verificação **obrigatória** com 1-2 exemplos por tipo de stack (ex.: web app → rotas de auth/api; serviço financeiro → serviços que movem valor; migrations → schema). Inclua o lembrete de que esquecer = superfície sensível sem gate.
+
+## Item 2 — auto-teste do gate dá FALSO-VERDE (a doc ensina um teste que não bloqueia)
+Empírico: em `docs/INSTALL.md` Passo 6 e `docs/INSTANTIATE.md` Passo 4, o teste manda encenar um commit tocando `.engrama/governance/` SEM entrada no ledger, esperando bloqueio. Mas como o Passo 5 já gravou uma entrada `[governance][gate]` na branch `main` (e o modo legado casa por branch+categoria), o commit de teste na `main` retorna exit 0 — NÃO bloqueia. O adotante conclui que o gate quebrou (ou comita o teste por engano).
+- Corrija os dois docs para o auto-teste ser **determinístico**: rode-o numa **branch descartável nova** (ex.: `git checkout -b _gate-selftest` antes do teste, e `git checkout - && git branch -D _gate-selftest` depois) **ou** com `ENGRAMA_REQUIRE_DIFF_BIND=1` no commit de teste — qualquer uma garante que não há entrada cobrindo aquele diff e o bloqueio ocorre de fato. Explique em 1 linha por que (a entrada do bootstrap na main cobriria governance).
+
+## Item 3 — 1º commit do projeto novo TRAVA até registrar manualmente o ledger (galinha-e-ovo)  ⚠️ governança sensível — critique
+Empírico: num bootstrap fresco, o 1º commit (que instala a própria governança/gate) é bloqueado (exit 2) até o adotante registrar manualmente a entrada inicial no ledger. Quem não entende o porquê fica travado. O `bin/bootstrap.sh` (254 linhas) hoje NÃO semeia nada no ledger.
+- **Sua crítica é requisitada aqui:** semear automaticamente uma entrada inicial `dispensada` no `.engrama/qa/criticas-do-executor.md` do projeto-alvo (ex.: `## [{{DATA}}] main | [governance][gate] bootstrap inicial — instalacao da governanca | dispensada | Autoridade (via bin/bootstrap.sh) — a critica do 1o commit e dispensada pela Autoridade ao rodar o instalador`) **pré-autoriza** só o 1º commit de instalação. Isso destrava, mas mexe com "governança não se autoaprova" (ADR 0006). Se você considerar que auto-semear é aceitável **porque** quem roda o instalador É a Autoridade e a dispensa é do escopo mínimo (só a instalação), implemente **com**: (a) a linha claramente rotulada como dispensa-da-Autoridade-via-instalador, (b) um aviso PROEMINENTE no stdout do `bootstrap.sh` ("semeei a entrada 'dispensada' do bootstrap inicial — revise; ela cobre só o 1º commit"), e (c) documentação em `docs/INSTALL.md` Passo 5. Se você DISCORDAR materialmente (achar que o framework não deve auto-aprovar nem o 1º commit), **não implemente o auto-seed**: em vez disso, deixe o ledger como está e só melhore a documentação + a mensagem do gate (item 4) pra ensinar o passo manual. Diga seu veredito e o porquê.
+
+## Item 4 — dica do gate pra repo fresco
+Em `.engrama/scripts/critique-gate.sh`, no bloco de bloqueio (a mensagem `🚫 GATE DE CRÍTICA`, ~linhas 274-298): quando `LEDGER_CONTENT` estiver vazio (ledger ausente/stub, típico do 1º commit), acrescente UMA linha de dica: algo como "(ledger vazio — se este e o 1o commit do bootstrap, registre a entrada inicial: ver docs/INSTALL.md Passo 5)". Propague ao template via sync.
+
+## Fora do seu escopo (eu, Orquestrador, faço no git)
+O `chmod +x` do hook versionado do template (`git update-index --chmod=+x`) é operação de índice, não código — eu aplico. Não mexa no modo de arquivo.
+
+## Saída esperada
+Liste os arquivos tocados. Rode e cole evidência de: `bash tests/run.sh`, `bash .engrama/scripts/lint.sh`, `shellcheck` nos scripts, e `bash tests/contract/sync.test.sh` (paridade raiz↔template do critique-gate.sh). Se semeou o ledger no bootstrap, mostre um `bash bin/bootstrap.sh` num /tmp provando que o 1º commit do alvo passa sem intervenção manual.

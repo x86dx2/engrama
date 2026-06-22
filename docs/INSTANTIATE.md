@@ -63,15 +63,17 @@ grep -rl '{{EXECUTOR_CMD}}' . | xargs sed -i '' 's#{{EXECUTOR_CMD}}#codex exec#g
 
 ---
 
-## Passo 3 — Adaptar o gate mecânico ao seu domínio
+## Passo 3 — Adaptar o gate mecanico ao seu dominio (OBRIGATORIO antes do 1o commit de codigo de dominio)
 
 Abra `.engrama/scripts/critique-gate.sh` e edite a função **`classify()`**:
 
 - As categorias **universais** já vêm cabeadas: `governance` (.engrama/governance, .engrama/decisions, AGENTS.md, CLAUDE.md), `gate` (.engrama/scripts/critique-gate*, .engrama/githooks, .claude/settings.json), `contract` (tests/contract).
 - As de **domínio** vêm como **exemplos comentados** — descomente e troque pelos caminhos reais: `financial`, `rbac`, `auth`, `schema`.
+- O que nao entrar no `case` passa **SEM revisao** por este gate. Exemplos: app web -> rotas de `auth` e guards de sessao; servico financeiro -> servicos que movem valor/estado irreversivel; banco -> `migrations/*` e mudancas de schema.
 - Atualize a frase "Categorias" em `.engrama/qa/criticas-do-executor.md` para refletir o que você mapeou.
 
 Princípio: mapeie **superfície sensível** (RBAC, fluxo de valor, auth, migrations, contratos) — onde um erro custa caro. Não cabeie o repo inteiro: o gate deve ser uma rede sob o que importa, não burocracia.
+Esquecer esse passo = deixar superficie sensivel fora do gate.
 
 ---
 
@@ -98,13 +100,18 @@ E, no harness do Orquestrador (defesa contra `git commit --no-verify`), cabeie o
 }
 ```
 
-Teste o gate (deve **bloquear**):
+Teste o gate de forma deterministica (deve **bloquear**):
 
 ```bash
+git checkout -b _gate-selftest
 touch .engrama/governance/teste.md && git add .engrama/governance/teste.md
-git commit -m "teste"     # → 🚫 GATE DE CRÍTICA … commit BLOQUEADO
+git commit -m "selftest gate"   # → 🚫 GATE DE CRITICA … commit BLOQUEADO
 git restore --staged .engrama/governance/teste.md && rm .engrama/governance/teste.md
+git checkout -
+git branch -D _gate-selftest
 ```
+
+Faca assim porque a entrada do bootstrap na `main` pode cobrir `governance`; na branch descartavel nao ha ledger cobrindo esse diff.
 
 ---
 

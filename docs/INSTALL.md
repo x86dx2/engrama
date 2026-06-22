@@ -55,17 +55,18 @@ bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-alvo [/tmp/overrid
 
 Ele: cria/inicializa o repo-alvo se necessário, infere defaults, copia `template/` → raiz do repo, substitui **todos** os placeholders, instala `.claude/settings.json`, registra `.engrama/VERSION`, e ativa o hook (`core.hooksPath .engrama/githooks`). **Confirme** que a saída diz `Placeholders restantes: ''` (vazio). Se sobrou algum, ajuste o arquivo de override e rode de novo (o instalador recusa sobrescrever — veja Merge).
 
-## Passo 3 — Adaptar o gate ao domínio (SEU julgamento)
+## Passo 3 — Adaptar o gate ao dominio (OBRIGATORIO antes do 1o commit de codigo de dominio)
 
 Abra `.engrama/scripts/critique-gate.sh` e edite a função **`classify()`**:
 
 - As categorias **universais** já vêm cabeadas (`governance`, `gate`, `contract`) — não remova.
-- **Inspecione o código do projeto** e identifique as superfícies sensíveis reais. Mapeie cada uma para uma categoria de domínio:
-  - `auth` — login/sessão/tokens/rate-limit/rotas de autenticação;
-  - `rbac` — permissões/papéis/multi-tenant;
-  - `financial` (ou o fluxo crítico do seu domínio) — serviços que movem **valor ou estado irreversível**;
-  - `schema` — migrations / mudança de esquema de dados.
+- **Mapeie os arquivos sensíveis do SEU dominio antes do 1o commit de codigo de dominio.** O que não entrar no `case` passa **SEM revisão** por este gate.
+- Exemplos curtos por stack:
+  - app web / API: rotas de `auth`, guardas de sessão, middleware de permissão, handlers de API que mudam estado irreversível;
+  - serviço financeiro / fluxo crítico: serviços que movem valor, conciliação, ledger, aprovação, cobrança, liquidação;
+  - banco / schema: `migrations/*`, mudanças de esquema, scripts de backfill que alteram dado persistido.
 - **APRESENTE o mapa proposto à Autoridade** (arquivo→categoria) e ajuste conforme a resposta. Mantenha-o em sincronia com a frase de categorias de `.engrama/qa/criticas-do-executor.md`.
+- Esquecer esse passo = deixar superfície sensível **fora do gate**.
 
 ## Passo 4 — (opcional) Cabear o gate no harness do Orquestrador
 
@@ -85,20 +86,34 @@ Defesa extra contra `git commit --no-verify`. Se o seu harness suporta hooks (ex
 
 ## Passo 5 — Ritual de bootstrap (ADR 0006: a governança se aplica a si mesma)
 
-A governança instalada **é** uma edição de governança → passa pelo próprio gate antes do 1º commit:
+A governança instalada **é** uma edição de governança → passa pelo próprio gate antes do 1º commit.
+
+Se você usou `bin/bootstrap.sh`, o instalador **já semeia** no ledger uma linha `dispensada` da **Autoridade (via bin/bootstrap.sh)**, amarrada por `sha256` ao **snapshot staged** que ele acabou de instalar. Isso destrava o commit mecânico inicial, mas **só** esse diff.
 
 1. Revise o Engrama instalado (placeholders trocados, `classify()` adaptado).
 2. Rode a **crítica do Executor** (read-only) sobre a governança instalada:
    `<EXECUTOR_CMD> -m <MODELO_CRITICA>` com uma ordem de crítica read-only (sem patch).
-3. **Antes de commitar** (logar precede commit): registre a crítica em `.engrama/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo seed; inclua o próximo passo seguro). A entrada do ledger precisa conter a **branch atual** + as **tags de categoria** tocadas (no 1º commit, tipicamente `[governance][gate]`) + um veredito OK.
-4. **Consenso** → aprovação da **Autoridade** → 1º commit (Engrama + ledger + log juntos). **Impasse** → a Autoridade arbitra (o Executor tem voz, não veto).
+3. Revise a linha `dispensada` semeada pelo instalador. Se o 1º commit for **o snapshot mecânico staged pelo bootstrap**, ela já cobre o diff. Se você editar arquivos sensíveis antes de commitar (por exemplo `classify()`, `.engrama/log.md` ou docs/ADRs de governança), o `sha256` fica obsoleto e você precisa **substituir** a dispensa por crítica real ou registrar o ledger manualmente.
+4. **Antes de commitar** (logar precede commit): registre a crítica em `.engrama/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo seed; inclua o próximo passo seguro) sempre que o diff já não for mais o snapshot puro do instalador.
+5. **Consenso** → aprovação da **Autoridade** → 1º commit. **Impasse** → a Autoridade arbitra (o Executor tem voz, não veto).
 
 ## Passo 6 — Verificação final (prove que replicou)
 
 - [ ] `grep -rho '{{[A-Z_]*}}' CLAUDE.md AGENTS.md .engrama` retorna **vazio**.
 - [ ] `git config core.hooksPath` = `.engrama/githooks`.
 - [ ] `.claude/settings.json` existe e chama `.engrama/scripts/critique-gate-hook.sh`.
-- [ ] **Teste do gate**: encene um commit tocando `.engrama/governance/` **sem** entrada no ledger para a branch → deve **bloquear** (🚫). Isso confirma que a regra está viva neste projeto.
+- [ ] **Teste do gate (deterministico):** num repo limpo, rode em branch descartável para não herdar a entrada do bootstrap na `main`:
+
+  ```bash
+  git checkout -b _gate-selftest
+  touch .engrama/governance/teste.md && git add .engrama/governance/teste.md
+  git commit -m "selftest gate"   # -> 🚫 GATE DE CRITICA
+  git restore --staged .engrama/governance/teste.md && rm .engrama/governance/teste.md
+  git checkout -
+  git branch -D _gate-selftest
+  ```
+
+  A linha do bootstrap na `main` cobriria `governance`; na branch descartável não há entrada cobrindo esse diff, então o bloqueio é real.
 - [ ] Declare o **handshake** de abertura: papel · alçada · estado factual (topo do `.engrama/log.md`) · próximo passo seguro · o que depende da Autoridade.
 - [ ] O repo-alvo ficou com `CLAUDE.md`, `AGENTS.md`, `.engrama/` e `.claude/settings.json` na raiz, sem copiar `docs/engrama/`.
 - [ ] `project/bootstrap-do-projeto.md` foi lido e, se ainda estiver `proposed`, o Orquestrador iniciou a entrevista de bootstrap com a Autoridade.

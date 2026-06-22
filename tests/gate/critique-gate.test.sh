@@ -44,6 +44,16 @@ write_ledger() { printf '%s\n' "$2" > "$1/.engrama/qa/criticas-do-executor.md"; 
 
 run_gate() { ( cd "$1" && bash .engrama/scripts/critique-gate.sh >/dev/null 2>&1; echo $?; ); }
 
+run_gate_capture_stderr() {
+  (
+    cd "$1" || exit 2
+    local out rc
+    out="$(bash .engrama/scripts/critique-gate.sh 2>&1 >/dev/null)"; rc=$?
+    printf '%s\n' "$rc"
+    printf '%s\n' "$out"
+  )
+}
+
 # check <id> <tag CORRETO|FURO> <esperado> <obtido> <descricao>
 check() {
   local id="$1" tag="$2" exp="$3" got="$4" desc="$5" mark
@@ -51,6 +61,13 @@ check() {
   [ "$tag" = "FURO" ] && HOLES=$((HOLES+1))
   local label; case "$got" in 0) label="LIBERA";; 2) label="BLOQUEIA";; *) label="exit:$got";; esac
   RESULTS="$RESULTS\n  [$mark] $id  ($tag)  -> gate $label  | $desc"
+}
+
+check_text() {
+  local id="$1" tag="$2" needle="$3" haystack="$4" desc="$5" mark
+  if printf '%s' "$haystack" | grep -Fq "$needle"; then mark="ok"; PASS=$((PASS+1)); else mark="XX"; FAIL=$((FAIL+1)); fi
+  [ "$tag" = "FURO" ] && HOLES=$((HOLES+1))
+  RESULTS="$RESULTS\n  [$mark] $id  ($tag)  -> texto  | $desc"
 }
 
 # ── GREEN: comportamento correto (proteger contra regressao) ──────────────────
@@ -68,6 +85,8 @@ write_ledger "$r" "# ledger vazio"
 echo x > "$r/.engrama/governance/p.md"
 git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
 check G2 CORRETO 2 "$(run_gate "$r")" "governanca SEM critica registrada"
+g2_out="$(run_gate_capture_stderr "$r")"
+check_text G2B CORRETO "ledger vazio/stub" "$g2_out" "mensagem de bloqueio orienta o bootstrap fresco quando o ledger esta vazio/stub"
 
 # G3: objecao sem waiver => BLOQUEIA
 r="$(new_repo main)"
