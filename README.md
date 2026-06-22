@@ -16,7 +16,7 @@ cp -R /caminho/do/engrama/template/. /caminho/do/projeto-novo/
 cd /caminho/do/projeto-novo
 # troque os placeholders e adapte o gate ao dominio
 grep -rno '{{[A-Z_]*}}' . --include='*.md' --include='*.sh' --include='VERSION' | sort -u
-bash ./.engrama/scripts/lint.sh
+bash ./.engrama/engine/scripts/lint.sh
 # docs no repo-fonte: /caminho/do/engrama/docs/INSTALL.md e INSTANTIATE.md
 ```
 
@@ -52,19 +52,19 @@ O mapeamento é direto:
 
 | Camada do LLM Wiki | No governance pack |
 |---|---|
-| **Raw sources** (imutável) | `.engrama/log.md` (factual, append-only) + o **ledger de críticas** (`.engrama/qa/criticas-do-executor.md`) — o registro do que aconteceu/foi decidido/foi criticado |
-| **The wiki** (mantido pelo LLM) | `.engrama/governance/*` + `.engrama/decisions/*` (ADRs) + `.engrama/specs/*` + `.engrama/index.md` — o modelo normativo interligado por `[[wikilinks]]` |
+| **Raw sources** (imutável) | `.engrama/log.md` (factual, append-only) + o **ledger de críticas** (`.engrama/evidence/qa/criticas-do-executor.md`) — o registro do que aconteceu/foi decidido/foi criticado |
+| **The wiki** (mantido pelo LLM) | `.engrama/memory/governance/*` + `.engrama/memory/decisions/*` (ADRs) + `.engrama/memory/specs/*` + `.engrama/index.md` — o modelo normativo interligado por `[[wikilinks]]` |
 | **The schema** (config) | `.engrama/CLAUDE.md` (o schema do Engrama) **+** `CLAUDE.md` / `AGENTS.md` (os **gates** que dizem ao agente como ler e manter o Engrama) |
 
 | Operação do LLM Wiki | No governance pack |
 |---|---|
 | **Ingest** | uma decisão/incidente/crítica nova → atualiza ADR/governança + `.engrama/log.md` + cross-links (workflow em `.engrama/CLAUDE.md`) |
 | **Query** | **abertura de sessão**: ler gate → governança → topo do `.engrama/log.md`; responder "qual é meu papel / qual o estado / próximo passo seguro" (o *handshake* obrigatório) |
-| **Lint** | a varredura de saúde do Engrama **+** o **gate mecânico de crítica** (`.engrama/scripts/critique-gate.sh`) — um lint **contínuo e imposto** sobre superfície sensível, que bloqueia o commit sem a crítica registrada |
+| **Lint** | a varredura de saúde do Engrama **+** o **gate mecânico de crítica** (`.engrama/engine/scripts/critique-gate.sh`) — um lint **contínuo e imposto** sobre superfície sensível, que bloqueia o commit sem a crítica registrada |
 
 > Em uma frase: o Karpathy resolve *"humanos abandonam wikis porque manter cansa"*; este pack aplica isso à governança — **o modelo operacional não apodrece** porque o agente o mantém, e o **gate** lembra/impõe a crítica no caminho cooperativo do commit.
 
-> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exige **enforcement server-side**. A CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) **reexecuta o gate contra o diff do PR** via [.engrama/scripts/critique-gate-ci.sh](.engrama/scripts/critique-gate-ci.sh) — o controle passa a existir num lugar **não-burlável pelo autor** (reusa a mesma `classify()` + parsing do ledger por campo e injeta o fingerprint do **diff real do PR**). O job `test` da CI (que **embute** o gate-contra-PR) está entre os ***required checks*** do *branch protection* — então o gate é **vinculante no merge** (push direto na `main` bloqueado; o furo **R1** fica **mitigado server-side**). O **modo estrito do diff-binding** (`ENGRAMA_REQUIRE_DIFF_BIND=1`) voltou a ficar **ligado na CI** porque o fingerprint foi unificado entre local e CI pela mesma fonte única (`engrama-diff-hash.sh`, local = staged; CI = `--range <base>...HEAD`). *Ressalva honesta:* em PRs com múltiplos commits, o binding cobre o **diff cumulativo** de `base...HEAD`, não cada commit isoladamente; o fluxo recomendado continua sendo squash/1 commit. Hoje: hook local = atrito útil + registro; **CI = enforcement vinculante** (required check). O gate garante que a crítica esteja **registrada** — **não** que um agente independente de fato a tenha produzido (ver [plano de remediação](.engrama/gaps/auditoria-e-plano-de-remediacao.md)).
+> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exige **enforcement server-side**. A CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) **reexecuta o gate contra o diff do PR** via [.engrama/engine/scripts/critique-gate-ci.sh](.engrama/engine/scripts/critique-gate-ci.sh) — o controle passa a existir num lugar **não-burlável pelo autor** (reusa a mesma `classify()` + parsing do ledger por campo e injeta o fingerprint do **diff real do PR**). O job `test` da CI (que **embute** o gate-contra-PR) está entre os ***required checks*** do *branch protection* — então o gate é **vinculante no merge** (push direto na `main` bloqueado; o furo **R1** fica **mitigado server-side**). O **modo estrito do diff-binding** (`ENGRAMA_REQUIRE_DIFF_BIND=1`) voltou a ficar **ligado na CI** porque o fingerprint foi unificado entre local e CI pela mesma fonte única (`engrama-diff-hash.sh`, local = staged; CI = `--range <base>...HEAD`). *Ressalva honesta:* em PRs com múltiplos commits, o binding cobre o **diff cumulativo** de `base...HEAD`, não cada commit isoladamente; o fluxo recomendado continua sendo squash/1 commit. Hoje: hook local = atrito útil + registro; **CI = enforcement vinculante** (required check). O gate garante que a crítica esteja **registrada** — **não** que um agente independente de fato a tenha produzido (ver [plano de remediação](.engrama/memory/gaps/auditoria-e-plano-de-remediacao.md)).
 
 ---
 
@@ -103,33 +103,33 @@ O mapeamento é direto:
 │   └── INSTANTIATE.md
 ├── .engrama/                      # instância viva (governança + scripts da instância)
 │   ├── CLAUDE.md
-│   ├── governance/ · decisions/ · project/ · specs/ · qa/
-│   ├── scripts/
+│   ├── memory/governance/ · memory/decisions/ · memory/project/ · memory/specs/ · evidence/qa/
+│   ├── engine/scripts/
 │   │   ├── critique-gate.sh
 │   │   ├── critique-gate-ci.sh
 │   │   ├── critique-gate-hook.sh
 │   │   ├── session-context.sh
 │   │   ├── lint.sh
 │   │   └── engrama-diff-hash.sh
-│   └── githooks/pre-commit
+│   └── engine/githooks/pre-commit
 └── template/                      # artefato distribuível para projetos novos
     ├── CLAUDE.md / AGENTS.md
     ├── .github/workflows/ci.yml
     ├── .markdownlint-cli2.yaml
     └── .engrama/
-        ├── governance/ · decisions/ · project/ · specs/ · qa/
-        ├── scripts/
+        ├── memory/governance/ · memory/decisions/ · memory/project/ · memory/specs/ · evidence/qa/
+        ├── engine/scripts/
         │   ├── critique-gate.sh
         │   ├── critique-gate-ci.sh
         │   ├── critique-gate-hook.sh
         │   ├── session-context.sh
         │   ├── lint.sh
         │   └── engrama-diff-hash.sh
-        ├── .engrama/transcripts/README.md
-        └── githooks/pre-commit
+        ├── evidence/transcripts/README.md
+        └── engine/githooks/pre-commit
 ```
 
-> Os ADRs de **domínio/stack/sequenciamento** do projeto original (stack, ordem de migração) **não entram** no template — são específicos. No projeto novo eles nascem a partir de `0011+`, ao lado das pastas `domain/`, `roadmap/` e `gaps/` que você cria conforme o trabalho avança.
+> Os ADRs de **domínio/stack/sequenciamento** do projeto original (stack, ordem de migração) **não entram** no template — são específicos. No projeto novo eles nascem a partir de `0011+`, ao lado das pastas `memory/domain/`, `memory/roadmap/` e `memory/gaps/` que você cria conforme o trabalho avança.
 
 ---
 
@@ -137,7 +137,7 @@ O mapeamento é direto:
 
 Dois caminhos:
 
-- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` e o CI portátil (`.github/workflows/ci.yml`, `.engrama/scripts/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) no artefato instalado e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
+- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` e o CI portátil (`.github/workflows/ci.yml`, `.engrama/engine/scripts/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) no artefato instalado e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
 - **Manual (referência):** **[docs/INSTANTIATE.md](docs/INSTANTIATE.md)** — os mesmos passos feitos à mão, com o glossário completo dos 12 placeholders.
 
 Em ambos vale o **ritual de bootstrap** (ADR 0006): a governança se aplica a si mesma — o Engrama inicial vai à crítica do Executor e à aprovação da Autoridade antes do 1º commit. E, em ambos, o passo final de enforcement **server-side** continua manual no GitHub do adotante: **dar push** e marcar o job `gate` como *required check* no *branch protection*.

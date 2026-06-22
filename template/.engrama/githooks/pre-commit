@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# Pre-commit hook versionado. Ativar com: git config core.hooksPath .engrama/githooks
-# Delega ao gate de crítica do Executor (ADR 0006 item 7 / ADR 0010).
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
-exec bash "$ROOT/.engrama/scripts/critique-gate.sh"

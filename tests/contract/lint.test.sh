@@ -4,7 +4,7 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-LINT_SRC="$REPO_ROOT/.engrama/scripts/lint.sh"
+LINT_SRC="$REPO_ROOT/.engrama/engine/scripts/lint.sh"
 [ -f "$LINT_SRC" ] || { echo "FATAL: lint nao encontrado em $LINT_SRC"; exit 1; }
 
 _probe="$(mktemp -d 2>/dev/null)" || { echo "FATAL: mktemp indisponivel — abortando"; exit 3; }
@@ -27,15 +27,15 @@ new_repo() {
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
   mkdir -p \
-    "$d/.engrama/decisions" \
-    "$d/.engrama/gaps" \
-    "$d/.engrama/governance" \
-    "$d/.engrama/project" \
-    "$d/.engrama/qa" \
-    "$d/.engrama/scripts" \
-    "$d/.engrama/specs"
-  cp "$LINT_SRC" "$d/.engrama/scripts/lint.sh"
-  chmod +x "$d/.engrama/scripts/lint.sh"
+    "$d/.engrama/memory/decisions" \
+    "$d/.engrama/memory/gaps" \
+    "$d/.engrama/memory/governance" \
+    "$d/.engrama/memory/project" \
+    "$d/.engrama/evidence/qa" \
+    "$d/.engrama/engine/scripts" \
+    "$d/.engrama/memory/specs"
+  cp "$LINT_SRC" "$d/.engrama/engine/scripts/lint.sh"
+  chmod +x "$d/.engrama/engine/scripts/lint.sh"
   printf '%s' "$d"
 }
 
@@ -64,16 +64,16 @@ seed_clean_repo() {
   write_file "$repo/.engrama/index.md" <<'EOF'
 # indice
 
-- [[project/bootstrap-do-projeto]]
-- [[governance/index]]
-- [[decisions/0001-primeira]]
-- [[specs/README]]
+- [[memory/project/bootstrap-do-projeto]]
+- [[memory/governance/index]]
+- [[memory/decisions/0001-primeira]]
+- [[memory/specs/README]]
 EOF
 
-  write_file "$repo/.engrama/governance/index.md" <<'EOF'
+  write_file "$repo/.engrama/memory/governance/index.md" <<'EOF'
 # indice de governanca
 
-- [[governance/regras]]
+- [[memory/governance/regras]]
 - [[log]]
 EOF
 
@@ -81,7 +81,7 @@ EOF
 # log
 EOF
 
-  write_file "$repo/.engrama/project/bootstrap-do-projeto.md" <<'EOF'
+  write_file "$repo/.engrama/memory/project/bootstrap-do-projeto.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -93,7 +93,7 @@ source_refs:
 Bootstrap ativo.
 EOF
 
-  write_file "$repo/.engrama/governance/regras.md" <<'EOF'
+  write_file "$repo/.engrama/memory/governance/regras.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -102,10 +102,10 @@ source_refs:
   - .engrama/log.md
 ---
 
-Ver [[governance/index]] e [[log]].
+Ver [[memory/governance/index]] e [[log]].
 EOF
 
-  write_file "$repo/.engrama/decisions/0001-primeira.md" <<'EOF'
+  write_file "$repo/.engrama/memory/decisions/0001-primeira.md" <<'EOF'
 ---
 type: decision
 status: active
@@ -114,10 +114,10 @@ source_refs:
   - .engrama/log.md
 ---
 
-ADR inicial. Ver [[governance/regras]].
+ADR inicial. Ver [[memory/governance/regras]].
 EOF
 
-  write_file "$repo/.engrama/specs/README.md" <<'EOF'
+  write_file "$repo/.engrama/memory/specs/README.md" <<'EOF'
 ---
 type: spec
 status: active
@@ -126,14 +126,14 @@ source_refs:
   - .engrama/log.md
 ---
 
-Guia. Ver [[governance/regras]].
+Guia. Ver [[memory/governance/regras]].
 EOF
 }
 
 run_lint() {
   (
     cd "$1" || exit 2
-    bash ./.engrama/scripts/lint.sh >/dev/null 2>&1
+    bash ./.engrama/engine/scripts/lint.sh >/dev/null 2>&1
     echo $?
   )
 }
@@ -141,7 +141,7 @@ run_lint() {
 run_lint_report() {
   (
     cd "$1" || exit 2
-    bash ./.engrama/scripts/lint.sh --report >/dev/null 2>&1
+    bash ./.engrama/engine/scripts/lint.sh --report >/dev/null 2>&1
     echo $?
   )
 }
@@ -157,7 +157,7 @@ is_one() {
 # L1: wikilink orfao => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/governance/regras.md" <<'EOF'
+write_file "$R/.engrama/memory/governance/regras.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -166,7 +166,7 @@ source_refs:
   - .engrama/log.md
 ---
 
-Ver [[governance/nao-existe]].
+Ver [[memory/governance/nao-existe]].
 EOF
 rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
@@ -175,7 +175,7 @@ check L1 CORRETO "$_r" "wikilink orfao derruba o lint"
 # L2: source_ref relativo quebrado => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/project/bootstrap-do-projeto.md" <<'EOF'
+write_file "$R/.engrama/memory/project/bootstrap-do-projeto.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -193,7 +193,7 @@ check L2 CORRETO "$_r" "source_ref relativo inexistente derruba o lint"
 # L3: frontmatter ausente em area obrigatoria => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/specs/README.md" <<'EOF'
+write_file "$R/.engrama/memory/specs/README.md" <<'EOF'
 Sem frontmatter.
 EOF
 rc="$(run_lint "$R")"
@@ -203,7 +203,7 @@ check L3 CORRETO "$_r" "frontmatter ausente derruba o lint"
 # L4: ADR superseded sem ponteiro => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0001-primeira.md" <<'EOF'
 ---
 type: decision
 status: superseded
@@ -228,7 +228,7 @@ check L5 CORRETO "$_r" "fixture limpo passa"
 # L6: --report so reporta (exit 0)
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/governance/regras.md" <<'EOF'
+write_file "$R/.engrama/memory/governance/regras.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -237,7 +237,7 @@ source_refs:
   - .engrama/log.md
 ---
 
-Ver [[governance/nao-existe]].
+Ver [[memory/governance/nao-existe]].
 EOF
 rc="$(run_lint_report "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -259,7 +259,7 @@ git clone -q "$R_SRC" "$R_CLONE"
 rm -rf "$R_SRC"
 rc="$(
   cd "$R_CLONE" || exit 2
-  bash ./.engrama/scripts/lint.sh >/dev/null 2>&1
+  bash ./.engrama/engine/scripts/lint.sh >/dev/null 2>&1
   echo $?
 )"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -269,7 +269,7 @@ rm -rf "$R_CLONE_PARENT"
 # L9: source_ref absoluto legado segue compativel
 R_SRC="$(new_repo)"
 seed_clean_repo "$R_SRC"
-write_file "$R_SRC/.engrama/project/bootstrap-do-projeto.md" <<EOF
+write_file "$R_SRC/.engrama/memory/project/bootstrap-do-projeto.md" <<EOF
 ---
 type: governance
 status: active
@@ -288,7 +288,7 @@ git clone -q "$R_SRC" "$R_CLONE"
 rm -rf "$R_SRC"
 rc="$(
   cd "$R_CLONE" || exit 2
-  bash ./.engrama/scripts/lint.sh >/dev/null 2>&1
+  bash ./.engrama/engine/scripts/lint.sh >/dev/null 2>&1
   echo $?
 )"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -298,7 +298,7 @@ rm -rf "$R_CLONE_PARENT"
 # L10: pagina orfa => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/specs/orfa.md" <<'EOF'
+write_file "$R/.engrama/memory/specs/orfa.md" <<'EOF'
 ---
 type: spec
 status: active
@@ -316,7 +316,7 @@ check L10 CORRETO "$_r" "pagina orfa derruba o lint"
 # L11: pagina orfa resolvida por indice => PASSA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/specs/orfa.md" <<'EOF'
+write_file "$R/.engrama/memory/specs/orfa.md" <<'EOF'
 ---
 type: spec
 status: active
@@ -330,11 +330,11 @@ EOF
 write_file "$R/.engrama/index.md" <<'EOF'
 # indice
 
-- [[project/bootstrap-do-projeto]]
-- [[governance/index]]
-- [[decisions/0001-primeira]]
-- [[specs/README]]
-- [[specs/orfa]]
+- [[memory/project/bootstrap-do-projeto]]
+- [[memory/governance/index]]
+- [[memory/decisions/0001-primeira]]
+- [[memory/specs/README]]
+- [[memory/specs/orfa]]
 EOF
 rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -343,7 +343,7 @@ check L11 CORRETO "$_r" "pagina deixa de ser orfa quando entra no indice"
 # L12: gap na numeracao de ADR => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0003-terceira.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0003-terceira.md" <<'EOF'
 ---
 type: decision
 status: active
@@ -357,11 +357,11 @@ EOF
 write_file "$R/.engrama/index.md" <<'EOF'
 # indice
 
-- [[project/bootstrap-do-projeto]]
-- [[governance/index]]
-- [[decisions/0001-primeira]]
-- [[decisions/0003-terceira]]
-- [[specs/README]]
+- [[memory/project/bootstrap-do-projeto]]
+- [[memory/governance/index]]
+- [[memory/decisions/0001-primeira]]
+- [[memory/decisions/0003-terceira]]
+- [[memory/specs/README]]
 EOF
 rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
@@ -370,7 +370,7 @@ check L12 CORRETO "$_r" "gap na sequencia 0001..N derruba o lint"
 # L13: sequencia de ADR contigua => PASSA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0002-segunda.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0002-segunda.md" <<'EOF'
 ---
 type: decision
 status: active
@@ -384,11 +384,11 @@ EOF
 write_file "$R/.engrama/index.md" <<'EOF'
 # indice
 
-- [[project/bootstrap-do-projeto]]
-- [[governance/index]]
-- [[decisions/0001-primeira]]
-- [[decisions/0002-segunda]]
-- [[specs/README]]
+- [[memory/project/bootstrap-do-projeto]]
+- [[memory/governance/index]]
+- [[memory/decisions/0001-primeira]]
+- [[memory/decisions/0002-segunda]]
+- [[memory/specs/README]]
 EOF
 rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -397,7 +397,7 @@ check L13 CORRETO "$_r" "sequencia contigua de ADRs passa"
 # L14: status invalido => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/governance/regras.md" <<'EOF'
+write_file "$R/.engrama/memory/governance/regras.md" <<'EOF'
 ---
 type: governance
 status: draft
@@ -406,7 +406,7 @@ source_refs:
   - .engrama/log.md
 ---
 
-Ver [[governance/index]] e [[log]].
+Ver [[memory/governance/index]] e [[log]].
 EOF
 rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
@@ -415,7 +415,7 @@ check L14 CORRETO "$_r" "status fora do enum derruba o lint"
 # L15: status valido volta a passar
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/governance/regras.md" <<'EOF'
+write_file "$R/.engrama/memory/governance/regras.md" <<'EOF'
 ---
 type: governance
 status: resolved
@@ -424,7 +424,7 @@ source_refs:
   - .engrama/log.md
 ---
 
-Ver [[governance/index]] e [[log]].
+Ver [[memory/governance/index]] e [[log]].
 EOF
 rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -433,7 +433,7 @@ check L15 CORRETO "$_r" "status permitido segue verde"
 # L16: TODO em doc normativo => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/governance/regras.md" <<'EOF'
+write_file "$R/.engrama/memory/governance/regras.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -451,7 +451,7 @@ check L16 CORRETO "$_r" "TODO em governanca derruba o lint"
 # L17: marcador fora da area normativa (bootstrap) nao derruba
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/project/bootstrap-do-projeto.md" <<'EOF'
+write_file "$R/.engrama/memory/project/bootstrap-do-projeto.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -469,17 +469,17 @@ check L17 CORRETO "$_r" "TODO no bootstrap continua permitido"
 # L18: reconcilia UPDATE para slug existente => PASSA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0001-primeira.md" <<'EOF'
 ---
 type: decision
 status: active
 date: 2026-06-21
 source_refs:
   - .engrama/log.md
-reconcilia: UPDATE governance/regras
+reconcilia: UPDATE memory/governance/regras
 ---
 
-ADR inicial. Ver [[governance/regras]].
+ADR inicial. Ver [[memory/governance/regras]].
 EOF
 rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -488,17 +488,17 @@ check L18 CORRETO "$_r" "reconcilia UPDATE com slug existente passa"
 # L19: reconcilia com operacao invalida => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0001-primeira.md" <<'EOF'
 ---
 type: decision
 status: active
 date: 2026-06-21
 source_refs:
   - .engrama/log.md
-reconcilia: XPTO governance/regras
+reconcilia: XPTO memory/governance/regras
 ---
 
-ADR inicial. Ver [[governance/regras]].
+ADR inicial. Ver [[memory/governance/regras]].
 EOF
 rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
@@ -507,17 +507,17 @@ check L19 CORRETO "$_r" "reconcilia com operacao fora do enum derruba o lint"
 # L20: reconcilia UPDATE para slug inexistente => BLOQUEIA
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0001-primeira.md" <<'EOF'
 ---
 type: decision
 status: active
 date: 2026-06-21
 source_refs:
   - .engrama/log.md
-reconcilia: UPDATE governance/nao-existe
+reconcilia: UPDATE memory/governance/nao-existe
 ---
 
-ADR inicial. Ver [[governance/regras]].
+ADR inicial. Ver [[memory/governance/regras]].
 EOF
 rc="$(run_lint "$R")"
 if is_one "$rc"; then _r=0; else _r=1; fi
@@ -526,7 +526,7 @@ check L20 CORRETO "$_r" "reconcilia UPDATE com slug inexistente derruba o lint"
 # L21: ausencia de reconcilia continua ok
 R="$(new_repo)"
 seed_clean_repo "$R"
-write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+write_file "$R/.engrama/memory/decisions/0001-primeira.md" <<'EOF'
 ---
 type: decision
 status: active
@@ -535,7 +535,7 @@ source_refs:
   - .engrama/log.md
 ---
 
-ADR inicial. Ver [[governance/regras]].
+ADR inicial. Ver [[memory/governance/regras]].
 EOF
 rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
@@ -547,7 +547,7 @@ seed_clean_repo "$R"
 commit_all_with_date "$R" 1704067200 "seed"
 out="$(
   cd "$R" || exit 2
-  ENGRAMA_NOW=1712448000 bash ./.engrama/scripts/lint.sh 2>&1
+  ENGRAMA_NOW=1712448000 bash ./.engrama/engine/scripts/lint.sh 2>&1
   printf '\n__RC__=%s\n' "$?"
 )"
 case "$out" in

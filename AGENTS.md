@@ -6,17 +6,17 @@
 
 Antes de analisar, propor, editar ou executar qualquer coisa, ler nesta ordem:
 
-1. `.engrama/governance/index.md`
-2. `.engrama/governance/papeis-e-alcadas.md`
-3. `.engrama/governance/cadeia-de-comando.md`
-4. `.engrama/governance/modelo-operacional.md`
-5. `.engrama/governance/continuidade-de-sessao.md`
-6. `.engrama/project/bootstrap-do-projeto.md`
+1. `.engrama/memory/governance/index.md`
+2. `.engrama/memory/governance/papeis-e-alcadas.md`
+3. `.engrama/memory/governance/cadeia-de-comando.md`
+4. `.engrama/memory/governance/modelo-operacional.md`
+5. `.engrama/memory/governance/continuidade-de-sessao.md`
+6. `.engrama/memory/project/bootstrap-do-projeto.md`
 7. topo de `.engrama/log.md`
 
 No primeiro retorno útil, declarar: papel · alçada · estado factual (topo do `.engrama/log.md`) · próximo passo seguro · o que depende de aprovação da Autoridade.
 
-Se `.engrama/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou com campos `TODO`, o Orquestrador deve interromper o trabalho de produto e completar o bootstrap do projeto com a Autoridade antes de seguir.
+Se `.engrama/memory/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou com campos `TODO`, o Orquestrador deve interromper o trabalho de produto e completar o bootstrap do projeto com a Autoridade antes de seguir.
 
 ## Papéis (por função, não por vendor)
 
@@ -24,7 +24,7 @@ Se `.engrama/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou 
 - **Executor Crítico** = **escreve o código**; critica ativamente toda ordem; objeção material → escala à Autoridade.
 - **Autoridade de Mudança** = arbitra discordâncias; aprova produção/irreversível.
 
-Mapeamento concreto (quem é quem) e matriz de alçadas: `.engrama/governance/papeis-e-alcadas.md`.
+Mapeamento concreto (quem é quem) e matriz de alçadas: `.engrama/memory/governance/papeis-e-alcadas.md`.
 
 ## Se você é o Executor
 

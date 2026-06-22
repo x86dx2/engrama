@@ -12,7 +12,7 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 - **Estrutura reorganizada (padrão do ai-memory/Akita):** o root passou a conter
   só metadados/manifests; o tooling e os guias foram para pastas por preocupação.
   `install.sh`/`bootstrap.sh`/`sync-template.sh` → **`bin/`**;
-  `critique-gate-ci.sh`/`lint.sh`/`engrama-diff-hash.sh` → **`.engrama/scripts/`**
+  `critique-gate-ci.sh`/`lint.sh`/`engrama-diff-hash.sh` → **`.engrama/engine/scripts/`**
   (junto do gate, deixando o `.engrama/` autocontido e distribuível);
   `INSTALL.md`/`INSTANTIATE.md` → **`docs/`**.
   Comandos de instalação agora usam `bash bin/install.sh` / `bash bin/bootstrap.sh`.
@@ -55,8 +55,8 @@ Todas as mudanças relevantes deste pack. Formato baseado em
   o gate contra o diff do PR** e esse check **está marcado como *required*** no branch
   protection → **enforcement vinculante no merge** (R1 mitigado server-side). Bootstrap
   chicken-and-egg explicitado (crítica inicial `dispensada`).
-- Schema (`.engrama/CLAUDE.md`): bloco "Estrutura" corrigido (inclui `specs/`, `qa/`,
-  `scripts/`, `githooks/`; marca `domain/`, `gaps/`, `roadmap/` como criadas por projeto).
+- Schema (`.engrama/CLAUDE.md`): bloco "Estrutura" corrigido (inclui `memory/specs/`, `evidence/qa/`,
+  `engine/scripts/`, `engine/githooks/`; marca `memory/domain/`, `memory/gaps/`, `memory/roadmap/` como criadas por projeto).
 
 ### Conhecido / aberto
 - **R1 (identidade do crítico):** o gate prova **cobertura do diff**, não **identidade

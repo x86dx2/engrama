@@ -4,8 +4,8 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+GATE_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate.sh"
+DIFF_HASH_SRC="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
 [ -f "$DIFF_HASH_SRC" ] || { echo "FATAL: helper de hash nao encontrado em $DIFF_HASH_SRC"; exit 1; }
 
@@ -49,28 +49,28 @@ new_repo() {
   git -C "$d" init -q -b "$branch" 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b "$branch"; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance" "$d/tests/contract"
-  cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
-  printf '# ledger\n' > "$d/.engrama/qa/criticas-do-executor.md"
-  git -C "$d" add .engrama/scripts/critique-gate.sh .engrama/qa/criticas-do-executor.md
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/evidence/qa" "$d/.engrama/memory/governance" "$d/tests/contract"
+  cp "$GATE_SRC" "$d/.engrama/engine/scripts/critique-gate.sh"
+  cp "$DIFF_HASH_SRC" "$d/.engrama/engine/scripts/engrama-diff-hash.sh"
+  printf '# ledger\n' > "$d/.engrama/evidence/qa/criticas-do-executor.md"
+  git -C "$d" add .engrama/engine/scripts/critique-gate.sh .engrama/evidence/qa/criticas-do-executor.md
   git -C "$d" commit -qm base
   printf '%s' "$d"
 }
 
 write_ledger() {
-  printf '%s' "$2" > "$1/.engrama/qa/criticas-do-executor.md"
+  printf '%s' "$2" > "$1/.engrama/evidence/qa/criticas-do-executor.md"
 }
 
 stage_changed_files() {
   local repo="$1" cats="$2"
   if printf '%s\n' "$cats" | grep -q ' governance '; then
-    printf 'x\n' > "$repo/.engrama/governance/p.md"
-    git -C "$repo" add .engrama/governance/p.md
+    printf 'x\n' > "$repo/.engrama/memory/governance/p.md"
+    git -C "$repo" add .engrama/memory/governance/p.md
   fi
   if printf '%s\n' "$cats" | grep -q ' gate '; then
-    printf '#!/usr/bin/env bash\n' > "$repo/.engrama/scripts/lint.sh"
-    git -C "$repo" add .engrama/scripts/lint.sh
+    printf '#!/usr/bin/env bash\n' > "$repo/.engrama/engine/scripts/lint.sh"
+    git -C "$repo" add .engrama/engine/scripts/lint.sh
   fi
   if printf '%s\n' "$cats" | grep -q ' contract '; then
     printf '#!/usr/bin/env bash\n' > "$repo/tests/contract/p.test.sh"
@@ -85,7 +85,7 @@ stage_changed_files() {
 run_gate() {
   (
     cd "$1" || exit 2
-    bash .engrama/scripts/critique-gate.sh >/dev/null 2>&1
+    bash .engrama/engine/scripts/critique-gate.sh >/dev/null 2>&1
     echo $?
   )
 }
@@ -251,7 +251,7 @@ while [ "$case_no" -le "$CASES" ]; do
   done
 
   write_ledger "$repo" "$ledger"
-  git -C "$repo" add .engrama/qa/criticas-do-executor.md
+  git -C "$repo" add .engrama/evidence/qa/criticas-do-executor.md
   git -C "$repo" commit -qm "ledger-$case_no"
   stage_changed_files "$repo" "$cats"
 

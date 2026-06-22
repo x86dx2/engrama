@@ -19,4 +19,4 @@ Resumo de governança:
 Validações locais:
 
 - `bash tests/run.sh`
-- `bash ./.engrama/scripts/lint.sh`
+- `bash ./.engrama/engine/scripts/lint.sh`

@@ -13,11 +13,11 @@ Copie **o conteúdo de `template/`** para a **raiz** do projeto novo:
 ```bash
 cp -R /caminho/do/engrama/template/. /caminho/do/projeto-novo/
 cd /caminho/do/projeto-novo
-chmod +x .engrama/scripts/*.sh .engrama/githooks/pre-commit
+chmod +x .engrama/engine/scripts/*.sh .engrama/engine/githooks/pre-commit
 ```
 
 Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml` e `.markdownlint-cli2.yaml`.
-Dentro de `.engrama/` ficam `.engrama/scripts/critique-gate-ci.sh` e `.engrama/transcripts/`.
+Dentro de `.engrama/` ficam `.engrama/engine/scripts/critique-gate-ci.sh` e `.engrama/evidence/transcripts/`.
 
 > Se você estiver seguindo o fluxo canônico herdado do `Ruflos`, copie também `.claude/settings.json` para ativar o hook `PreToolUse` do gate mecânico.
 
@@ -66,18 +66,18 @@ grep -rl '{{EXECUTOR_CMD}}' . | xargs sed -i '' 's#{{EXECUTOR_CMD}}#codex exec#g
 
 > `{{ENGRAMA_VERSION}}` deve receber a versão do pack-fonte que você está instalando (tipicamente `cat /caminho/do/engrama/VERSION`). `{{MODELO_*}}` são **exemplos**: confirme os ids reais no namespace do seu `codex exec` antes de gravar. Para o inventário completo de overrides/defaults do bootstrap (incluindo `CMD_E2E`), confira `engrama.values.example`.
 
-> **Decisão de estilo:** o modelo é *"papéis por função, não por vendor"*. Na prosa normativa, os papéis aparecem como **Orquestrador / Executor / Autoridade** (canônicos). Os `{{ORQUESTRADOR/EXECUTOR/AUTORIDADE}}` aparecem **uma vez**, na tabela "Mapeamento atual" de `.engrama/governance/papeis-e-alcadas.md`. Trocar quem ocupa cada papel = editar só essa tabela.
+> **Decisão de estilo:** o modelo é *"papéis por função, não por vendor"*. Na prosa normativa, os papéis aparecem como **Orquestrador / Executor / Autoridade** (canônicos). Os `{{ORQUESTRADOR/EXECUTOR/AUTORIDADE}}` aparecem **uma vez**, na tabela "Mapeamento atual" de `.engrama/memory/governance/papeis-e-alcadas.md`. Trocar quem ocupa cada papel = editar só essa tabela.
 
 ---
 
 ## Passo 3 — Adaptar o gate mecanico ao seu dominio (OBRIGATORIO antes do 1o commit de codigo de dominio)
 
-Abra `.engrama/scripts/critique-gate.sh` e edite a função **`classify()`**:
+Abra `.engrama/engine/scripts/critique-gate.sh` e edite a função **`classify()`**:
 
-- As categorias **universais** já vêm cabeadas: `governance` (.engrama/governance, .engrama/decisions, AGENTS.md, CLAUDE.md), `gate` (.engrama/scripts/critique-gate*, .engrama/githooks, .claude/settings.json), `contract` (tests/contract).
+- As categorias **universais** já vêm cabeadas: `governance` (.engrama/memory/governance, .engrama/memory/decisions, AGENTS.md, CLAUDE.md), `gate` (.engrama/engine/scripts/critique-gate*, .engrama/engine/githooks, .claude/settings.json), `contract` (tests/contract).
 - As de **domínio** vêm como **exemplos comentados** — descomente e troque pelos caminhos reais: `financial`, `rbac`, `auth`, `schema`.
 - O que nao entrar no `case` passa **SEM revisao** por este gate. Exemplos: app web -> rotas de `auth` e guards de sessao; servico financeiro -> servicos que movem valor/estado irreversivel; banco -> `migrations/*` e mudancas de schema.
-- Atualize a frase "Categorias" em `.engrama/qa/criticas-do-executor.md` para refletir o que você mapeou.
+- Atualize a frase "Categorias" em `.engrama/evidence/qa/criticas-do-executor.md` para refletir o que você mapeou.
 
 Princípio: mapeie **superfície sensível** (RBAC, fluxo de valor, auth, migrations, contratos) — onde um erro custa caro. Não cabeie o repo inteiro: o gate deve ser uma rede sob o que importa, não burocracia.
 Esquecer esse passo = deixar superficie sensivel fora do gate.
@@ -87,7 +87,7 @@ Esquecer esse passo = deixar superficie sensivel fora do gate.
 ## Passo 4 — Ativar o gate
 
 ```bash
-git config core.hooksPath .engrama/githooks   # pre-commit do git delega ao gate
+git config core.hooksPath .engrama/engine/githooks   # pre-commit do git delega ao gate
 ```
 
 E, no harness do Orquestrador (defesa contra `git commit --no-verify`), cabeie o wrapper. Em Claude Code, em `.claude/settings.json`:
@@ -99,7 +99,7 @@ E, no harness do Orquestrador (defesa contra `git commit --no-verify`), cabeie o
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.engrama/scripts/critique-gate-hook.sh\"" }
+          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.engrama/engine/scripts/critique-gate-hook.sh\"" }
         ]
       }
     ]
@@ -111,9 +111,9 @@ Teste o gate de forma deterministica (deve **bloquear**):
 
 ```bash
 git checkout -b _gate-selftest
-touch .engrama/governance/teste.md && git add .engrama/governance/teste.md
+touch .engrama/memory/governance/teste.md && git add .engrama/memory/governance/teste.md
 git commit -m "selftest gate"   # → 🚫 GATE DE CRITICA … commit BLOQUEADO
-git restore --staged .engrama/governance/teste.md && rm .engrama/governance/teste.md
+git restore --staged .engrama/memory/governance/teste.md && rm .engrama/memory/governance/teste.md
 git checkout -
 git branch -D _gate-selftest
 ```
@@ -128,7 +128,7 @@ Pelo **ADR 0006**, governança não se autoaprova. O Engrama inicial **é** uma 
 
 1. O **Orquestrador** revisa o Engrama instanciado (placeholders trocados, gate adaptado).
 2. Submete à **crítica do Executor** (`{{EXECUTOR_CMD}} -m {{MODELO_CRITICA}}`, read-only): coerência, contradições, riscos.
-3. **Antes de commitar (logar precede commit não-trivial):** registra a crítica no ledger `.engrama/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo, com o **próximo passo seguro**).
+3. **Antes de commitar (logar precede commit não-trivial):** registra a crítica no ledger `.engrama/evidence/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo, com o **próximo passo seguro**).
 4. **Consenso →** aprovação da **Autoridade** → 1º commit (Engrama + ledger + log no mesmo commit).
    **Impasse →** a Autoridade arbitra (o Executor tem voz, não veto).
 
@@ -138,7 +138,7 @@ A partir daí, a regra vale para si mesma: toda mudança futura de governança r
 
 ## Passo 6 — Ativar enforcement server-side
 
-O template manual já entregou `.github/workflows/ci.yml`, `.engrama/scripts/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`. Isso **não** basta sozinho: sem push no GitHub + *branch protection*, o projeto novo continua só com o **freio local burlável**.
+O template manual já entregou `.github/workflows/ci.yml`, `.engrama/engine/scripts/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`. Isso **não** basta sozinho: sem push no GitHub + *branch protection*, o projeto novo continua só com o **freio local burlável**.
 
 1. Dê push do repo para o GitHub (ou confirme que a branch default já existe lá).
 2. Descubra `owner/repo` e a branch default, se precisar:
@@ -191,10 +191,10 @@ gh api "repos/$OWNER_REPO/branches/$DEFAULT_BRANCH/protection" --jq '{
 
 Conforme o projeto avança, **ingira** conhecimento no Engrama (workflow em `.engrama/CLAUDE.md`):
 
-- **decisão de arquitetura/domínio** → novo ADR `0011+` em `.engrama/decisions/`;
-- **invariante de negócio** → página em `domain/` (linka a fonte no código via `source_refs`);
-- **fatia/WP** → página em `roadmap/`;
-- **débito/contradição/dúvida** → página em `gaps/`;
+- **decisão de arquitetura/domínio** → novo ADR `0011+` em `.engrama/memory/decisions/`;
+- **invariante de negócio** → página em `memory/domain/` (linka a fonte no código via `source_refs`);
+- **fatia/WP** → página em `memory/roadmap/`;
+- **débito/contradição/dúvida** → página em `memory/gaps/`;
 - todo fato relevante → entrada em `.engrama/log.md`; cross-links (`touches`) atualizados.
 
 Rode o **Lint** periodicamente (páginas órfãs, `source_refs` que mudaram, ADRs `superseded` sem ponteiro, contradições) e registre o resultado.
@@ -206,10 +206,10 @@ Rode o **Lint** periodicamente (páginas órfãs, `source_refs` que mudaram, ADR
 - [ ] `template/` copiado para a raiz; scripts executáveis.
 - [ ] Todos os `{{PLACEHOLDERS}}` da tabela foram trocados, conferidos contra `engrama.values.example`, e `grep -rno '{{[A-Z_]*}}'` retorna vazio.
 - [ ] `classify()` do gate adaptado ao domínio; frase de categorias do ledger alinhada.
-- [ ] `core.hooksPath .engrama/githooks` setado; wrapper PreToolUse cabeado; gate testado (bloqueia).
+- [ ] `core.hooksPath .engrama/engine/githooks` setado; wrapper PreToolUse cabeado; gate testado (bloqueia).
 - [ ] Ritual de bootstrap concluído (crítica do Executor + aprovação da Autoridade + ledger).
 - [ ] `.github/workflows/ci.yml` e `.markdownlint-cli2.yaml` estão na raiz do projeto novo.
-- [ ] `.engrama/scripts/critique-gate-ci.sh` e `.engrama/transcripts/README.md` estão no projeto novo.
+- [ ] `.engrama/engine/scripts/critique-gate-ci.sh` e `.engrama/evidence/transcripts/README.md` estão no projeto novo.
 - [ ] No GitHub do projeto novo, a branch default exige PR, bloqueia *force-push* e marca o check `gate` como obrigatório. Sem isso, o enforcement segue só local/cooperativo.
 - [ ] 1ª entrada real no `.engrama/log.md` com o próximo passo seguro.
 - [ ] Handshake de abertura de sessão validado (papel · alçada · estado · próximo passo · o que depende de aprovação).

@@ -154,7 +154,7 @@ stage_bootstrap_snapshot() {
     rel="${src#"$src_template"/}"
     case "$rel" in
       .DS_Store|*/.DS_Store) continue ;;
-      .engrama/qa/criticas-do-executor.md) continue ;;
+      .engrama/evidence/qa/criticas-do-executor.md) continue ;;
     esac
     [ -e "$ROOT/$rel" ] || continue
     git -C "$ROOT" add -- "$rel"
@@ -162,7 +162,7 @@ stage_bootstrap_snapshot() {
 }
 
 seed_bootstrap_dispensa() {
-  local ledger="$ROOT/.engrama/qa/criticas-do-executor.md"
+  local ledger="$ROOT/.engrama/evidence/qa/criticas-do-executor.md"
   local branch="" diff_hash=""
 
   [ -f "$ledger" ] || return 0
@@ -185,7 +185,7 @@ EOF
   branch="$(git -C "$ROOT" branch --show-current 2>/dev/null || true)"
   [ -n "$branch" ] || branch="main"
 
-  if ! diff_hash="$( (cd "$ROOT" && bash ./.engrama/scripts/engrama-diff-hash.sh --cached) 2>/dev/null )"; then
+  if ! diff_hash="$( (cd "$ROOT" && bash ./.engrama/engine/scripts/engrama-diff-hash.sh --cached) 2>/dev/null )"; then
     diff_hash=""
   fi
   if ! printf '%s\n' "$diff_hash" | grep -qE '^sha256:[0-9a-f]{64}$'; then
@@ -195,7 +195,7 @@ EOF
 
   printf '\n## [%s] %s | [governance][gate] bootstrap inicial — instalacao da governanca | dispensada | Autoridade (via bin/bootstrap.sh) — dispensa do bootstrap inicial; cobre so o diff staged do instalador %s\n' \
     "$DATA" "$branch" "$diff_hash" >> "$ledger"
-  git -C "$ROOT" add -- .engrama/qa/criticas-do-executor.md
+  git -C "$ROOT" add -- .engrama/evidence/qa/criticas-do-executor.md
 
   cat <<EOF
 
@@ -203,7 +203,7 @@ ATENCAO: semeei a entrada 'dispensada' do bootstrap inicial no ledger.
 - Ela foi rotulada como dispensa da Autoridade via bin/bootstrap.sh.
 - Ela cobre SO o 1o commit do snapshot staged pelo instalador ($diff_hash).
 - Se voce editar arquivos sensiveis antes de commitar (ex.: classify(), log, docs de governanca), o sha256 fica obsoleto e o gate volta a bloquear.
-- Revise essa linha em .engrama/qa/criticas-do-executor.md; ver docs/INSTALL.md Passo 5.
+- Revise essa linha em .engrama/evidence/qa/criticas-do-executor.md; ver docs/INSTALL.md Passo 5.
 EOF
 }
 
@@ -313,6 +313,6 @@ Bootstrap concluído com os defaults:
 - MODELO_EXECUTOR_LEVE=$MODELO_EXECUTOR_LEVE  (EXEMPLO — confirme o id real contra o seu codex exec)
 
 Próximo passo:
-- adaptar .engrama/scripts/critique-gate.sh ao domínio do projeto;
+- adaptar .engrama/engine/scripts/critique-gate.sh ao domínio do projeto;
 - registrar crítica do Executor + log + aprovação da Autoridade antes do 1º commit.
 EOF

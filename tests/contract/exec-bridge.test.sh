@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Contract tests do executor-bridge mecanizado.
-# Garante persistencia em .engrama/transcripts/, extracao de codex-session e fallback derived.
+# Garante persistencia em .engrama/evidence/transcripts/, extracao de codex-session e fallback derived.
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-WRAPPER_SRC="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
+WRAPPER_SRC="$REPO_ROOT/.engrama/engine/scripts/exec-bridge.sh"
 [ -f "$WRAPPER_SRC" ] || { echo "FATAL: wrapper nao encontrado em $WRAPPER_SRC"; exit 1; }
 
 _probe="$(mktemp -d 2>/dev/null)" || { echo "FATAL: mktemp indisponivel — abortando"; exit 3; }
@@ -26,9 +26,9 @@ new_repo() {
   git -C "$d" init -q -b main 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b main; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts"
-  cp "$WRAPPER_SRC" "$d/.engrama/scripts/exec-bridge.sh"
-  chmod +x "$d/.engrama/scripts/exec-bridge.sh"
+  mkdir -p "$d/.engrama/engine/scripts"
+  cp "$WRAPPER_SRC" "$d/.engrama/engine/scripts/exec-bridge.sh"
+  chmod +x "$d/.engrama/engine/scripts/exec-bridge.sh"
   printf '%s' "$d"
 }
 
@@ -73,17 +73,17 @@ printf 'ORDEM VERBATIM\n- item 1\n' > "$ORDER"
 write_stream_stub "$STUB"
 OUT="$(
   cd "$R" || exit 2
-  ENGRAMA_CODEX_BIN="$STUB" bash ./.engrama/scripts/exec-bridge.sh --order "$ORDER" --label demo --date 2026-06-21
+  ENGRAMA_CODEX_BIN="$STUB" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$ORDER" --label demo --date 2026-06-21
 )"
 RC=$?
-ORDER_OUT="$R/.engrama/transcripts/2026-06-21-demo-order.md"
-RESPONSE_OUT="$R/.engrama/transcripts/2026-06-21-demo-response.md"
+ORDER_OUT="$R/.engrama/evidence/transcripts/2026-06-21-demo-order.md"
+RESPONSE_OUT="$R/.engrama/evidence/transcripts/2026-06-21-demo-response.md"
 if [ "$RC" -eq 0 ] && [ -f "$ORDER_OUT" ] && [ -f "$RESPONSE_OUT" ] && cmp -s "$ORDER" "$ORDER_OUT"; then
   _r=0
 else
   _r=1
 fi
-check E1 CORRETO "$_r" "salva order+response em .engrama/transcripts/ com data fixa e copia verbatim da ordem"
+check E1 CORRETO "$_r" "salva order+response em .engrama/evidence/transcripts/ com data fixa e copia verbatim da ordem"
 
 if grep -Fq 'codex-session: sessao-fake-123' "$RESPONSE_OUT" \
   && grep -Fq 'model: gpt-5.4-mini' "$RESPONSE_OUT" \
@@ -95,8 +95,8 @@ else
 fi
 check E2 CORRETO "$_r" "response.md carrega cabecalho YAML com codex-session/model/sandbox/label"
 
-if printf '%s\n' "$OUT" | grep -Fqx '.engrama/transcripts/2026-06-21-demo-order.md' \
-  && printf '%s\n' "$OUT" | grep -Fqx '.engrama/transcripts/2026-06-21-demo-response.md' \
+if printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-order.md' \
+  && printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-response.md' \
   && printf '%s\n' "$OUT" | grep -Fqx 'codex-session:sessao-fake-123'; then
   _r=0
 else
@@ -112,9 +112,9 @@ printf 'ORDEM DERIVED\n' > "$ORDER2"
 write_derived_stub "$STUB2"
 OUT2="$(
   cd "$R2" || exit 2
-  ENGRAMA_CODEX_BIN="$STUB2" bash ./.engrama/scripts/exec-bridge.sh --order "$ORDER2" --label derived --date 2026-06-21
+  ENGRAMA_CODEX_BIN="$STUB2" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$ORDER2" --label derived --date 2026-06-21
 )"
-RESPONSE_OUT2="$R2/.engrama/transcripts/2026-06-21-derived-response.md"
+RESPONSE_OUT2="$R2/.engrama/evidence/transcripts/2026-06-21-derived-response.md"
 DERIVED_LINE="$(printf '%s\n' "$OUT2" | awk -F: '/^codex-session:/ { print $2 }')"
 if grep -Fq 'codex-session-source: derived' "$RESPONSE_OUT2" && [ -n "$DERIVED_LINE" ]; then
   _r=0
@@ -129,7 +129,7 @@ STUB3="$R3/codex-stub.sh"
 write_stream_stub "$STUB3"
 OUT3="$(
   cd "$R3" || exit 2
-  ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/scripts/exec-bridge.sh --label sem-ordem --date 2026-06-21 2>&1
+  ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/engine/scripts/exec-bridge.sh --label sem-ordem --date 2026-06-21 2>&1
 )"
 RC3=$?
 if [ "$RC3" -ne 0 ] && printf '%s\n' "$OUT3" | grep -Fq 'faltou --order'; then
@@ -142,7 +142,7 @@ check E5 CORRETO "$_r" "falta de --order falha com mensagem clara"
 printf 'ORDEM\n' > "$R3/ordem.md"
 OUT4="$(
   cd "$R3" || exit 2
-  ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/scripts/exec-bridge.sh --order "$R3/ordem.md" --date 2026-06-21 2>&1
+  ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$R3/ordem.md" --date 2026-06-21 2>&1
 )"
 RC4=$?
 if [ "$RC4" -ne 0 ] && printf '%s\n' "$OUT4" | grep -Fq 'faltou --label'; then
@@ -175,9 +175,9 @@ printf '%s\n' '{"type":"response_item","payload":{"type":"message","role":"assis
 printf 'ORDEM\n' > "$R7/ordem.md"
 (
   cd "$R7" || exit 2
-  CODEX_HOME="$HOME7" ENGRAMA_CODEX_BIN="$STUB7" bash ./.engrama/scripts/exec-bridge.sh --order "$R7/ordem.md" --label fallback --date 2026-06-21 >/dev/null 2>&1
+  CODEX_HOME="$HOME7" ENGRAMA_CODEX_BIN="$STUB7" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$R7/ordem.md" --label fallback --date 2026-06-21 >/dev/null 2>&1
 )
-RESP7="$R7/.engrama/transcripts/2026-06-21-fallback-response.md"
+RESP7="$R7/.engrama/evidence/transcripts/2026-06-21-fallback-response.md"
 if [ -f "$RESP7" ] && grep -Fq 'RESPOSTA-DO-SESSION-FILE-FALLBACK' "$RESP7"; then _r=0; else _r=1; fi
 rm -rf "$HOME7"
 check E7 CORRETO "$_r" "fallback: extrai a resposta do session file quando o stream nao a traz (codex real)"
@@ -192,7 +192,7 @@ set -u
 
 [ "${1:-}" = "exec" ] || { echo "stub recebeu comando inesperado" >&2; exit 9; }
 cat >/dev/null
-cat > "./.engrama/scripts/exec-bridge.sh" <<'BROKEN'
+cat > "./.engrama/engine/scripts/exec-bridge.sh" <<'BROKEN'
 #!/usr/bin/env bash
 set -u
 # mutated during contract test
@@ -207,16 +207,16 @@ chmod +x "$STUB8"
 printf 'ORDEM AUTO-EDICAO\n' > "$R8/ordem.md"
 OUT8="$(
   cd "$R8" || exit 2
-  ENGRAMA_CODEX_BIN="$STUB8" bash ./.engrama/scripts/exec-bridge.sh --order "$R8/ordem.md" --label self-edit --date 2026-06-21
+  ENGRAMA_CODEX_BIN="$STUB8" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$R8/ordem.md" --label self-edit --date 2026-06-21
 )"
 RC8=$?
-ORDER_OUT8="$R8/.engrama/transcripts/2026-06-21-self-edit-order.md"
-RESPONSE_OUT8="$R8/.engrama/transcripts/2026-06-21-self-edit-response.md"
+ORDER_OUT8="$R8/.engrama/evidence/transcripts/2026-06-21-self-edit-order.md"
+RESPONSE_OUT8="$R8/.engrama/evidence/transcripts/2026-06-21-self-edit-response.md"
 if [ "$RC8" -eq 0 ] \
   && [ -f "$ORDER_OUT8" ] \
   && [ -f "$RESPONSE_OUT8" ] \
   && grep -Fq 'RUN IMUNE A AUTO-EDICAO' "$RESPONSE_OUT8" \
-  && grep -Fq 'mutated during contract test' "$R8/.engrama/scripts/exec-bridge.sh" \
+  && grep -Fq 'mutated during contract test' "$R8/.engrama/engine/scripts/exec-bridge.sh" \
   && printf '%s\n' "$OUT8" | grep -Fqx 'codex-session:sessao-self-edit-888'; then
   _r=0
 else

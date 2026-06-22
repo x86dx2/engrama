@@ -35,12 +35,12 @@ jobs:
 
       - name: Run shellcheck
         run: >
-          shellcheck bin/*.sh .engrama/scripts/*.sh
-          .engrama/githooks/pre-commit tests/run.sh tests/gate/*.test.sh
+          shellcheck bin/*.sh .engrama/engine/scripts/*.sh
+          .engrama/engine/githooks/pre-commit tests/run.sh tests/gate/*.test.sh
           tests/contract/*.test.sh
 
       - name: Run Engrama lint
-        run: bash ./.engrama/scripts/lint.sh
+        run: bash ./.engrama/engine/scripts/lint.sh
 
       - name: Run test suite
         run: bash tests/run.sh
@@ -60,7 +60,7 @@ jobs:
           PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
         run: |
           git diff --name-only -z "origin/${{ github.base_ref }}...HEAD" > "$PR_FILES"
-          bash ./.engrama/scripts/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
+          bash ./.engrama/engine/scripts/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
 
       - name: Notice on multi-commit diff-binding
         if: always() && github.event_name == 'pull_request'

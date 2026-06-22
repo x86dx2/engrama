@@ -32,7 +32,8 @@ globs:
 ignores:
   - "node_modules"
   - ".git"
-  # .engrama/transcripts/ guarda registros VERBATIM do executor-bridge (ordem + resposta do
-  # codex). Sao evidencia, nao docs autorais — nao se aplica estilo de markdown a eles.
-  - ".engrama/transcripts"
-  - "template/.engrama/transcripts"
+  # .engrama/evidence/transcripts/ guarda registros VERBATIM do executor-bridge
+  # (ordem + resposta do codex). Sao evidencia, nao docs autorais — nao se
+  # aplica estilo de markdown a eles.
+  - ".engrama/evidence/transcripts"
+  - "template/.engrama/evidence/transcripts"

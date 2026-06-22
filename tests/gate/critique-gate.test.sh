@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Suite de testes do gate de critica (.engrama/scripts/critique-gate.sh).
+# Suite de testes do gate de critica (.engrama/engine/scripts/critique-gate.sh).
 # Portavel (bash puro, zero dependencia externa alem de git) — roda local e em CI.
 #
 # Cada caso monta um repo git temporario, copia o gate real, encena um staging,
@@ -12,8 +12,8 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+GATE_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate.sh"
+DIFF_HASH_SRC="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
 [ -f "$DIFF_HASH_SRC" ] || { echo "FATAL: helper de hash nao encontrado em $DIFF_HASH_SRC"; exit 1; }
 
@@ -33,22 +33,22 @@ new_repo() {
   d="$(mktemp -d 2>/dev/null || mktemp -d -t engrama)"
   git -C "$d" init -q -b "$branch" 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b "$branch"; }
   git -C "$d" config user.email t@t; git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance"
-  cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/evidence/qa" "$d/.engrama/memory/governance"
+  cp "$GATE_SRC" "$d/.engrama/engine/scripts/critique-gate.sh"
+  cp "$DIFF_HASH_SRC" "$d/.engrama/engine/scripts/engrama-diff-hash.sh"
   printf '%s' "$d"
 }
 
 # write_ledger <repo> <conteudo...>  (escreve a linha de dados do ledger)
-write_ledger() { printf '%s\n' "$2" > "$1/.engrama/qa/criticas-do-executor.md"; }
+write_ledger() { printf '%s\n' "$2" > "$1/.engrama/evidence/qa/criticas-do-executor.md"; }
 
-run_gate() { ( cd "$1" && bash .engrama/scripts/critique-gate.sh >/dev/null 2>&1; echo $?; ); }
+run_gate() { ( cd "$1" && bash .engrama/engine/scripts/critique-gate.sh >/dev/null 2>&1; echo $?; ); }
 
 run_gate_capture_stderr() {
   (
     cd "$1" || exit 2
     local out rc
-    out="$(bash .engrama/scripts/critique-gate.sh 2>&1 >/dev/null)"; rc=$?
+    out="$(bash .engrama/engine/scripts/critique-gate.sh 2>&1 >/dev/null)"; rc=$?
     printf '%s\n' "$rc"
     printf '%s\n' "$out"
   )
@@ -75,15 +75,15 @@ check_text() {
 # G1: governanca + ledger com 'confirmo' p/ a branch+categoria => LIBERA
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] plano | confirmo | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check G1 CORRETO 0 "$(run_gate "$r")" "governanca COM critica 'confirmo' registrada"
 
 # G2: governanca SEM nenhuma entrada no ledger => BLOQUEIA
 r="$(new_repo main)"
 write_ledger "$r" "# ledger vazio"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check G2 CORRETO 2 "$(run_gate "$r")" "governanca SEM critica registrada"
 g2_out="$(run_gate_capture_stderr "$r")"
 check_text G2B CORRETO "ledger vazio/stub" "$g2_out" "mensagem de bloqueio orienta o bootstrap fresco quando o ledger esta vazio/stub"
@@ -91,22 +91,22 @@ check_text G2B CORRETO "ledger vazio/stub" "$g2_out" "mensagem de bloqueio orien
 # G3: objecao sem waiver => BLOQUEIA
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | objecao: risco serio | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check G3 CORRETO 2 "$(run_gate "$r")" "objecao do Executor SEM waiver"
 
 # G4: entrada apenas 'pendente' => BLOQUEIA
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | pendente | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check G4 CORRETO 2 "$(run_gate "$r")" "critica ainda 'pendente'"
 
 # G5: branch 'slice/1' NAO casa entrada de 'slice/10' => BLOQUEIA
 r="$(new_repo slice/1)"
 write_ledger "$r" "## [2026-06-20] slice/10 | [governance] x | confirmo | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check G5 CORRETO 2 "$(run_gate "$r")" "slice/1 nao deve casar entrada de slice/10 (space-delimited)"
 
 # G6: arquivo NAO-sensivel => LIBERA (gate nao e burocracia universal)
@@ -125,24 +125,24 @@ check G6 CORRETO 0 "$(run_gate "$r")" "arquivo fora de superficie sensivel"
 #     (sha256) e no modo estrito/CI — ver ADR 0011.
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] eu mesmo aprovei | confirmo | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check R1 FURO 0 "$(run_gate "$r")" "auto-aprovacao local LIBERA no legado; o endurecimento vive no sha256 + modo estrito/CI"
 
 # R2: FALSO-POSITIVO por substring — 'nao confirmo' contem 'confirmo' => LIBERA (FURO).
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | nao confirmo, tenho ressalvas serias | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check R2 CORRETO 2 "$(run_gate "$r")" "'nao confirmo' agora BLOQUEIA (veredito lido por campo/enum, nao substring)"
 
 # R3: PATH NON-ASCII — git quota o nome ("...decis\303\243o.md") e classify() nao
 #     casa o leading-quote => CATS vazio => LIBERA (FURO). Isolado: NAO stageia o
-#     ledger (que e .engrama/qa/* e por si so dispararia 'governance' e mascararia
+#     ledger (que e .engrama/evidence/qa/* e por si so dispararia 'governance' e mascararia
 #     o teste). Controle ASCII (G2) prova que o mesmo arquivo sem acento BLOQUEIA.
 r="$(new_repo main)"
-echo x > "$r/.engrama/governance/decisão.md"
-git -C "$r" add ".engrama/governance/decisão.md"
+echo x > "$r/.engrama/memory/governance/decisão.md"
+git -C "$r" add ".engrama/memory/governance/decisão.md"
 check R3 CORRETO 2 "$(run_gate "$r")" "arquivo acentuado agora CLASSIFICADO e bloqueado (R3 corrigido via -z stream)"
 
 # R4: DETACHED HEAD com linha de ledger contendo espaco-duplo => casa BRANCH vazio (FURO).
@@ -150,8 +150,8 @@ r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] qualquer  | [governance] x | confirmo | ref"
 echo base > "$r/base.txt"; git -C "$r" add .; git -C "$r" commit -qm base
 git -C "$r" checkout -q --detach
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check R4 CORRETO 2 "$(run_gate "$r")" "detached HEAD agora FAIL-CLOSED: bloqueia em vez de casar espaco-duplo (R4 corrigido)"
 
 # G7: o gate le o ledger STAGED, nao o working-tree (prova o ponto forte).
@@ -159,17 +159,17 @@ check R4 CORRETO 2 "$(run_gate "$r")" "detached HEAD agora FAIL-CLOSED: bloqueia
 #     Gate deve LIBERAR (le o staged, nao o disco).
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
-printf 'LIXO no working-tree sem confirmo\n' > "$r/.engrama/qa/criticas-do-executor.md"
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
+printf 'LIXO no working-tree sem confirmo\n' > "$r/.engrama/evidence/qa/criticas-do-executor.md"
 check G7 CORRETO 0 "$(run_gate "$r")" "le o ledger STAGED, ignora o working-tree sujo"
 
 # R5: BYPASS cross-branch (achado da critica do Executor) — grep livre na linha
 #     inteira: entrada de OUTRA branch que MENCIONA 'main' no texto livre libera main.
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] outra | [governance] afeta o fluxo main do produto | confirmo | ref"
-echo x > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+echo x > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check R5 CORRETO 2 "$(run_gate "$r")" "entrada de 'outra' branch que cita 'main' NAO libera (branch por igualdade de campo, nao substring)"
 
 # ── RELATORIO ─────────────────────────────────────────────────────────────────

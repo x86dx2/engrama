@@ -28,11 +28,11 @@ run_integrity_smoke() {
   local root="$1" failed=0 rel out rc
   echo "Smoke de integridade (syntax-check + diff-hash):"
   for script in \
-    "$root/.engrama/scripts/critique-gate.sh" \
-    "$root/.engrama/scripts/engrama-diff-hash.sh" \
-    "$root/.engrama/scripts/critique-gate-hook.sh" \
-    "$root/.engrama/scripts/lint.sh" \
-    "$root/.engrama/scripts/critique-gate-ci.sh"
+    "$root/.engrama/engine/scripts/critique-gate.sh" \
+    "$root/.engrama/engine/scripts/engrama-diff-hash.sh" \
+    "$root/.engrama/engine/scripts/critique-gate-hook.sh" \
+    "$root/.engrama/engine/scripts/lint.sh" \
+    "$root/.engrama/engine/scripts/critique-gate-ci.sh"
   do
     rel="${script#"$root"/}"
     out="$(bash -n "$script" 2>&1)"
@@ -46,7 +46,7 @@ run_integrity_smoke() {
     fi
   done
 
-  out="$(cd "$root" && bash ./.engrama/scripts/engrama-diff-hash.sh 2>&1)"
+  out="$(cd "$root" && bash ./.engrama/engine/scripts/engrama-diff-hash.sh 2>&1)"
   rc=$?
   if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
     echo "  OK    engrama-diff-hash.sh -> $out"
@@ -164,9 +164,9 @@ done < <(
 }
 
 # 5) ativar o gate
-chmod +x "$ROOT"/.engrama/scripts/*.sh "$ROOT"/.engrama/githooks/* 2>/dev/null || true
-git -C "$ROOT" config core.hooksPath .engrama/githooks
-echo "Gate ativado: core.hooksPath=.engrama/githooks"
+chmod +x "$ROOT"/.engrama/engine/scripts/*.sh "$ROOT"/.engrama/engine/githooks/* 2>/dev/null || true
+git -C "$ROOT" config core.hooksPath .engrama/engine/githooks
+echo "Gate ativado: core.hooksPath=.engrama/engine/githooks"
 
 # 6) relatório
 if ! report_remaining_placeholders "$ROOT"; then
@@ -183,9 +183,9 @@ else
 fi
 echo ""
 echo "PRÓXIMO (julgamento do AGENTE — ver docs/INSTALL.md):"
-echo "  Passo 3) concluir o bootstrap do projeto em .engrama/project/bootstrap-do-projeto.md"
-echo "  Passo 4) adaptar classify() em .engrama/scripts/critique-gate.sh às superfícies sensíveis deste projeto"
+echo "  Passo 3) concluir o bootstrap do projeto em .engrama/memory/project/bootstrap-do-projeto.md"
+echo "  Passo 4) adaptar classify() em .engrama/engine/scripts/critique-gate.sh às superfícies sensíveis deste projeto"
 echo "  Passo 5) revisar/mesclar .claude/settings.json se o projeto já tiver config própria do Claude Code"
 echo "  Passo 6) bootstrap: crítica do Executor + ledger + log + aprovação da Autoridade -> 1º commit"
 echo "  Passo 7) ativar enforcement server-side (push + branch protection — ver docs/INSTALL.md/INSTANTIATE.md)"
-echo "  Passo 8) revisar/apagar o exemplo seed em .engrama/log.md e .engrama/qa/criticas-do-executor.md"
+echo "  Passo 8) revisar/apagar o exemplo seed em .engrama/log.md e .engrama/evidence/qa/criticas-do-executor.md"
