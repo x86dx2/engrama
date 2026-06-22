@@ -24,6 +24,41 @@ report_remaining_placeholders() {
   [ -z "$rem" ]
 }
 
+run_integrity_smoke() {
+  local root="$1" failed=0 rel out rc
+  echo "Smoke de integridade (syntax-check + diff-hash):"
+  for script in \
+    "$root/.engrama/scripts/critique-gate.sh" \
+    "$root/.engrama/scripts/engrama-diff-hash.sh" \
+    "$root/.engrama/scripts/critique-gate-hook.sh" \
+    "$root/.engrama/scripts/lint.sh" \
+    "$root/bin/critique-gate-ci.sh"
+  do
+    rel="${script#"$root"/}"
+    out="$(bash -n "$script" 2>&1)"
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
+      echo "  OK    bash -n $rel"
+    else
+      echo "  FALHA bash -n $rel"
+      printf '    %s\n' "$out"
+      failed=1
+    fi
+  done
+
+  out="$(cd "$root" && bash ./.engrama/scripts/engrama-diff-hash.sh 2>&1)"
+  rc=$?
+  if [ "$rc" -eq 0 ] && printf '%s\n' "$out" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+    echo "  OK    engrama-diff-hash.sh -> $out"
+  else
+    echo "  FALHA engrama-diff-hash.sh"
+    printf '    %s\n' "${out:-<vazio>}"
+    failed=1
+  fi
+  echo ""
+  return "$failed"
+}
+
 usage() {
   cat <<'EOF'
 Uso:
@@ -141,8 +176,16 @@ fi
 if [ -f "$ROOT/.engrama/VERSION" ]; then
   printf 'Versao instalada do pack: %s\n' "$(sed -n '1{s/\r$//;p;q;}' "$ROOT/.engrama/VERSION" 2>/dev/null)"
 fi
+if run_integrity_smoke "$ROOT"; then
+  echo "Smoke de integridade: OK"
+else
+  echo "AVISO: smoke de integridade encontrou falhas no artefato instalado. Revise os itens FALHA acima."
+fi
+echo ""
 echo "PRÓXIMO (julgamento do AGENTE — ver docs/INSTALL.md):"
 echo "  Passo 3) concluir o bootstrap do projeto em .engrama/project/bootstrap-do-projeto.md"
 echo "  Passo 4) adaptar classify() em .engrama/scripts/critique-gate.sh às superfícies sensíveis deste projeto"
 echo "  Passo 5) revisar/mesclar .claude/settings.json se o projeto já tiver config própria do Claude Code"
 echo "  Passo 6) bootstrap: crítica do Executor + ledger + log + aprovação da Autoridade -> 1º commit"
+echo "  Passo 7) ativar enforcement server-side (push + branch protection — ver docs/INSTALL.md/INSTANTIATE.md)"
+echo "  Passo 8) revisar/apagar o exemplo seed em .engrama/log.md e .engrama/qa/criticas-do-executor.md"

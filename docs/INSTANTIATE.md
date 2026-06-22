@@ -16,7 +16,7 @@ cd /caminho/do/projeto-novo
 chmod +x .engrama/scripts/*.sh .engrama/githooks/pre-commit
 ```
 
-Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`.
+Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh`, `.markdownlint-cli2.yaml` e `transcripts/`.
 
 > Se você estiver seguindo o fluxo canônico herdado do `Ruflos`, copie também `.claude/settings.json` para ativar o hook `PreToolUse` do gate mecânico.
 
@@ -26,21 +26,27 @@ Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml`
 
 Todos os pontos variáveis usam `{{CHAVE}}`. Defina os valores do seu projeto:
 
-| Placeholder | O que é | Exemplo (Ruflos) |
+| Placeholder | O que é | Exemplo (`engrama.values.example`) |
 |---|---|---|
-| `{{PROJETO}}` | nome do projeto | `Ruflos` |
-| `{{REPO_PATH}}` | caminho absoluto do repo (para `source_refs`) | `/Users/x86/git-projects/Ruflos` |
+| `{{PROJETO}}` | nome do projeto | `MeuProjeto` |
+| `{{REPO_PATH}}` | caminho absoluto do repo (para `source_refs`) | `/caminho/absoluto/do/repo` |
 | `{{ENGRAMA_VERSION}}` | versão do pack que gerou a instalação (`.engrama/VERSION`) | `0.1.0` |
 | `{{ORQUESTRADOR}}` | agente no papel de Orquestrador/Auditor | `Claude (Claude Code)` |
 | `{{EXECUTOR}}` | agente no papel de Executor Crítico | `Codex` |
 | `{{AUTORIDADE}}` | quem é a Autoridade de Mudança | `Humano (voce@exemplo.com)` |
+| `{{FINALIDADE_DO_PROJETO}}` | finalidade inicial registrada no bootstrap do projeto | `preencher na primeira abertura` |
 | `{{EXECUTOR_CMD}}` | comando que invoca o Executor (adaptador concreto do projeto) | `codex exec` |
 | `{{MODELO_CRITICA}}` | modelo independente usado na crítica | `gpt-5.5` *(exemplo; confirme o id real contra o seu `codex exec`)* |
 | `{{MODELO_EXECUTOR_PESADO}}` | modelo do Executor para tarefas pesadas | `gpt-5.4` *(exemplo; confirme o id real contra o seu `codex exec`)* |
 | `{{MODELO_EXECUTOR_LEVE}}` | modelo do Executor para tarefas leves | `gpt-5.4-mini` *(exemplo; confirme o id real contra o seu `codex exec`)* |
-| `{{STACK}}` | stack do projeto | `Cloudflare Workers + Next.js + D1` |
+| `{{STACK}}` | stack do projeto | `Node + Postgres` |
 | `{{DEV_URL}}` | URL/porta do dev local | `localhost:3000` |
-| `{{DATA}}` | data de instanciação (frontmatter/log) | `2026-06-17` |
+| `{{CMD_DEV}}` | comando canônico de desenvolvimento | `npm run dev` |
+| `{{CMD_BUILD}}` | comando canônico de build | `npm run build` |
+| `{{CMD_TEST}}` | comando canônico de teste | `npm test` |
+| `{{DATA}}` | data de instanciação (frontmatter/log) | `2026-01-01` |
+
+> Inventário canônico dos placeholders/defaults do bootstrap: `engrama.values.example`. No caminho manual, confira a sua lista contra ele antes de substituir em lote.
 
 Busque o que falta trocar:
 
@@ -57,7 +63,7 @@ grep -rl '{{EXECUTOR_CMD}}' . | xargs sed -i '' 's#{{EXECUTOR_CMD}}#codex exec#g
 # … repita por placeholder …
 ```
 
-> `{{ENGRAMA_VERSION}}` deve receber a versão do pack-fonte que você está instalando (tipicamente `cat /caminho/do/engrama/VERSION`). `{{MODELO_*}}` são **exemplos**: confirme os ids reais no namespace do seu `codex exec` antes de gravar.
+> `{{ENGRAMA_VERSION}}` deve receber a versão do pack-fonte que você está instalando (tipicamente `cat /caminho/do/engrama/VERSION`). `{{MODELO_*}}` são **exemplos**: confirme os ids reais no namespace do seu `codex exec` antes de gravar. Para o inventário completo de overrides/defaults do bootstrap (incluindo `CMD_E2E`), confira `engrama.values.example`.
 
 > **Decisão de estilo:** o modelo é *"papéis por função, não por vendor"*. Na prosa normativa, os papéis aparecem como **Orquestrador / Executor / Autoridade** (canônicos). Os `{{ORQUESTRADOR/EXECUTOR/AUTORIDADE}}` aparecem **uma vez**, na tabela "Mapeamento atual" de `.engrama/governance/papeis-e-alcadas.md`. Trocar quem ocupa cada papel = editar só essa tabela.
 
@@ -197,7 +203,7 @@ Rode o **Lint** periodicamente (páginas órfãs, `source_refs` que mudaram, ADR
 ## Checklist de adoção
 
 - [ ] `template/` copiado para a raiz; scripts executáveis.
-- [ ] Todos os `{{PLACEHOLDERS}}` trocados (`grep -rno '{{[A-Z_]*}}'` retorna vazio).
+- [ ] Todos os `{{PLACEHOLDERS}}` da tabela foram trocados, conferidos contra `engrama.values.example`, e `grep -rno '{{[A-Z_]*}}'` retorna vazio.
 - [ ] `classify()` do gate adaptado ao domínio; frase de categorias do ledger alinhada.
 - [ ] `core.hooksPath .engrama/githooks` setado; wrapper PreToolUse cabeado; gate testado (bloqueia).
 - [ ] Ritual de bootstrap concluído (crítica do Executor + aprovação da Autoridade + ledger).

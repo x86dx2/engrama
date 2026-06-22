@@ -7,6 +7,17 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-F — polimento de docs/install do bootstrap (P2/P3, fecha a remediacao)
+- Branch `feat/p3-docs-install-polish`. Executor via `exec-bridge.sh` (codex-session da run prF, veredito `concordo`). Orquestrador auditou + smoke proprio.
+- **Fecha a lista P2/P3 da auditoria de prontidao.** Itens:
+  - **Placeholders:** tabela do Passo 2 do INSTANTIATE reconciliada com os 17 placeholders reais do template (faltavam CMD_DEV/BUILD/TEST + FINALIDADE), exemplos vindos de `engrama.values.example` (apontado como inventario canonico). O Executor tambem cortou exemplos `Ruflos` herdados na tabela.
+  - **install.sh:** smoke de integridade (`bash -n` nos 5 scripts criticos + dry-run do `engrama-diff-hash.sh` provando `sha256:<hex>`), nao-abortante; checklist final ganhou Passo 7 (enforcement server-side: push + branch protection) e Passo 8 (revisar/apagar o exemplo seed do log/ledger).
+  - **CONTRIBUTING:** nota de que ADRs `0001-0011` sao referencia do framework; os do projeto comecam em `0012`.
+  - **CLAUDE.md (raiz+template):** bullet de que universais (governance/gate/contract) nascem protegidas e adaptar `classify()` ao dominio segue obrigatorio.
+- **Isolamento (regra pos-incidente):** Executor nao mexeu no git do repo real; identidade reverificada antes de gravar.
+- **QA (ADR 0005):** suite verde; lint/shellcheck(-S info)/sync exit 0; meu smoke via `bin/bootstrap.sh` em /tmp mostrou o bloco de integridade (5 OK + sha256) e os Passos 7/8.
+- **Conclusao:** com PR-D+E+F, os P1/P2/P3 da auditoria de prontidao estao fechados (menos os itens dropados por contradizerem arquitetura: docs/values.example no template; mover ADRs 0001-0011). O bootstrap fica `ready` operacional.
+
 ## [2026-06-21] feat | PR-E — enforcement server-side PORTATIL no template (P2 da auditoria)
 - Branch `feat/p2-enforcement-server-side`. Executor via `exec-bridge.sh` (codex-session 019eecc5, veredito `concordo`). Orquestrador auditou + reexecutou.
 - **Fecha o P2:** um projeto recem-bootstrapado nascia so com o freio LOCAL (burlavel). Agora o `template/` entrega o enforcement server-side: `template/.github/workflows/ci.yml` (ENXUTO/portatil — jobs gate+markdown+gitleaks, sem `tests/run.sh` do framework), `template/bin/critique-gate-ci.sh` (identico a raiz, portatil), `template/.markdownlint-cli2.yaml`.
