@@ -24,6 +24,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 - [[decisions/0009-producao-intocavel-dupla-confirmacao]] — produção intocável (inativo até existir deploy).
 - [[decisions/0010-roteamento-modelo-effort-do-executor]] — Orquestrador decide modelo+effort do Executor por tarefa (tiers T1–T4; conservador-pra-cima; risco=piso).
 - [[decisions/0011-diff-binding-atestacao-verificavel]] — ledger pode vincular a crítica ao diff staged por `sha256`, com modo estrito opt-in/CI.
+- [[decisions/0012-reconciliacao-de-memoria]] — `reconcilia:` explicita ADD/UPDATE/DELETE/NOOP contra a memória já versionada.
 
 ## Specs (playbooks operacionais — o "como")
 - [[specs/README]] — índice + princípio (spec ≠ subagente).
@@ -36,5 +37,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 - [[qa/criticas-do-executor]] — ledger de críticas do Executor (gpt-5.5) + gate mecânico de commit (ADR 0006/0010).
 
 ## Páginas do seu projeto (domínio · roadmap · QA · gaps)
+
+- [[gaps/metricas-de-engrama]] — estado das métricas mecanizadas do Engrama (densidade de enlaces, staleness) e pesquisas futuras sem runtime extra.
 
 > Template: aqui entram as páginas de `domain/`, `roadmap/`, `gaps/` e `qa/` DO SEU PROJETO (criadas conforme o trabalho avança). Este pack entrega só o esqueleto de governança/processo; o conteúdo de domínio, sequenciamento e cobertura é específico de cada projeto. Ao criá-las, registre-as nesta seção com um blurb curto e mantenha os cross-links (`touches`) em dia.

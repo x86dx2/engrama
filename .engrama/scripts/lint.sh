@@ -2,6 +2,9 @@
 set -u
 
 REPORT_ONLY=0
+WARNINGS=0
+STALE_AFTER_DAYS=90
+STALE_AFTER_SECONDS=$((STALE_AFTER_DAYS * 24 * 60 * 60))
 
 usage() {
   cat <<'EOF'
@@ -11,11 +14,13 @@ Valida a saude mecanica do Engrama:
 - wikilinks em .engrama/**/*.md e na raiz (CLAUDE.md / AGENTS.md)
 - source_refs no frontmatter
 - frontmatter minimo nas areas obrigatorias
+- `reconcilia:` quando presente
 - ADR superseded sem ponteiro para substituta
-- paginas orfas nas areas indexadas do Engrama
+- paginas orfas nas areas indexadas do Engrama (metrica de densidade de enlaces)
 - gaps de numeracao em ADRs
 - status de frontmatter fora do enum permitido
 - TODO/FIXME/XXX em documentacao normativa
+- staleness (warning) em governance/specs/decisions `active`
 EOF
 }
 
@@ -41,8 +46,23 @@ REPO_ROOT="$(
 )"
 ROOT="$REPO_ROOT"
 TMP_REPORT="$(mktemp 2>/dev/null || mktemp -t engrama-lint)"
-trap 'rm -f "$TMP_REPORT"' EXIT
+TMP_WARNINGS="$(mktemp 2>/dev/null || mktemp -t engrama-lint-warn)"
+trap 'rm -f "$TMP_REPORT" "$TMP_WARNINGS"' EXIT
 ERRORS=0
+
+if [ -n "${ENGRAMA_NOW:-}" ]; then
+  case "$ENGRAMA_NOW" in
+    ''|*[!0-9]*)
+      echo "ERRO: ENGRAMA_NOW invalido: $ENGRAMA_NOW" >&2
+      exit 2
+      ;;
+    *)
+      NOW_EPOCH="$ENGRAMA_NOW"
+      ;;
+  esac
+else
+  NOW_EPOCH="$(date +%s)"
+fi
 
 trim() {
   local s="${1-}"
@@ -70,6 +90,12 @@ report_problem() {
   local file="$1" line="$2" message="$3"
   printf '%s:%s: %s\n' "$file" "$line" "$message" >> "$TMP_REPORT"
   ERRORS=$((ERRORS + 1))
+}
+
+report_warning() {
+  local file="$1" line="$2" message="$3"
+  printf 'WARN %s:%s: %s\n' "$file" "$line" "$message" >> "$TMP_WARNINGS"
+  WARNINGS=$((WARNINGS + 1))
 }
 
 requires_frontmatter() {
@@ -142,6 +168,8 @@ frontmatter_reset() {
   FRONTMATTER_CLOSED=0
   FRONTMATTER_END_LINE=0
   FRONTMATTER_TYPE_VALUE=""
+  FRONTMATTER_RECONCILIA_LINE=0
+  FRONTMATTER_RECONCILIA_VALUE=""
   FRONTMATTER_STATUS_LINE=0
   FRONTMATTER_STATUS_VALUE=""
   FRONTMATTER_DATE_VALUE=""
@@ -182,6 +210,12 @@ parse_frontmatter() {
         fi
         source_refs_mode=0
         ;;
+      reconcilia:*)
+        value="$(trim "${trimmed#reconcilia:}")"
+        FRONTMATTER_RECONCILIA_LINE="$line_no"
+        FRONTMATTER_RECONCILIA_VALUE="$value"
+        source_refs_mode=0
+        ;;
       status:*)
         value="$(trim "${trimmed#status:}")"
         if [ -n "$value" ]; then
@@ -214,6 +248,76 @@ parse_frontmatter() {
         ;;
     esac
   done < "$file"
+}
+
+validate_reconcilia_target() {
+  local file="$1" line="$2" op="$3" slug="$4" target
+
+  target="$(resolve_wikilink_target "$slug")" || {
+    report_problem "$file" "$line" "reconcilia malformado: $op exige slug-alvo no formato de wikilink/slug"
+    return 1
+  }
+
+  if [ ! -e "$target" ]; then
+    report_problem "$file" "$line" "reconcilia alvo inexistente: $slug"
+    return 1
+  fi
+
+  return 0
+}
+
+check_reconcilia_value() {
+  local file="$1" raw_value value op slug remainder
+
+  [ -n "$FRONTMATTER_RECONCILIA_VALUE" ] || return 0
+
+  raw_value="$FRONTMATTER_RECONCILIA_VALUE"
+  value="$(strip_quotes "$(trim "$raw_value")")"
+
+  [ -n "$value" ] || {
+    report_problem "$file" "${FRONTMATTER_RECONCILIA_LINE:-1}" "reconcilia malformado: valor vazio"
+    return 0
+  }
+
+  op="${value%% *}"
+  if [ "$op" = "$value" ]; then
+    slug=""
+  else
+    remainder="${value#"$op"}"
+    slug="$(trim "$remainder")"
+  fi
+
+  case "$op" in
+    ADD|UPDATE|DELETE|NOOP)
+      ;;
+    *)
+      report_problem "$file" "${FRONTMATTER_RECONCILIA_LINE:-1}" "reconcilia invalido: $value (esperado: ADD|UPDATE|DELETE|NOOP)"
+      return 0
+      ;;
+  esac
+
+  case "$slug" in
+    *" "*)
+      report_problem "$file" "${FRONTMATTER_RECONCILIA_LINE:-1}" "reconcilia malformado: esperado no maximo um slug-alvo"
+      return 0
+      ;;
+    *)
+      ;;
+  esac
+
+  case "$op" in
+    ADD)
+      [ -n "$slug" ] || return 0
+      validate_reconcilia_target "$file" "${FRONTMATTER_RECONCILIA_LINE:-1}" "$op" "$slug"
+      ;;
+    UPDATE|DELETE|NOOP)
+      if [ -z "$slug" ]; then
+        report_problem "$file" "${FRONTMATTER_RECONCILIA_LINE:-1}" "reconcilia malformado: $op exige slug-alvo"
+        return 0
+      fi
+      validate_reconcilia_target "$file" "${FRONTMATTER_RECONCILIA_LINE:-1}" "$op" "$slug"
+      ;;
+  esac
 }
 
 check_wikilinks() {
@@ -374,6 +478,32 @@ check_normative_markers() {
   done < <(grep -nE '(^|[^[:alnum:]_])(TODO|FIXME|XXX)([^[:alnum:]_]|$)' "$file" || true)
 }
 
+check_staleness() {
+  local file="$1" status_value last_commit_epoch age_seconds age_days
+
+  case "$file" in
+    .engrama/governance/*.md|.engrama/specs/*.md|.engrama/decisions/*.md) ;;
+    *) return 0 ;;
+  esac
+
+  [ -n "$FRONTMATTER_STATUS_VALUE" ] || return 0
+  status_value="$(strip_quotes "$(trim "$FRONTMATTER_STATUS_VALUE")")"
+  [ "$status_value" = "active" ] || return 0
+
+  last_commit_epoch="$(git -C "$ROOT" log -1 --format=%ct -- "$file" 2>/dev/null || true)"
+  last_commit_epoch="$(trim "$last_commit_epoch")"
+  case "$last_commit_epoch" in
+    ''|*[!0-9]*) return 0 ;;
+    *) ;;
+  esac
+
+  age_seconds=$((NOW_EPOCH - last_commit_epoch))
+  [ "$age_seconds" -gt "$STALE_AFTER_SECONDS" ] || return 0
+
+  age_days=$((age_seconds / 86400))
+  report_warning "$file" "${FRONTMATTER_STATUS_LINE:-1}" "staleness: ultima mudanca versionada ha ${age_days}d (> ${STALE_AFTER_DAYS}d)"
+}
+
 has_inbound_wikilink() {
   local target_file="$1" target_abs source_file line_no slug resolved
   target_abs="$ROOT/$target_file"
@@ -415,6 +545,7 @@ is_listed_in_primary_indexes() {
 check_orphan_pages() {
   local file
 
+  # Paginas orfas funcionam como proxy simples da densidade de enlaces do Engrama.
   while IFS= read -r file; do
     [ -n "$file" ] || continue
     is_listed_in_primary_indexes "$file" && continue
@@ -466,9 +597,11 @@ lint_file() {
   parse_frontmatter "$file"
   check_frontmatter_requirements "$file"
   check_status_value "$file"
+  check_reconcilia_value "$file"
   check_source_refs "$file"
   check_superseded_pointer "$file"
   check_normative_markers "$file"
+  check_staleness "$file"
 }
 
 while IFS= read -r file; do
@@ -480,7 +613,11 @@ check_orphan_pages
 check_adr_numbering_gaps
 
 if [ "$ERRORS" -gt 0 ]; then
-  cat "$TMP_REPORT"
+  cat "$TMP_REPORT" >&2
+fi
+
+if [ "$WARNINGS" -gt 0 ]; then
+  cat "$TMP_WARNINGS"
 fi
 
 if [ "$REPORT_ONLY" -eq 1 ]; then
