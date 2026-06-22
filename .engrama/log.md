@@ -7,6 +7,17 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-D — atritos do adotante no bootstrap (P1 da auditoria de prontidao)
+- Branch `feat/p1-atritos-do-adotante`. Executor via `exec-bridge.sh` (codex-session 019eeca7, veredito `ajuste-menor`). Orquestrador auditou + reexecutou + smoke proprio em /tmp.
+- **Origem:** auditoria multiagente de prontidao de bootstrap (72 agentes, 0 bloqueadores, ready-with-caveats). Esta fatia fecha o P1 (atritos que confundem o adotante).
+- **Freio ativo do Executor (ADR 0004) consertou minha ordem:** propus auto-semear `dispensada` no ledger do projeto novo por `branch+categoria`. O Executor objetou — isso abriria QUALQUER commit futuro de governance/gate naquela branch (regressao do gate). Ajuste aceito: a dispensa do bootstrap sai **vinculada por `sha256`** ao diff staged do instalador; cobre so o snapshot inicial; editar algo sensivel antes do 1o commit re-bloqueia. Compativel com ADR 0006 (escopo minimo, rotulada como dispensa-da-Autoridade-via-instalador).
+- **Item 1 (classify imperativo):** comentario do `classify()` (raiz + gerador do template no sync) agora diz que mapear superficie sensivel do dominio e OBRIGATORIO antes do 1o commit de dominio; o que nao entra no `case` passa SEM revisao. INSTALL/INSTANTIATE Passo 3 viram verificacao obrigatoria com exemplos por stack.
+- **Item 2 (auto-teste falso-verde):** INSTALL Passo 6 / INSTANTIATE Passo 4 — o self-test agora roda em branch descartavel deterministica (a entrada do bootstrap na main cobriria governance e dava falso-verde).
+- **Item 3 (deadlock galinha-e-ovo):** `bin/bootstrap.sh` semeia a dispensa vinculada por sha256 + aviso PROEMINENTE no stdout; documentado no INSTALL Passo 5. Provado: 1o commit do alvo passa sem intervencao manual; 2a mudanca sensivel re-bloqueia.
+- **Item 4 (dica repo-fresco):** o bloqueio do gate ganha dica quando o ledger esta vazio/stub.
+- **Eu (git):** `chmod +x` no hook versionado do template (era 100644 -> git pulava o pre-commit em clone fresco; agora 100755).
+- **QA (ADR 0005):** suite verde (+G2B/C12/C13 novos); lint/shellcheck/sync exit 0; smoke proprio em /tmp confirmou o binding da dispensa. Ledger com sha256 + codex-session.
+
 ## [2026-06-21] feat | PR-C — quickstart + diff-binding multi-commit acionavel + gitleaks sem Node
 - Branch `feat/quickstart-diffbind-gitleaks`. Executor via `exec-bridge.sh` (codex-session 019eeb2e, veredito `concordo`). Orquestrador auditou e reexecutou os gates.
 - **Transparencia provada de ponta a ponta:** o wrapper consertado no PR-B capturou o **corpo completo** da resposta do Executor desta run (nao so o session-id). A correcao saiu da teoria.

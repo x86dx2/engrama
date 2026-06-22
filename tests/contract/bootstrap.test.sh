@@ -135,6 +135,29 @@ else
 fi
 check C11 CORRETO "$_r" "bootstrap instala .engrama/scripts/exec-bridge.sh e transcripts/README.md no projeto-alvo"
 
+# C12: bootstrap semeia a dispensa inicial vinculada por sha256 e deixa o 1o commit passar.
+seed_line="$(grep -m 1 '^## \[[0-9-]\{10\}\] .*| \[governance\]\[gate\] bootstrap inicial' "$T8/.engrama/qa/criticas-do-executor.md" 2>/dev/null || true)"
+git -C "$T8" config user.email t@t
+git -C "$T8" config user.name t
+git -C "$T8" commit -qm "bootstrap inicial" >/dev/null 2>&1; rc12=$?
+if printf '%s\n' "$seed_line" | grep -qE 'sha256:[0-9a-f]{64}' && [ "$rc12" -eq 0 ]; then
+  _r=0
+else
+  _r=1
+fi
+check C12 CORRETO "$_r" "bootstrap semeia dispensa com sha256 e o 1o commit do alvo passa sem intervencao manual"
+
+# C13: a dispensa do bootstrap nao abre a branch inteira; novo diff sensivel volta a bloquear.
+printf 'ajuste\n' >> "$T8/.engrama/governance/index.md"
+git -C "$T8" add .engrama/governance/index.md
+git -C "$T8" commit -qm "segunda mudanca sensivel" >/dev/null 2>&1; rc13=$?
+if [ "$rc13" -ne 0 ]; then
+  _r=0
+else
+  _r=1
+fi
+check C13 CORRETO "$_r" "dispensa do bootstrap cobre so o diff inicial; nova mudanca sensivel na mesma branch volta a bloquear"
+
 printf '%b\n' "$RESULTS"
 echo ""
 echo "Resumo: $PASS asserts batidos, $FAIL divergentes | $HOLES casos marcados FURO (a corrigir)"

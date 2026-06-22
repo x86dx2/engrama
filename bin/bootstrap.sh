@@ -144,6 +144,69 @@ infer_package_script() {
   echo "N/A"
 }
 
+stage_bootstrap_snapshot() {
+  local src_template="$HERE/../template"
+  local src=""
+  local rel=""
+  [ -d "$src_template" ] || return 1
+
+  while IFS= read -r -d '' src; do
+    rel="${src#"$src_template"/}"
+    case "$rel" in
+      .DS_Store|*/.DS_Store) continue ;;
+      .engrama/qa/criticas-do-executor.md) continue ;;
+    esac
+    [ -e "$ROOT/$rel" ] || continue
+    git -C "$ROOT" add -- "$rel"
+  done < <(find "$src_template" -type f -print0)
+}
+
+seed_bootstrap_dispensa() {
+  local ledger="$ROOT/.engrama/qa/criticas-do-executor.md"
+  local branch="" diff_hash=""
+
+  [ -f "$ledger" ] || return 0
+
+  if ! git -C "$ROOT" diff --cached --quiet --; then
+    cat <<'EOF'
+
+AVISO: indice ja tinha staged antes do bootstrap; nao semeei a dispensa automatica.
+- Motivo: o sha256 ficaria amarrado a um diff maior que o snapshot minimo do instalador.
+- Caminho seguro: registre a entrada inicial do ledger manualmente (ver docs/INSTALL.md Passo 5).
+EOF
+    return 0
+  fi
+
+  stage_bootstrap_snapshot || {
+    echo "AVISO: nao consegui stagear o snapshot do bootstrap; pulando a dispensa automatica."
+    return 0
+  }
+
+  branch="$(git -C "$ROOT" branch --show-current 2>/dev/null || true)"
+  [ -n "$branch" ] || branch="main"
+
+  if ! diff_hash="$( (cd "$ROOT" && bash ./.engrama/scripts/engrama-diff-hash.sh --cached) 2>/dev/null )"; then
+    diff_hash=""
+  fi
+  if ! printf '%s\n' "$diff_hash" | grep -qE '^sha256:[0-9a-f]{64}$'; then
+    echo "AVISO: fingerprint invalido no bootstrap; pulando a dispensa automatica."
+    return 0
+  fi
+
+  printf '\n## [%s] %s | [governance][gate] bootstrap inicial — instalacao da governanca | dispensada | Autoridade (via bin/bootstrap.sh) — dispensa do bootstrap inicial; cobre so o diff staged do instalador %s\n' \
+    "$DATA" "$branch" "$diff_hash" >> "$ledger"
+  git -C "$ROOT" add -- .engrama/qa/criticas-do-executor.md
+
+  cat <<EOF
+
+ATENCAO: semeei a entrada 'dispensada' do bootstrap inicial no ledger.
+- Ela foi rotulada como dispensa da Autoridade via bin/bootstrap.sh.
+- Ela cobre SO o 1o commit do snapshot staged pelo instalador ($diff_hash).
+- Se voce editar arquivos sensiveis antes de commitar (ex.: classify(), log, docs de governanca), o sha256 fica obsoleto e o gate volta a bloquear.
+- Revise essa linha em .engrama/qa/criticas-do-executor.md; ver docs/INSTALL.md Passo 5.
+EOF
+}
+
 apply_overrides() {
   local values_file="$1"
   [ -f "$values_file" ] || { echo "ERRO: override não encontrado: $values_file"; exit 1; }
@@ -225,6 +288,7 @@ MODELO_EXECUTOR_LEVE=$MODELO_EXECUTOR_LEVE
 EOF
 
 bash "$INSTALLER" "$ROOT" "$VALUES_TMP"
+seed_bootstrap_dispensa
 
 cat <<EOF
 

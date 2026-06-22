@@ -69,7 +69,10 @@ emit_template_gate_classify() {
   cat <<'EOF'
 # ── CONFIG DO PROJETO: arquivo → categoria(s) ─────────────────────────────────
 # Categorias OK: financial · rbac · auth · schema · governance · gate · contract.
-# governance/gate/contract sao UNIVERSAIS; o resto e ilustrativo — edite a vontade.
+# Mapear as superficies sensiveis do SEU dominio neste `case` e OBRIGATORIO
+# antes do 1o commit de codigo de dominio. O que NAO entrar aqui passa SEM
+# revisao por este gate. governance/gate/contract sao universais; o resto e
+# ilustrativo e deve ser trocado pelos caminhos reais do seu projeto.
 classify() {
   local f="$1"
   case "$f" in

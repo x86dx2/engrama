@@ -17,10 +17,12 @@
 #
 # ── COMO ADAPTAR AO SEU PROJETO ───────────────────────────────────────────────
 # 1. Ajuste as variáveis EXECUTOR_CMD / CRITIQUE_MODEL abaixo.
-# 2. No bloco "CONFIG DO PROJETO" (a função classify), mapeie os ARQUIVOS/GLOBS
-#    sensíveis do SEU código para as categorias. As categorias universais
-#    (governance · gate · contract) já vêm pré-cabeadas; financial/rbac/auth/schema
-#    são ILUSTRATIVAS — troque pelos caminhos reais do seu domínio.
+# 2. No bloco "CONFIG DO PROJETO" (a função classify), mapear os ARQUIVOS/GLOBS
+#    sensíveis do SEU código para categorias e OBRIGATORIO antes do 1o commit
+#    de codigo de dominio. O que NAO estiver no `case` passa SEM revisao por este
+#    gate. governance/gate/contract sao universais e ja vem pre-cabeadas;
+#    financial/rbac/auth/schema seguem como EXEMPLOS de dominio para voce trocar
+#    pelos caminhos reais do seu projeto.
 # 3. Ative o hook: git config core.hooksPath .engrama/githooks  (e/ou PreToolUse no harness).
 # ──────────────────────────────────────────────────────────────────────────────
 set -u
@@ -173,6 +175,10 @@ LEDGER=".engrama/qa/criticas-do-executor.md"
 # Versão durável: índice (staged) com fallback p/ HEAD. NÃO usa o working-tree.
 LEDGER_CONTENT="$(git show ":$LEDGER" 2>/dev/null || true)"
 [ -z "$LEDGER_CONTENT" ] && LEDGER_CONTENT="$(git show "HEAD:$LEDGER" 2>/dev/null || true)"
+LEDGER_HAS_ENTRIES=0
+if printf '%s\n' "$LEDGER_CONTENT" | grep -q '^## \['; then
+  LEDGER_HAS_ENTRIES=1
+fi
 
 REQUIRE_DIFF_BIND="${ENGRAMA_REQUIRE_DIFF_BIND:-0}"
 MISSING=""
@@ -285,6 +291,7 @@ done
     echo "Modo estrito ativo: entradas legadas sem sha256 nao satisfazem:$LEGACY_ONLY"
   fi
   [ "$REQUIRE_DIFF_BIND" = "1" ] && echo "Modo estrito ativo: ENGRAMA_REQUIRE_DIFF_BIND=1"
+  [ "$LEDGER_HAS_ENTRIES" = "0" ] && echo "Dica: ledger vazio/stub — se este e o 1o commit do bootstrap, registre a entrada inicial (ou revise a linha dispensada semeada pelo bin/bootstrap.sh, quando houver): ver docs/INSTALL.md Passo 5."
   echo ""
   echo "Para cada categoria acima, em $LEDGER (staged), inclua uma linha com:"
   echo "  a branch '$BRANCH' + a tag [categoria] + veredito (confirmo|ressalvas|N/A:<motivo>|waiver)"
