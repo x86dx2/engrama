@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-E — enforcement server-side PORTATIL no template (P2 da auditoria)
+- Branch `feat/p2-enforcement-server-side`. Executor via `exec-bridge.sh` (codex-session 019eecc5, veredito `concordo`). Orquestrador auditou + reexecutou.
+- **Fecha o P2:** um projeto recem-bootstrapado nascia so com o freio LOCAL (burlavel). Agora o `template/` entrega o enforcement server-side: `template/.github/workflows/ci.yml` (ENXUTO/portatil — jobs gate+markdown+gitleaks, sem `tests/run.sh` do framework), `template/bin/critique-gate-ci.sh` (identico a raiz, portatil), `template/.markdownlint-cli2.yaml`.
+- **Paridade garantida:** `sync-template.sh` + `sync.test.sh` (21 asserts) sincronizam o gate-CI e o pin do gitleaks (v8.30.1) raiz<->template; o ci.yml do template NAO e identico a raiz (por design) mas o contrato exige que exista + referencie o gate-CI + nao drifte no pin.
+- **Honestidade (princ. 12):** README vira "template QUASE auto-contido" (entrega freio local + CI; branch protection e passo MANUAL no GitHub do adotante). INSTALL/INSTANTIATE ganham passo "ativar enforcement server-side" com `gh api` concreto (required check no job `gate`, exigir PR, bloquear force-push). ADR 0006 (raiz cita job `test`; template cita job `gate` — o Executor acertou a distincao) ganha a ressalva de que o modo estrito e OFF por padrao LOCALMENTE; o freio vinculante e server-side.
+- **LICAO (loop falha->regra) — incidente de isolamento:** durante o PR-D, um smoke de agente rodou `git config`+`git commit` no REPO REAL (nao em /tmp), contaminando minha identidade (-> "Test User") e deixando o commit do PR-D (da45576, ja mergeado) mis-atribuido + um commit-lixo no main local. Detectei via soft-reset, resetei o main local pro origin/main correto, restaurei a identidade e limpei o lixo. **Regra:** (1) ordens ao Executor proibem explicitamente mutacao git no repo real — smoke so em `mktemp` com `git -C`; (2) o Orquestrador reverifica `git config user.email` antes de cada commit. No PR-E a regra valeu: identidade ficou intacta.
+- **QA (ADR 0005):** suite verde (sync 21 asserts); lint/shellcheck(-S info)/sync exit 0; `template/.github/workflows/ci.yml` validado com parser YAML real (ruby). O workflow do template so roda de fato num repo adotante — nao exercivel localmente.
+
 ## [2026-06-21] feat | PR-D — atritos do adotante no bootstrap (P1 da auditoria de prontidao)
 - Branch `feat/p1-atritos-do-adotante`. Executor via `exec-bridge.sh` (codex-session 019eeca7, veredito `ajuste-menor`). Orquestrador auditou + reexecutou + smoke proprio em /tmp.
 - **Origem:** auditoria multiagente de prontidao de bootstrap (72 agentes, 0 bloqueadores, ready-with-caveats). Esta fatia fecha o P1 (atritos que confundem o adotante).

@@ -16,7 +16,7 @@ cd /caminho/do/projeto-novo
 chmod +x .engrama/scripts/*.sh .engrama/githooks/pre-commit
 ```
 
-Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`.
+Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`.
 
 > Se você estiver seguindo o fluxo canônico herdado do `Ruflos`, copie também `.claude/settings.json` para ativar o hook `PreToolUse` do gate mecânico.
 
@@ -129,7 +129,58 @@ A partir daí, a regra vale para si mesma: toda mudança futura de governança r
 
 ---
 
-## Passo 6 — Crescer o Engrama no padrão
+## Passo 6 — Ativar enforcement server-side
+
+O template manual já entregou `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`. Isso **não** basta sozinho: sem push no GitHub + *branch protection*, o projeto novo continua só com o **freio local burlável**.
+
+1. Dê push do repo para o GitHub (ou confirme que a branch default já existe lá).
+2. Descubra `owner/repo` e a branch default, se precisar:
+
+```bash
+gh api repos/<owner>/<repo> --jq '{full_name: .full_name, default_branch: .default_branch}'
+```
+
+3. Aplique o *branch protection* tornando o job `gate` um *required check*, exigindo PR e bloqueando *force-push*:
+
+```bash
+OWNER_REPO="<owner>/<repo>"
+DEFAULT_BRANCH="<default>"
+
+gh api -X PUT "repos/$OWNER_REPO/branches/$DEFAULT_BRANCH/protection" --input - <<'JSON'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["gate"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 1
+  },
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "block_creations": false,
+  "required_conversation_resolution": true,
+  "lock_branch": false,
+  "allow_fork_syncing": false
+}
+JSON
+```
+
+4. Confirme o estado aplicado:
+
+```bash
+gh api "repos/$OWNER_REPO/branches/$DEFAULT_BRANCH/protection" --jq '{
+  required_checks: .required_status_checks.contexts,
+  enforce_admins: .enforce_admins.enabled,
+  approving_reviews: .required_pull_request_reviews.required_approving_review_count,
+  allow_force_pushes: .allow_force_pushes.enabled
+}'
+```
+
+## Passo 7 — Crescer o Engrama no padrão
 
 Conforme o projeto avança, **ingira** conhecimento no Engrama (workflow em `.engrama/CLAUDE.md`):
 
@@ -150,5 +201,7 @@ Rode o **Lint** periodicamente (páginas órfãs, `source_refs` que mudaram, ADR
 - [ ] `classify()` do gate adaptado ao domínio; frase de categorias do ledger alinhada.
 - [ ] `core.hooksPath .engrama/githooks` setado; wrapper PreToolUse cabeado; gate testado (bloqueia).
 - [ ] Ritual de bootstrap concluído (crítica do Executor + aprovação da Autoridade + ledger).
+- [ ] `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` estão na raiz do projeto novo.
+- [ ] No GitHub do projeto novo, a branch default exige PR, bloqueia *force-push* e marca o check `gate` como obrigatório. Sem isso, o enforcement segue só local/cooperativo.
 - [ ] 1ª entrada real no `.engrama/log.md` com o próximo passo seguro.
 - [ ] Handshake de abertura de sessão validado (papel · alçada · estado · próximo passo · o que depende de aprovação).

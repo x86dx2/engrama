@@ -17,8 +17,14 @@ ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
 ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
 TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
+ROOT_CI_GATE="$REPO_ROOT/bin/critique-gate-ci.sh"
+TEMPLATE_CI_GATE="$REPO_ROOT/template/bin/critique-gate-ci.sh"
+ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
+TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
+ROOT_CI="$REPO_ROOT/.github/workflows/ci.yml"
+TEMPLATE_CI="$REPO_ROOT/template/.github/workflows/ci.yml"
 SYNC_SCRIPT="$REPO_ROOT/bin/sync-template.sh"
 
 PASS=0; FAIL=0; HOLES=0; RESULTS=""
@@ -46,6 +52,28 @@ extract_logic_without_template_config() {
     mode == "skip_classify" && /^while IFS= read -r /{ mode = "tail" }
     mode == "tail" { print }
   ' "$src" > "$out"
+}
+
+yaml_has_expected_jobs() {
+  local file="$1"
+  if command -v ruby >/dev/null 2>&1; then
+    ruby -e '
+      require "yaml"
+      data = YAML.load_file(ARGV[0])
+      jobs = data["jobs"]
+      exit(jobs.is_a?(Hash) && %w[gate gitleaks markdown].all? { |job| jobs.key?(job) } ? 0 : 1)
+    ' "$file"
+    return $?
+  fi
+
+  grep -Eq '^jobs:$' "$file" &&
+    grep -Eq '^  gate:$' "$file" &&
+    grep -Eq '^  gitleaks:$' "$file" &&
+    grep -Eq '^  markdown:$' "$file"
+}
+
+extract_gitleaks_version() {
+  sed -n 's/.*version="\([0-9][0-9.]*\)".*/\1/p' "$1" | head -n 1
 }
 
 TMPDIR_SYNC="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-sync-test)"
@@ -78,8 +106,21 @@ check S3C CORRETO "$_r" "engrama-diff-hash.sh do template identico ao da raiz"
 if cmp -s "$ROOT_EXEC_BRIDGE" "$TEMPLATE_EXEC_BRIDGE"; then _r=0; else _r=1; fi
 check S3CA CORRETO "$_r" "exec-bridge.sh do template identico ao da raiz"
 
+if cmp -s "$ROOT_CI_GATE" "$TEMPLATE_CI_GATE"; then _r=0; else _r=1; fi
+check S3CB CORRETO "$_r" "template/bin/critique-gate-ci.sh identico ao da raiz"
+
+if cmp -s "$ROOT_MARKDOWNLINT" "$TEMPLATE_MARKDOWNLINT"; then _r=0; else _r=1; fi
+check S3CC CORRETO "$_r" "template/.markdownlint-cli2.yaml identico ao da raiz"
+
 if cmp -s "$ROOT_SETTINGS" "$TEMPLATE_SETTINGS"; then _r=0; else _r=1; fi
 check S3D CORRETO "$_r" "settings.json do template identico ao da raiz"
+
+if grep -Fq 'ROOT_CI_GATE=' "$SYNC_SCRIPT" && grep -Fq 'TEMPLATE_CI_GATE=' "$SYNC_SCRIPT" && grep -Fq 'ROOT_MARKDOWNLINT=' "$SYNC_SCRIPT" && grep -Fq 'TEMPLATE_MARKDOWNLINT=' "$SYNC_SCRIPT"; then
+  _r=0
+else
+  _r=1
+fi
+check S3E CORRETO "$_r" "sync-template sincroniza critique-gate-ci.sh e .markdownlint-cli2.yaml"
 
 if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template preserva placeholders do gate"
@@ -107,6 +148,43 @@ else
   _r=1
 fi
 check S5 CORRETO "$_r" "template preserva exemplos de dominio comentados"
+
+if [ -f "$TEMPLATE_CI" ]; then
+  _r=0
+else
+  _r=1
+fi
+check S6 CORRETO "$_r" "template/.github/workflows/ci.yml existe"
+
+if yaml_has_expected_jobs "$TEMPLATE_CI"; then
+  _r=0
+else
+  _r=1
+fi
+check S6A CORRETO "$_r" "ci do template e YAML valido (ou, sem parser, declara gate/gitleaks/markdown)"
+
+if grep -Fq 'bin/critique-gate-ci.sh' "$TEMPLATE_CI"; then
+  _r=0
+else
+  _r=1
+fi
+check S6B CORRETO "$_r" "ci do template referencia bin/critique-gate-ci.sh"
+
+root_gitleaks_version="$(extract_gitleaks_version "$ROOT_CI")"
+template_gitleaks_version="$(extract_gitleaks_version "$TEMPLATE_CI")"
+if [ "$root_gitleaks_version" = "8.30.1" ] && [ "$template_gitleaks_version" = "$root_gitleaks_version" ]; then
+  _r=0
+else
+  _r=1
+fi
+check S6C CORRETO "$_r" "pin do gitleaks no ci do template bate com a raiz (v8.30.1)"
+
+if cmp -s "$ROOT_CI" "$TEMPLATE_CI"; then
+  _r=1
+else
+  _r=0
+fi
+check S6D CORRETO "$_r" "ci do template nao e identico ao da raiz (por design)"
 
 printf '%b\n' "$RESULTS"
 echo ""
