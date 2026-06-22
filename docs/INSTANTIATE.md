@@ -16,7 +16,8 @@ cd /caminho/do/projeto-novo
 chmod +x .engrama/scripts/*.sh .engrama/githooks/pre-commit
 ```
 
-Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh`, `.markdownlint-cli2.yaml` e `transcripts/`.
+Ficam na raiz: `CLAUDE.md`, `AGENTS.md`, `.engrama/`, `.github/workflows/ci.yml` e `.markdownlint-cli2.yaml`.
+Dentro de `.engrama/` ficam `.engrama/scripts/critique-gate-ci.sh` e `.engrama/transcripts/`.
 
 > Se você estiver seguindo o fluxo canônico herdado do `Ruflos`, copie também `.claude/settings.json` para ativar o hook `PreToolUse` do gate mecânico.
 
@@ -137,7 +138,7 @@ A partir daí, a regra vale para si mesma: toda mudança futura de governança r
 
 ## Passo 6 — Ativar enforcement server-side
 
-O template manual já entregou `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`. Isso **não** basta sozinho: sem push no GitHub + *branch protection*, o projeto novo continua só com o **freio local burlável**.
+O template manual já entregou `.github/workflows/ci.yml`, `.engrama/scripts/critique-gate-ci.sh` e `.markdownlint-cli2.yaml`. Isso **não** basta sozinho: sem push no GitHub + *branch protection*, o projeto novo continua só com o **freio local burlável**.
 
 1. Dê push do repo para o GitHub (ou confirme que a branch default já existe lá).
 2. Descubra `owner/repo` e a branch default, se precisar:
@@ -207,7 +208,8 @@ Rode o **Lint** periodicamente (páginas órfãs, `source_refs` que mudaram, ADR
 - [ ] `classify()` do gate adaptado ao domínio; frase de categorias do ledger alinhada.
 - [ ] `core.hooksPath .engrama/githooks` setado; wrapper PreToolUse cabeado; gate testado (bloqueia).
 - [ ] Ritual de bootstrap concluído (crítica do Executor + aprovação da Autoridade + ledger).
-- [ ] `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` estão na raiz do projeto novo.
+- [ ] `.github/workflows/ci.yml` e `.markdownlint-cli2.yaml` estão na raiz do projeto novo.
+- [ ] `.engrama/scripts/critique-gate-ci.sh` e `.engrama/transcripts/README.md` estão no projeto novo.
 - [ ] No GitHub do projeto novo, a branch default exige PR, bloqueia *force-push* e marca o check `gate` como obrigatório. Sem isso, o enforcement segue só local/cooperativo.
 - [ ] 1ª entrada real no `.engrama/log.md` com o próximo passo seguro.
 - [ ] Handshake de abertura de sessão validado (papel · alçada · estado · próximo passo · o que depende de aprovação).

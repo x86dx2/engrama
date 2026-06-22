@@ -60,7 +60,7 @@ jobs:
           PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
         run: |
           git diff --name-only -z "origin/${{ github.base_ref }}...HEAD" > "$PR_FILES"
-          bash ./bin/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
+          bash ./.engrama/scripts/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
 
       - name: Notice on multi-commit diff-binding
         if: always() && github.event_name == 'pull_request'

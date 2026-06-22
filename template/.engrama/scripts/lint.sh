@@ -114,7 +114,9 @@ requires_frontmatter() {
 }
 
 list_markdown_files() {
-  find .engrama -type f -name '*.md' | sort
+  find .engrama \
+    -path '.engrama/transcripts' -prune -o \
+    -type f -name '*.md' -print | sort
   [ -f CLAUDE.md ] && printf '%s\n' CLAUDE.md
   [ -f AGENTS.md ] && printf '%s\n' AGENTS.md
 }

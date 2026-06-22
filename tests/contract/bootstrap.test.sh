@@ -128,12 +128,12 @@ fi
 check C10 CORRETO "$_r" ".engrama/VERSION instalado com a versao do pack e sem placeholder cru"
 
 # C11: bootstrap instala o wrapper do executor-bridge e a pasta versionada de transcripts.
-if [ -x "$T8/.engrama/scripts/exec-bridge.sh" ] && [ -f "$T8/transcripts/README.md" ]; then
+if [ -x "$T8/.engrama/scripts/exec-bridge.sh" ] && [ -f "$T8/.engrama/transcripts/README.md" ]; then
   _r=0
 else
   _r=1
 fi
-check C11 CORRETO "$_r" "bootstrap instala .engrama/scripts/exec-bridge.sh e transcripts/README.md no projeto-alvo"
+check C11 CORRETO "$_r" "bootstrap instala .engrama/scripts/exec-bridge.sh e .engrama/transcripts/README.md no projeto-alvo"
 
 # C12: bootstrap semeia a dispensa inicial vinculada por sha256 e deixa o 1o commit passar.
 seed_line="$(grep -m 1 '^## \[[0-9-]\{10\}\] .*| \[governance\]\[gate\] bootstrap inicial' "$T8/.engrama/qa/criticas-do-executor.md" 2>/dev/null || true)"

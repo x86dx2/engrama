@@ -8,7 +8,7 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-CI_GATE_SRC="$REPO_ROOT/bin/critique-gate-ci.sh"
+CI_GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate-ci.sh"
 DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
 [ -f "$CI_GATE_SRC" ] || { echo "FATAL: wrapper CI nao encontrado em $CI_GATE_SRC"; exit 1; }
@@ -27,12 +27,12 @@ new_repo() {
   git -C "$d" init -q -b "$branch" 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b "$branch"; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance" "$d/bin"
+  mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance"
   cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$CI_GATE_SRC" "$d/bin/critique-gate-ci.sh"
+  cp "$CI_GATE_SRC" "$d/.engrama/scripts/critique-gate-ci.sh"
   cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
   printf '# ledger\n' > "$d/.engrama/qa/criticas-do-executor.md"
-  git -C "$d" add .engrama/scripts/critique-gate.sh bin/critique-gate-ci.sh .engrama/scripts/engrama-diff-hash.sh .engrama/qa/criticas-do-executor.md
+  git -C "$d" add .engrama/scripts/critique-gate.sh .engrama/scripts/critique-gate-ci.sh .engrama/scripts/engrama-diff-hash.sh .engrama/qa/criticas-do-executor.md
   git -C "$d" commit -qm base
   printf '%s' "$d"
 }
@@ -57,9 +57,9 @@ run_ci_gate() {
     cd "$repo" || exit 2
     if [ "$strict" = "1" ]; then
       ENGRAMA_REQUIRE_DIFF_BIND=1 \
-        bash ./bin/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
+        bash ./.engrama/scripts/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
     else
-      bash ./bin/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
+      bash ./.engrama/scripts/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
     fi
     echo $?
   )

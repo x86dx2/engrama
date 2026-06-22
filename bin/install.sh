@@ -32,7 +32,7 @@ run_integrity_smoke() {
     "$root/.engrama/scripts/engrama-diff-hash.sh" \
     "$root/.engrama/scripts/critique-gate-hook.sh" \
     "$root/.engrama/scripts/lint.sh" \
-    "$root/bin/critique-gate-ci.sh"
+    "$root/.engrama/scripts/critique-gate-ci.sh"
   do
     rel="${script#"$root"/}"
     out="$(bash -n "$script" 2>&1)"

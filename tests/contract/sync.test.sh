@@ -17,8 +17,8 @@ ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
 ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
 TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
-ROOT_CI_GATE="$REPO_ROOT/bin/critique-gate-ci.sh"
-TEMPLATE_CI_GATE="$REPO_ROOT/template/bin/critique-gate-ci.sh"
+ROOT_CI_GATE="$REPO_ROOT/.engrama/scripts/critique-gate-ci.sh"
+TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate-ci.sh"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
@@ -107,7 +107,7 @@ if cmp -s "$ROOT_EXEC_BRIDGE" "$TEMPLATE_EXEC_BRIDGE"; then _r=0; else _r=1; fi
 check S3CA CORRETO "$_r" "exec-bridge.sh do template identico ao da raiz"
 
 if cmp -s "$ROOT_CI_GATE" "$TEMPLATE_CI_GATE"; then _r=0; else _r=1; fi
-check S3CB CORRETO "$_r" "template/bin/critique-gate-ci.sh identico ao da raiz"
+check S3CB CORRETO "$_r" "template/.engrama/scripts/critique-gate-ci.sh identico ao da raiz"
 
 if cmp -s "$ROOT_MARKDOWNLINT" "$TEMPLATE_MARKDOWNLINT"; then _r=0; else _r=1; fi
 check S3CC CORRETO "$_r" "template/.markdownlint-cli2.yaml identico ao da raiz"
@@ -132,12 +132,12 @@ else
 fi
 check S4A CORRETO "$_r" "gate do template classifica .engrama/VERSION como gate"
 
-if grep -Fq '.engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json|.engrama/scripts/exec-bridge.sh) addcat gate ;;' "$TEMPLATE_GATE"; then
+if grep -Fq '.engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;' "$TEMPLATE_GATE"; then
   _r=0
 else
   _r=1
 fi
-check S4B CORRETO "$_r" "gate do template classifica .engrama/scripts/exec-bridge.sh como gate"
+check S4B CORRETO "$_r" "gate do template classifica .engrama/scripts/*.sh como gate"
 
 if grep -Fq '# src/server/services/agreements.*|src/server/services/ledger.*)    addcat financial ;;' "$TEMPLATE_GATE" \
   && grep -Fq '# src/server/permissions.*|src/server/services/users.*)             addcat rbac ;;' "$TEMPLATE_GATE" \
@@ -163,12 +163,12 @@ else
 fi
 check S6A CORRETO "$_r" "ci do template e YAML valido (ou, sem parser, declara gate/gitleaks/markdown)"
 
-if grep -Fq 'bin/critique-gate-ci.sh' "$TEMPLATE_CI"; then
+if grep -Fq '.engrama/scripts/critique-gate-ci.sh' "$TEMPLATE_CI"; then
   _r=0
 else
   _r=1
 fi
-check S6B CORRETO "$_r" "ci do template referencia bin/critique-gate-ci.sh"
+check S6B CORRETO "$_r" "ci do template referencia .engrama/scripts/critique-gate-ci.sh"
 
 root_gitleaks_version="$(extract_gitleaks_version "$ROOT_CI")"
 template_gitleaks_version="$(extract_gitleaks_version "$TEMPLATE_CI")"

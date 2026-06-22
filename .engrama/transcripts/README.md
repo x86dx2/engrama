@@ -7,15 +7,15 @@ para que qualquer um possa auditar exatamente o que foi pedido ao Executor e o q
 
 ## Convenção
 
-A partir de `.engrama/scripts/exec-bridge.sh`, cada invocação gera um par datado em `transcripts/`:
+A partir de `.engrama/scripts/exec-bridge.sh`, cada invocação gera um par datado em `.engrama/transcripts/`:
 
 ```
-transcripts/<YYYY-MM-DD>-<label>-order.md      # a ordem (verbatim)
-transcripts/<YYYY-MM-DD>-<label>-response.md   # a resposta do codex (íntegra) + cabeçalho
+.engrama/transcripts/<YYYY-MM-DD>-<label>-order.md      # a ordem (verbatim)
+.engrama/transcripts/<YYYY-MM-DD>-<label>-response.md   # a resposta do codex (íntegra) + cabeçalho
 ```
 
 O cabeçalho da resposta registra `codex-session`, modelo, sandbox e timestamp. A entrada
-correspondente no [ledger](../.engrama/qa/criticas-do-executor.md) referencia o `label` e o
+correspondente no [ledger](../qa/criticas-do-executor.md) referencia o `label` e o
 `codex-session:<id>` como **evidência (fraca) de execução real** do Executor (não prova
 identidade independente — ver ADR 0011).
 

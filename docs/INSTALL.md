@@ -2,7 +2,7 @@
 
 > **Você (agente) está lendo isto** no repo-fonte do Engrama e pediram para **bootstrapar / instalar** o Engrama em outro projeto. Execute os passos abaixo na ordem. Onde estiver marcado **PERGUNTAR**, pergunte ao humano e **não invente**. Onde estiver **INFERIR**, descubra do repositório e **confirme** com o humano antes de gravar.
 
-Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.md`, o `.engrama/` de governança, o `.claude/settings.json` com o hook do gate mecânico, o CI portátil (`.github/workflows/ci.yml`, `bin/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) e o primeiro commit feito sob as próprias regras. A partir daí, qualquer agente que abrir o repo cai no gate de governança e, no **primeiro startup**, é forçado a completar o bootstrap do projeto.
+Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.md`, o `.engrama/` de governança, o `.claude/settings.json` com o hook do gate mecânico, `.github/workflows/ci.yml`, `.markdownlint-cli2.yaml` e o primeiro commit feito sob as próprias regras. Dentro de `.engrama/` ficam o CI-gate (`.engrama/scripts/critique-gate-ci.sh`) e os transcripts versionados (`.engrama/transcripts/`). A partir daí, qualquer agente que abrir o repo cai no gate de governança e, no **primeiro startup**, é forçado a completar o bootstrap do projeto.
 
 ---
 
@@ -99,7 +99,7 @@ Se você usou `bin/bootstrap.sh`, o instalador **já semeia** no ledger uma linh
 
 ## Passo 6 — Ativar enforcement server-side
 
-O template já trouxe `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` para o repo-alvo. Isso **não** vira freio vinculante sozinho: sem push no GitHub + *branch protection*, o projeto novo fica só com o **freio local burlável**.
+O template já trouxe `.github/workflows/ci.yml`, `.engrama/scripts/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` para o repo-alvo. Isso **não** vira freio vinculante sozinho: sem push no GitHub + *branch protection*, o projeto novo fica só com o **freio local burlável**.
 
 1. Dê push do repo-alvo para o GitHub (ou confirme que a branch default já está lá).
 2. Descubra `owner/repo` e a branch default, se precisar:
@@ -153,7 +153,8 @@ gh api "repos/$OWNER_REPO/branches/$DEFAULT_BRANCH/protection" --jq '{
 - [ ] `grep -rho '{{[A-Z_]*}}' CLAUDE.md AGENTS.md .engrama` retorna **vazio**.
 - [ ] `git config core.hooksPath` = `.engrama/githooks`.
 - [ ] `.claude/settings.json` existe e chama `.engrama/scripts/critique-gate-hook.sh`.
-- [ ] `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` existem na raiz do repo-alvo.
+- [ ] `.github/workflows/ci.yml` e `.markdownlint-cli2.yaml` existem na raiz do repo-alvo.
+- [ ] `.engrama/scripts/critique-gate-ci.sh` e `.engrama/transcripts/README.md` existem no repo-alvo.
 - [ ] **Teste do gate (deterministico):** num repo limpo, rode em branch descartável para não herdar a entrada do bootstrap na `main`:
 
   ```bash

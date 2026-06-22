@@ -1,8 +1,25 @@
 #!/usr/bin/env bash
-# exec-bridge.sh -- invoca codex exec e preserva ordem/resposta em transcripts/.
+# exec-bridge.sh -- invoca codex exec e preserva ordem/resposta em .engrama/transcripts/.
 set -u
 
-HERE="$(cd "$(dirname "$0")" && pwd)"
+BRIDGE_STABLE_COPY=""
+
+cleanup_stable_copy() {
+  rm -f "${BRIDGE_STABLE_COPY:-}"
+}
+
+if [ -z "${ENGRAMA_BRIDGE_REEXEC:-}" ]; then
+  __orig_here="$(cd "$(dirname "$0")" && pwd)"
+  __orig_script="$__orig_here/$(basename "$0")"
+  BRIDGE_STABLE_COPY="$(mktemp 2>/dev/null || mktemp -t exec-bridge)" || { echo "exec-bridge: mktemp falhou" >&2; exit 2; }
+  trap cleanup_stable_copy EXIT HUP INT TERM
+  cat "$__orig_script" > "$BRIDGE_STABLE_COPY" || { echo "exec-bridge: copia falhou" >&2; exit 2; }
+  ENGRAMA_BRIDGE_REEXEC=1 ENGRAMA_BRIDGE_HERE="$__orig_here" bash "$BRIDGE_STABLE_COPY" "$@"
+  __rc=$?
+  exit "$__rc"
+fi
+
+HERE="${ENGRAMA_BRIDGE_HERE:-$(cd "$(dirname "$0")" && pwd)}"
 REPO_ROOT="$(git -C "$HERE/.." rev-parse --show-toplevel 2>/dev/null || true)"
 TRANSCRIPTS_DIR=""
 ORDER_FILE=""
@@ -255,10 +272,10 @@ main() {
   validate_inputs
   resolve_date
 
-  TRANSCRIPTS_DIR="$REPO_ROOT/transcripts"
-  order_rel="transcripts/${RUN_DATE}-${LABEL}-order.md"
+  TRANSCRIPTS_DIR="$REPO_ROOT/.engrama/transcripts"
+  order_rel=".engrama/transcripts/${RUN_DATE}-${LABEL}-order.md"
   order_path="$REPO_ROOT/$order_rel"
-  response_rel="transcripts/${RUN_DATE}-${LABEL}-response.md"
+  response_rel=".engrama/transcripts/${RUN_DATE}-${LABEL}-response.md"
   response_path="$REPO_ROOT/$response_rel"
 
   [ ! -e "$order_path" ] || fail "transcript ja existe: $order_rel"

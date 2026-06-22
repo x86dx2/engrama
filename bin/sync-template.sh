@@ -15,7 +15,7 @@ ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
 ROOT_LINT="$REPO_ROOT/.engrama/scripts/lint.sh"
 ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
-ROOT_CI_GATE="$REPO_ROOT/bin/critique-gate-ci.sh"
+ROOT_CI_GATE="$REPO_ROOT/.engrama/scripts/critique-gate-ci.sh"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
@@ -24,7 +24,7 @@ TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.s
 TEMPLATE_LINT="$REPO_ROOT/template/.engrama/scripts/lint.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
 TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
-TEMPLATE_CI_GATE="$REPO_ROOT/template/bin/critique-gate-ci.sh"
+TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate-ci.sh"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
@@ -85,7 +85,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json|.engrama/scripts/exec-bridge.sh) addcat gate ;;
+    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;

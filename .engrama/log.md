@@ -7,6 +7,23 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-22] fix | endurecer exec-bridge.sh contra auto-edicao (re-exec de copia estavel) — dobrado no PR #14
+- Branch `feat/consolidar-root-em-engrama` (mesmo PR #14, squash p/ 1 commit). Executor via copia estavel do bridge (codex-session `019eef66`, veredito `ajuste-menor`). Orquestrador auditou.
+- **Fecha a licao da fatia anterior:** o crash cosmetico (`codex_rc: unbound variable`) vinha de editar o `exec-bridge.sh` enquanto ele era o script em execucao (bash relê por offset de byte). **Fix:** guard no topo que re-executa de uma **copia estavel** em tempfile (`ENGRAMA_BRIDGE_REEXEC`/`ENGRAMA_BRIDGE_HERE`, `HERE` resolve REPO_ROOT sob re-exec), com `trap` de cleanup do tempfile. Comportamento (transcript/session/model/fallbacks) intacto.
+- **Dogfood da propria mitigacao:** apliquei o fix rodando o Executor **de uma copia estavel** (`.exec-bridge-stable.sh`, removida pos-run) — a run saiu exit 0, sem o crash da fatia anterior.
+- **Teste E8** (`tests/contract/exec-bridge.test.sh`): stub de codex sobrescreve o `exec-bridge.sh` do working tree DURANTE a run (assert `mutated during contract test` prova a corrupcao real) e exige bridge exit 0 + transcripts intactos. Nao-vacuo: sem o guard, falharia.
+- **Ajuste-menor do Executor sobre meu esboco:** `trap` no processo pai (EXIT/HUP/INT/TERM) p/ o cleanup; teste edita o bridge **in-place** (nao rename) p/ exercer o modo de falha por offset/inode.
+- **QA (ADR 0005):** suite TODAS VERDES (exec-bridge 8 incl. E8; sync 21); paridade S3CA (template identico, guard presente); lint exit 0; shellcheck -S info limpo; reproduzi E8 isolado (CORRETO).
+
+## [2026-06-22] refactor | consolidar raiz em .engrama/ — move bin/critique-gate-ci.sh + transcripts/ (limpa o root do adotante)
+- Branch `feat/consolidar-root-em-engrama`. Executor via `exec-bridge.sh` (codex-session `019eef11`, veredito `ajuste-menor`). Orquestrador auditou + 2 micro-fixes (carve-out typo/lint).
+- **Origem:** a Autoridade viu `bin/` e `transcripts/` na raiz do `../finance` recem-bootstrapado e perguntou por que coisa do engrama mora fora de `.engrama/`. Diagnostico: 4 itens sao OBRIGATORIOS na raiz (CLAUDE.md/AGENTS.md/.claude/.github — convencao de Claude Code/Codex/GitHub); 3 eram discricionarios. A Autoridade aprovou mover **A+B** e manter `.markdownlint-cli2.yaml` na raiz (escopo C vetado: risco de glob parar de lintar README/docs).
+- **A:** `bin/critique-gate-ci.sh` -> `.engrama/scripts/` (raiz+template); `template/bin/` deixa de existir. **B:** `transcripts/` -> `.engrama/transcripts/`; `exec-bridge.sh` grava futuros transcripts la; `lint.sh` ganha prune de `.engrama/transcripts/`; `.markdownlint-cli2.yaml` ignores atualizados; `template/transcripts/README.md` -> `template/.engrama/transcripts/`. Refs atualizadas em ci.yml (raiz+template), sync-template.sh, install.sh, ADR 0003/0006, README/CHANGELOG/docs, 4 suites.
+- **Armadilha 1 (bridge):** o Executor editou `exec-bridge.sh` enquanto ele era o script em execucao — bash re-le por offset de byte e o tail crashou (`codex_rc: unbound variable`, exit 1) DEPOIS de capturar a resposta. Trabalho intacto; crash cosmetico. **Licao:** fatia que edita o proprio bridge deveria rodar de uma copia. **Armadilha 2 (auto-move):** o Orquestrador (dono do git, evidencia≠codigo) realocou o `transcripts/` vivo da raiz pos-run, fora da run do Executor, p/ nao rachar o par desta run.
+- **Micro-fix do Orquestrador (auditoria pegou):** o prune do lint veio `-path './.engrama/transcripts'` (com `./`) — NO-OP, pois `find .engrama` emite `.engrama/...` sem `./`. O verde do Executor nao pegou porque os transcripts ainda nao estavam dentro de `.engrama/`. Provei isolado, corrigi p/ `-path '.engrama/transcripts'` (raiz, re-sync ao template) + corrigi 3 paths no README realocado. Carve-out typo/lint (escritor≠auditor preservado p/ o refactor).
+- **QA (ADR 0005) no estado FINAL (54 transcripts dentro de .engrama/):** lint exit 0 (0 transcripts varridos — prova o prune); suite verde; sync 21; shellcheck -S info limpo; markdownlint 0 erros em 77 arquivos (ignores cobrem ambos transcripts/); zero ref ativa quebrada.
+- **PROXIMO:** commit + push + abrir PR (merge depende da Autoridade — branch protection).
+
 ## [2026-06-21] feat | PR-H — absorcao mem0/Honcho: nomear padroes (domain) + spec de ingestao (fecha a absorcao)
 - Branch `feat/absorcao-domain-ingestao`. Executor via `exec-bridge.sh` (codex-session da run prH, veredito `ajuste-menor`). Orquestrador auditou.
 - **Segunda fatia da absorcao (docs).** Nomeia padroes que o engrama JA pratica + formaliza o fluxo de ingestao. Zero infra.

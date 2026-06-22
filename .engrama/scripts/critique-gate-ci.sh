@@ -8,7 +8,7 @@
 set -u
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$HERE/.." && pwd)"
+REPO_ROOT="$(cd "$HERE/../.." && pwd)"
 GATE_REL=".engrama/scripts/critique-gate.sh"
 LEDGER_REL=".engrama/qa/criticas-do-executor.md"
 DIFF_HASH_REL=".engrama/scripts/engrama-diff-hash.sh"
@@ -21,7 +21,7 @@ declare -a CHANGED_FILES=()
 
 usage() {
   cat <<'EOF'
-Uso: bash bin/critique-gate-ci.sh --branch <nome-da-branch> --base-ref <gitish> --files-from <arquivo-nul>
+Uso: bash .engrama/scripts/critique-gate-ci.sh --branch <nome-da-branch> --base-ref <gitish> --files-from <arquivo-nul>
 
 Recebe a branch do PR, um gitish da base e um arquivo com a lista NUL-delimited
 de paths mudados. Calcula o fingerprint do diff REAL do PR e reaplica o

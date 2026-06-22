@@ -51,8 +51,8 @@ Para ganhar throughput (ex.: uma frente com muitas fatias independentes), a for�
 Todo I/O do executor-bridge continua **exposto à Autoridade**, mas agora isso é
 **mecanizado**:
 - `.engrama/scripts/exec-bridge.sh` invoca `{{EXECUTOR_CMD}} --json`, salva a **ordem
-  verbatim** em `transcripts/<data>-<label>-order.md` e a **resposta íntegra**
-  em `transcripts/<data>-<label>-response.md`.
+  verbatim** em `.engrama/transcripts/<data>-<label>-order.md` e a **resposta íntegra**
+  em `.engrama/transcripts/<data>-<label>-response.md`.
 - O transcript da resposta registra `codex-session`, modelo, sandbox e `label`
   no cabeçalho YAML.
 - O wrapper imprime `codex-session:<id>` para que o Orquestrador o cole no
