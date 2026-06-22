@@ -186,3 +186,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Isolamento respeitado (regra pos-incidente do PR-D):** o Executor NAO alterou a config nem gravou nada no repo real; minha identidade ficou intacta (reverificada antes de gravar a fatia).
 - **Auditoria (ADR 0005):** suite verde (sync 21 asserts); lint/shellcheck(-S info)/sync exit 0; ci.yml do template validado com parser YAML real; confirmei: portatil (nao cita a suite do framework), gate-CI identico raiz<->template, pin gitleaks v8.30.1 em paridade, ADR 0006 do template cita o job `gate` (e o da raiz cita `test`) corretamente.
 - **Nao exercivel local:** o workflow do template so roda num repo adotante no GitHub + o branch protection (passo manual documentado). **Consenso.**
+
+## [2026-06-21] feat/p3-docs-install-polish | [governance][gate] PR-F: polimento docs/install (placeholders, smoke de integridade, checklist, nota ADR) | confirmo | sha256:976d1933631c45bb28d46221fa4a2dfe449f45f9be48347fdda3fe98b25d8e3f codex-session:019eecd7-325e-7632-a2d3-e34c7189240c executor codex via exec-bridge + auditoria orquestrador
+- **Veredito do Executor `concordo`.** Levantou a ambiguidade do regex de placeholder ({CMD_E2E} tem digito) e resolveu apontando engrama.values.example como inventario canonico; cortou exemplos Ruflos herdados na tabela.
+- **Isolamento respeitado:** Executor nao alterou config nem gravou no repo real; identidade reverificada antes de gravar.
+- **Auditoria (ADR 0005):** suite verde; lint/shellcheck(-S info)/sync exit 0; confirmei ADR max=0011 (logo "comeca em 0012" correto), tabela com os 17 placeholders, os 2 Ruflos restantes sao prosa/exemplo (nao tabela). Smoke proprio via bootstrap.sh: 5 scripts OK + sha256 valido + Passos 7/8 no checklist.
+- **Fecha a remediacao** P1/P2/P3 da auditoria de prontidao. **Consenso.**
