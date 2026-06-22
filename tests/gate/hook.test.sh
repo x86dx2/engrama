@@ -5,9 +5,9 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-HOOK_SRC="$REPO_ROOT/.engrama/scripts/critique-gate-hook.sh"
-GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+HOOK_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate-hook.sh"
+GATE_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate.sh"
+DIFF_HASH_SRC="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 BASH_BIN="$(command -v bash)"
 [ -f "$HOOK_SRC" ] || { echo "FATAL: hook nao encontrado em $HOOK_SRC"; exit 1; }
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
@@ -38,18 +38,18 @@ new_repo() {
   git -C "$d" init -q -b main 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b main; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/governance"
-  cp "$HOOK_SRC" "$d/.engrama/scripts/critique-gate-hook.sh"
-  cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
-  chmod +x "$d/.engrama/scripts/critique-gate-hook.sh" "$d/.engrama/scripts/critique-gate.sh" "$d/.engrama/scripts/engrama-diff-hash.sh"
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/memory/governance"
+  cp "$HOOK_SRC" "$d/.engrama/engine/scripts/critique-gate-hook.sh"
+  cp "$GATE_SRC" "$d/.engrama/engine/scripts/critique-gate.sh"
+  cp "$DIFF_HASH_SRC" "$d/.engrama/engine/scripts/engrama-diff-hash.sh"
+  chmod +x "$d/.engrama/engine/scripts/critique-gate-hook.sh" "$d/.engrama/engine/scripts/critique-gate.sh" "$d/.engrama/engine/scripts/engrama-diff-hash.sh"
   printf '%s' "$d"
 }
 
 stage_sensitive_change() {
   local repo="$1"
-  mkdir -p "$repo/.engrama/governance"
-  cat > "$repo/.engrama/governance/p.md" <<'EOF'
+  mkdir -p "$repo/.engrama/memory/governance"
+  cat > "$repo/.engrama/memory/governance/p.md" <<'EOF'
 ---
 type: governance
 status: active
@@ -58,7 +58,7 @@ date: 2026-06-21
 
 Mudanca sensivel sem ledger.
 EOF
-  git -C "$repo" add .engrama/governance/p.md
+  git -C "$repo" add .engrama/memory/governance/p.md
 }
 
 build_path_without_python3() {
@@ -83,7 +83,7 @@ run_hook() {
   : > "$LAST_OUTPUT"
   (
     cd "$repo" || exit 2
-    PATH="$path_override" CLAUDE_PROJECT_DIR="$repo" "$BASH_BIN" ./.engrama/scripts/critique-gate-hook.sh <<EOF
+    PATH="$path_override" CLAUDE_PROJECT_DIR="$repo" "$BASH_BIN" ./.engrama/engine/scripts/critique-gate-hook.sh <<EOF
 $payload
 EOF
   ) >"$LAST_OUTPUT" 2>&1

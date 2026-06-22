@@ -4,7 +4,7 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SESSION_CONTEXT_SRC="$REPO_ROOT/.engrama/scripts/session-context.sh"
+SESSION_CONTEXT_SRC="$REPO_ROOT/.engrama/engine/scripts/session-context.sh"
 [ -f "$SESSION_CONTEXT_SRC" ] || { echo "FATAL: session-context nao encontrado em $SESSION_CONTEXT_SRC"; exit 1; }
 
 PASS=0; FAIL=0; HOLES=0; RESULTS=""
@@ -19,9 +19,9 @@ check() { # <id> <tag> <cond 0/1> <desc>
 new_fixture_root() {
   local d
   d="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-session-context)"
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/project"
-  cp "$SESSION_CONTEXT_SRC" "$d/.engrama/scripts/session-context.sh"
-  chmod +x "$d/.engrama/scripts/session-context.sh" 2>/dev/null || true
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/memory/project"
+  cp "$SESSION_CONTEXT_SRC" "$d/.engrama/engine/scripts/session-context.sh"
+  chmod +x "$d/.engrama/engine/scripts/session-context.sh" 2>/dev/null || true
   printf '%s' "$d"
 }
 
@@ -29,7 +29,7 @@ run_script() {
   local root="$1" out="$2"
   (
     cd "$root" || exit 2
-    bash "$root/.engrama/scripts/session-context.sh" >"$out" 2>&1
+    bash "$root/.engrama/engine/scripts/session-context.sh" >"$out" 2>&1
     echo $?
   )
 }
@@ -48,7 +48,7 @@ Texto introdutorio.
 ## [2026-06-19] fix | checkpoint antigo
 - nao deveria aparecer
 EOF
-cat > "$R1/.engrama/project/bootstrap-do-projeto.md" <<'EOF'
+cat > "$R1/.engrama/memory/project/bootstrap-do-projeto.md" <<'EOF'
 ---
 status: active
 ---
@@ -78,7 +78,7 @@ check SC2 CORRETO "$_r" "degrada sem quebrar quando log/bootstrap faltam"
 
 # SC3: bootstrap proposed avisa explicitamente que a abertura ainda nao concluiu.
 R3="$(new_fixture_root)"
-cat > "$R3/.engrama/project/bootstrap-do-projeto.md" <<'EOF'
+cat > "$R3/.engrama/memory/project/bootstrap-do-projeto.md" <<'EOF'
 ---
 status: proposed
 ---

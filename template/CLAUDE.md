@@ -6,30 +6,30 @@
 
 Antes de qualquer ação relevante, ler nesta ordem:
 
-1. `.engrama/governance/index.md`
-2. `.engrama/governance/papeis-e-alcadas.md`
-3. `.engrama/governance/cadeia-de-comando.md`
-4. `.engrama/governance/modelo-operacional.md`
-5. `.engrama/governance/continuidade-de-sessao.md`
-6. `.engrama/project/bootstrap-do-projeto.md`
+1. `.engrama/memory/governance/index.md`
+2. `.engrama/memory/governance/papeis-e-alcadas.md`
+3. `.engrama/memory/governance/cadeia-de-comando.md`
+4. `.engrama/memory/governance/modelo-operacional.md`
+5. `.engrama/memory/governance/continuidade-de-sessao.md`
+6. `.engrama/memory/project/bootstrap-do-projeto.md`
 7. topo de `.engrama/log.md`
 
 No **primeiro retorno útil** da sessão, declarar: papel assumido · alçada · estado factual (topo do `.engrama/log.md`) · próximo passo seguro · o que depende de aprovação da Autoridade. **Sem esse gate, a sessão não está corretamente aberta.**
 
-Se `.engrama/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou com campos `TODO`, a **primeira tarefa do Orquestrador** é conduzir o bootstrap do projeto com a Autoridade: confirmar finalidade, stack, comandos canônicos, fronteiras e superfícies sensíveis; ajustar `classify()` e só então seguir para trabalho de produto.
+Se `.engrama/memory/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou com campos `TODO`, a **primeira tarefa do Orquestrador** é conduzir o bootstrap do projeto com a Autoridade: confirmar finalidade, stack, comandos canônicos, fronteiras e superfícies sensíveis; ajustar `classify()` e só então seguir para trabalho de produto.
 
 ## Modelo em uma página
 
 - **Tríade (por função, não por vendor):** **Orquestrador** = Orquestrador/Auditor/QA/Arquiteto (dono do git; **não escreve código de fatia**) · **Executor Crítico** = escreve o código; critica ativamente · **Autoridade de Mudança** = arbitra discordâncias; aprova produção.
 - **Executor-bridge:** o Orquestrador invoca o Executor direto (`{{EXECUTOR_CMD}}`, adaptador concreto do projeto); **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003)
 - **Executor é freio ativo:** objeção material → escala à Autoridade; o Orquestrador **não tem overrule**. (ADR 0004)
-- **Governança não se autoaprova:** edição de governança vai à **crítica do Executor antes do commit** — imposto pelo gate mecânico `.engrama/scripts/critique-gate.sh`. (ADR 0006)
+- **Governança não se autoaprova:** edição de governança vai à **crítica do Executor antes do commit** — imposto pelo gate mecânico `.engrama/engine/scripts/critique-gate.sh`. (ADR 0006)
 - **Reconciliação explícita:** ADRs e páginas novas podem declarar `reconcilia:` (`ADD`/`UPDATE`/`DELETE`/`NOOP`) para explicitar como dialogam com a memória existente; schema e lint vivem em `.engrama/CLAUDE.md`.
-- **Categorias universais já nascem protegidas:** `governance`, `gate` e `contract` vêm cabeadas; adaptar `classify()` às superfícies sensíveis reais do projeto continua obrigatório (ver `.engrama/scripts/critique-gate.sh` e `.engrama/project/bootstrap-do-projeto.md`).
+- **Categorias universais já nascem protegidas:** `governance`, `gate` e `contract` vêm cabeadas; adaptar `classify()` às superfícies sensíveis reais do projeto continua obrigatório (ver `.engrama/engine/scripts/critique-gate.sh` e `.engrama/memory/project/bootstrap-do-projeto.md`).
 - **Subagentes** só na lane do Orquestrador; **nunca** escrevem código de fatia. (ADR 0008)
 - **Produção intocável:** ordem + 2ª confirmação; o Orquestrador nunca aprova MR de prod. (ADR 0009)
 
-Detalhe normativo e matriz de alçadas: `.engrama/governance/papeis-e-alcadas.md`. Schema do Engrama: `.engrama/CLAUDE.md`.
+Detalhe normativo e matriz de alçadas: `.engrama/memory/governance/papeis-e-alcadas.md`. Schema do Engrama: `.engrama/CLAUDE.md`.
 
 ## Regras do projeto
 
@@ -42,6 +42,6 @@ Detalhe normativo e matriz de alçadas: `.engrama/governance/papeis-e-alcadas.md
 
 Stack-alvo: `{{STACK}}`.
 
-Bootstrap do projeto: `.engrama/project/bootstrap-do-projeto.md`.
+Bootstrap do projeto: `.engrama/memory/project/bootstrap-do-projeto.md`.
 
-> Template: descreva a stack concreta e as regras específicas do seu projeto aqui; use `.engrama/project/bootstrap-do-projeto.md` como fonte de verdade do primeiro startup.
+> Template: descreva a stack concreta e as regras específicas do seu projeto aqui; use `.engrama/memory/project/bootstrap-do-projeto.md` como fonte de verdade do primeiro startup.

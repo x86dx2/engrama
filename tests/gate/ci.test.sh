@@ -7,9 +7,9 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-CI_GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate-ci.sh"
-DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+GATE_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate.sh"
+CI_GATE_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate-ci.sh"
+DIFF_HASH_SRC="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
 [ -f "$CI_GATE_SRC" ] || { echo "FATAL: wrapper CI nao encontrado em $CI_GATE_SRC"; exit 1; }
 [ -f "$DIFF_HASH_SRC" ] || { echo "FATAL: helper de hash nao encontrado em $DIFF_HASH_SRC"; exit 1; }
@@ -27,18 +27,18 @@ new_repo() {
   git -C "$d" init -q -b "$branch" 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b "$branch"; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance"
-  cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$CI_GATE_SRC" "$d/.engrama/scripts/critique-gate-ci.sh"
-  cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
-  printf '# ledger\n' > "$d/.engrama/qa/criticas-do-executor.md"
-  git -C "$d" add .engrama/scripts/critique-gate.sh .engrama/scripts/critique-gate-ci.sh .engrama/scripts/engrama-diff-hash.sh .engrama/qa/criticas-do-executor.md
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/evidence/qa" "$d/.engrama/memory/governance"
+  cp "$GATE_SRC" "$d/.engrama/engine/scripts/critique-gate.sh"
+  cp "$CI_GATE_SRC" "$d/.engrama/engine/scripts/critique-gate-ci.sh"
+  cp "$DIFF_HASH_SRC" "$d/.engrama/engine/scripts/engrama-diff-hash.sh"
+  printf '# ledger\n' > "$d/.engrama/evidence/qa/criticas-do-executor.md"
+  git -C "$d" add .engrama/engine/scripts/critique-gate.sh .engrama/engine/scripts/critique-gate-ci.sh .engrama/engine/scripts/engrama-diff-hash.sh .engrama/evidence/qa/criticas-do-executor.md
   git -C "$d" commit -qm base
   printf '%s' "$d"
 }
 
 write_ledger() {
-  printf '%s\n' "$2" > "$1/.engrama/qa/criticas-do-executor.md"
+  printf '%s\n' "$2" > "$1/.engrama/evidence/qa/criticas-do-executor.md"
 }
 
 write_files_list_from_range() {
@@ -57,9 +57,9 @@ run_ci_gate() {
     cd "$repo" || exit 2
     if [ "$strict" = "1" ]; then
       ENGRAMA_REQUIRE_DIFF_BIND=1 \
-        bash ./.engrama/scripts/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
+        bash ./.engrama/engine/scripts/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
     else
-      bash ./.engrama/scripts/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
+      bash ./.engrama/engine/scripts/critique-gate-ci.sh --branch "$branch" --base-ref "$base_ref" --files-from "$files" >/dev/null 2>&1
     fi
     echo $?
   )
@@ -68,7 +68,7 @@ run_ci_gate() {
 run_diff_hash_cached() {
   (
     cd "$1" || exit 2
-    bash ./.engrama/scripts/engrama-diff-hash.sh --cached
+    bash ./.engrama/engine/scripts/engrama-diff-hash.sh --cached
   )
 }
 
@@ -88,8 +88,8 @@ check() {
 # C1: governanca sem entrada no ledger => BLOQUEIA
 r="$(new_repo main)"
 git -C "$r" checkout -q -b pr/ci-1
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 git -C "$r" commit -qm pr
 files="$(write_files_list_from_range "$r" "main")"
 check C1 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-1" "main" "$files" 1)" "governanca do PR sem critica registrada bloqueia"
@@ -97,11 +97,11 @@ check C1 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-1" "main" "$files" 1)" "governanca
 # C2: modo estrito na CI exige hash e libera quando o diff real do PR bate
 r="$(new_repo main)"
 git -C "$r" checkout -q -b pr/ci-2
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 hash="$(run_diff_hash_cached "$r")"
 write_ledger "$r" "## [2026-06-20] pr/ci-2 | [governance] x | confirmo | ref $hash"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
 git -C "$r" commit -qm pr
 files="$(write_files_list_from_range "$r" "main")"
 check C2 CORRETO 0 "$(run_ci_gate "$r" "pr/ci-2" "main" "$files" 1)" "modo estrito da CI libera quando sha256 bate o diff real do PR"
@@ -109,13 +109,13 @@ check C2 CORRETO 0 "$(run_ci_gate "$r" "pr/ci-2" "main" "$files" 1)" "modo estri
 # C3: arquivo alterado depois da critica => hash obsoleto => BLOQUEIA em modo estrito
 r="$(new_repo main)"
 git -C "$r" checkout -q -b pr/ci-3
-printf 'v1\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'v1\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 hash="$(run_diff_hash_cached "$r")"
 write_ledger "$r" "## [2026-06-20] pr/ci-3 | [governance] x | confirmo | ref $hash"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
-printf 'v2\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
+printf 'v2\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 git -C "$r" commit -qm pr
 files="$(write_files_list_from_range "$r" "main")"
 check C3 CORRETO 2 "$(run_ci_gate "$r" "pr/ci-3" "main" "$files" 1)" "modo estrito da CI bloqueia critica vinculada a diff antigo"

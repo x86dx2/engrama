@@ -4,8 +4,8 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-GATE_SRC="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-DIFF_HASH_SRC="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
+GATE_SRC="$REPO_ROOT/.engrama/engine/scripts/critique-gate.sh"
+DIFF_HASH_SRC="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 [ -f "$GATE_SRC" ] || { echo "FATAL: gate nao encontrado em $GATE_SRC"; exit 1; }
 [ -f "$DIFF_HASH_SRC" ] || { echo "FATAL: helper de hash nao encontrado em $DIFF_HASH_SRC"; exit 1; }
 
@@ -22,15 +22,15 @@ new_repo() {
   git -C "$d" init -q -b "$branch" 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b "$branch"; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/scripts" "$d/.engrama/qa" "$d/.engrama/governance"
-  cp "$GATE_SRC" "$d/.engrama/scripts/critique-gate.sh"
-  cp "$DIFF_HASH_SRC" "$d/.engrama/scripts/engrama-diff-hash.sh"
-  printf '# ledger\n' > "$d/.engrama/qa/criticas-do-executor.md"
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/evidence/qa" "$d/.engrama/memory/governance"
+  cp "$GATE_SRC" "$d/.engrama/engine/scripts/critique-gate.sh"
+  cp "$DIFF_HASH_SRC" "$d/.engrama/engine/scripts/engrama-diff-hash.sh"
+  printf '# ledger\n' > "$d/.engrama/evidence/qa/criticas-do-executor.md"
   printf '%s' "$d"
 }
 
 write_ledger() {
-  printf '%s\n' "$2" > "$1/.engrama/qa/criticas-do-executor.md"
+  printf '%s\n' "$2" > "$1/.engrama/evidence/qa/criticas-do-executor.md"
 }
 
 run_gate() {
@@ -41,9 +41,9 @@ run_gate() {
       export ENGRAMA_DIFF_HASH="$override_hash"
     fi
     if [ "$strict" = "1" ]; then
-      ENGRAMA_REQUIRE_DIFF_BIND=1 bash ./.engrama/scripts/critique-gate.sh >/dev/null 2>&1
+      ENGRAMA_REQUIRE_DIFF_BIND=1 bash ./.engrama/engine/scripts/critique-gate.sh >/dev/null 2>&1
     else
-      bash ./.engrama/scripts/critique-gate.sh >/dev/null 2>&1
+      bash ./.engrama/engine/scripts/critique-gate.sh >/dev/null 2>&1
     fi
     echo $?
   )
@@ -52,14 +52,14 @@ run_gate() {
 run_diff_hash_cached() {
   (
     cd "$1" || exit 2
-    bash ./.engrama/scripts/engrama-diff-hash.sh --cached
+    bash ./.engrama/engine/scripts/engrama-diff-hash.sh --cached
   )
 }
 
 run_diff_hash_range() {
   (
     cd "$1" || exit 2
-    bash ./.engrama/scripts/engrama-diff-hash.sh --range "$2"
+    bash ./.engrama/engine/scripts/engrama-diff-hash.sh --range "$2"
   )
 }
 
@@ -78,46 +78,46 @@ check() {
 
 # D1: hash que bate o diff staged => LIBERA
 r="$(new_repo main)"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 hash="$(run_diff_hash_cached "$r")"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref $hash"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
 check D1 CORRETO 0 "$(run_gate "$r")" "sha256 correspondente ao diff staged libera"
 
 # D2: arquivo alterado depois da critica => hash obsoleto => BLOQUEIA
 r="$(new_repo main)"
-printf 'v1\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'v1\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 hash="$(run_diff_hash_cached "$r")"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref $hash"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
-printf 'v2\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
+printf 'v2\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 check D2 CORRETO 2 "$(run_gate "$r")" "editar o arquivo apos a critica invalida o binding"
 
 # D3: entrada sem hash preserva o legado => LIBERA
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check D3 CORRETO 0 "$(run_gate "$r")" "sem sha256 o comportamento legado continua liberando"
 
 # D4: modo estrito exige hash => entrada legada nao satisfaz
 r="$(new_repo main)"
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md .engrama/qa/criticas-do-executor.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md .engrama/evidence/qa/criticas-do-executor.md
 check D4 CORRETO 2 "$(run_gate "$r" 1)" "ENGRAMA_REQUIRE_DIFF_BIND=1 rejeita entrada sem sha256"
 
 # D5: fingerprint estavel no mesmo staged e muda quando arquivo nao-ledger muda
 r="$(new_repo main)"
-printf 'v1\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'v1\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 hash1="$(run_diff_hash_cached "$r")"
 hash2="$(run_diff_hash_cached "$r")"
-printf 'v2\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'v2\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 hash3="$(run_diff_hash_cached "$r")"
 if [ "$hash1" = "$hash2" ] && [ "$hash1" != "$hash3" ]; then
   ok=0
@@ -128,12 +128,12 @@ check D5 CORRETO 0 "$ok" "fingerprint repete no mesmo staged e muda ao alterar a
 
 # D6: num PR de 1 commit, --cached (antes do commit) == --range base...HEAD (apos commit)
 r="$(new_repo main)"
-git -C "$r" add .engrama/scripts/critique-gate.sh .engrama/scripts/engrama-diff-hash.sh .engrama/qa/criticas-do-executor.md
+git -C "$r" add .engrama/engine/scripts/critique-gate.sh .engrama/engine/scripts/engrama-diff-hash.sh .engrama/evidence/qa/criticas-do-executor.md
 git -C "$r" commit -qm base
 git -C "$r" branch base
 git -C "$r" checkout -q -b pr/d6
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 cached_hash="$(run_diff_hash_cached "$r")"
 git -C "$r" commit -qm pr
 range_hash="$(run_diff_hash_range "$r" "base...HEAD")"
@@ -147,27 +147,27 @@ check D6 CORRETO 0 "$ok" "--cached e --range base...HEAD batem no mesmo conteudo
 # D7: override valido domina a recomputacao do hash atual
 r="$(new_repo main)"
 override_hash="sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref $override_hash"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
 check D7 CORRETO 0 "$(run_gate "$r" 1 "$override_hash")" "ENGRAMA_DIFF_HASH override e usado em vez de recomputar o hash local"
 
 # D8: modo estrito libera quando o sha256 do ledger bate o override
 r="$(new_repo main)"
 override_hash="sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref $override_hash"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
 check D8 CORRETO 0 "$(run_gate "$r" 1 "$override_hash")" "modo estrito libera quando o hash do ledger bate o override"
 
 # D9: modo estrito bloqueia quando o sha256 do ledger NAO bate o override
 r="$(new_repo main)"
-printf 'x\n' > "$r/.engrama/governance/p.md"
-git -C "$r" add .engrama/governance/p.md
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-git -C "$r" add .engrama/qa/criticas-do-executor.md
+git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
 check D9 CORRETO 2 "$(run_gate "$r" 1 "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")" "modo estrito bloqueia quando o override diverge do sha256 registrado"
 
 printf '%b\n' "$RESULTS"

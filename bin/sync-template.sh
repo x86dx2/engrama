@@ -9,22 +9,22 @@ set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$HERE/.." && pwd)"
-ROOT_GATE="$REPO_ROOT/.engrama/scripts/critique-gate.sh"
-ROOT_HOOK="$REPO_ROOT/.engrama/scripts/critique-gate-hook.sh"
-ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
-ROOT_LINT="$REPO_ROOT/.engrama/scripts/lint.sh"
-ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
-ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
-ROOT_CI_GATE="$REPO_ROOT/.engrama/scripts/critique-gate-ci.sh"
+ROOT_GATE="$REPO_ROOT/.engrama/engine/scripts/critique-gate.sh"
+ROOT_HOOK="$REPO_ROOT/.engrama/engine/scripts/critique-gate-hook.sh"
+ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/engine/scripts/session-context.sh"
+ROOT_LINT="$REPO_ROOT/.engrama/engine/scripts/lint.sh"
+ROOT_DIFF_HASH="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
+ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/engine/scripts/exec-bridge.sh"
+ROOT_CI_GATE="$REPO_ROOT/.engrama/engine/scripts/critique-gate-ci.sh"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
-TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
-TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/scripts/critique-gate-hook.sh"
-TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.sh"
-TEMPLATE_LINT="$REPO_ROOT/template/.engrama/scripts/lint.sh"
-TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
-TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
-TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate-ci.sh"
+TEMPLATE_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate.sh"
+TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate-hook.sh"
+TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/engine/scripts/session-context.sh"
+TEMPLATE_LINT="$REPO_ROOT/template/.engrama/engine/scripts/lint.sh"
+TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/engine/scripts/engrama-diff-hash.sh"
+TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/engine/scripts/exec-bridge.sh"
+TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate-ci.sh"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
@@ -83,9 +83,9 @@ classify() {
     # --- Universais (nao remova) ---
     AGENTS.md|CLAUDE.md) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
-    .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
-    .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/memory/governance/*|.engrama/memory/decisions/*|.engrama/memory/specs/*|.engrama/memory/project/*|.engrama/evidence/qa/*) addcat governance ;;
+    .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*) addcat governance ;;
+    .engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;

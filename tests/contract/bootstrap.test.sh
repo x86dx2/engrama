@@ -63,7 +63,7 @@ if [ -z "$rem" ]; then _r=0; else _r=1; fi; check C1 CORRETO "$_r" "instalacao b
 
 # C2: hooksPath setado
 got="$(git -C "$T" config core.hooksPath 2>/dev/null)"
-if [ "$got" = ".engrama/githooks" ]; then _r=0; else _r=1; fi; check C2 CORRETO "$_r" "core.hooksPath == .engrama/githooks"
+if [ "$got" = ".engrama/engine/githooks" ]; then _r=0; else _r=1; fi; check C2 CORRETO "$_r" "core.hooksPath == .engrama/engine/githooks"
 
 # C3: deteccao de colisao — 2a execucao recusa (exit != 0)
 bash "$REPO_ROOT/bin/install.sh" "$T" "$V" >/dev/null 2>&1; rc=$?
@@ -128,15 +128,15 @@ fi
 check C10 CORRETO "$_r" ".engrama/VERSION instalado com a versao do pack e sem placeholder cru"
 
 # C11: bootstrap instala o wrapper do executor-bridge e a pasta versionada de transcripts.
-if [ -x "$T8/.engrama/scripts/exec-bridge.sh" ] && [ -f "$T8/.engrama/transcripts/README.md" ]; then
+if [ -x "$T8/.engrama/engine/scripts/exec-bridge.sh" ] && [ -f "$T8/.engrama/evidence/transcripts/README.md" ]; then
   _r=0
 else
   _r=1
 fi
-check C11 CORRETO "$_r" "bootstrap instala .engrama/scripts/exec-bridge.sh e .engrama/transcripts/README.md no projeto-alvo"
+check C11 CORRETO "$_r" "bootstrap instala .engrama/engine/scripts/exec-bridge.sh e .engrama/evidence/transcripts/README.md no projeto-alvo"
 
 # C12: bootstrap semeia a dispensa inicial vinculada por sha256 e deixa o 1o commit passar.
-seed_line="$(grep -m 1 '^## \[[0-9-]\{10\}\] .*| \[governance\]\[gate\] bootstrap inicial' "$T8/.engrama/qa/criticas-do-executor.md" 2>/dev/null || true)"
+seed_line="$(grep -m 1 '^## \[[0-9-]\{10\}\] .*| \[governance\]\[gate\] bootstrap inicial' "$T8/.engrama/evidence/qa/criticas-do-executor.md" 2>/dev/null || true)"
 git -C "$T8" config user.email t@t
 git -C "$T8" config user.name t
 git -C "$T8" commit -qm "bootstrap inicial" >/dev/null 2>&1; rc12=$?
@@ -148,8 +148,8 @@ fi
 check C12 CORRETO "$_r" "bootstrap semeia dispensa com sha256 e o 1o commit do alvo passa sem intervencao manual"
 
 # C13: a dispensa do bootstrap nao abre a branch inteira; novo diff sensivel volta a bloquear.
-printf 'ajuste\n' >> "$T8/.engrama/governance/index.md"
-git -C "$T8" add .engrama/governance/index.md
+printf 'ajuste\n' >> "$T8/.engrama/memory/governance/index.md"
+git -C "$T8" add .engrama/memory/governance/index.md
 git -C "$T8" commit -qm "segunda mudanca sensivel" >/dev/null 2>&1; rc13=$?
 if [ "$rc13" -ne 0 ]; then
   _r=0

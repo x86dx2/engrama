@@ -1,5 +1,5 @@
 # CI do PROJETO ADOTANTE: enxuto e portatil.
-# O template ja entrega este workflow + .engrama/scripts/critique-gate-ci.sh, mas o
+# O template ja entrega este workflow + .engrama/engine/scripts/critique-gate-ci.sh, mas o
 # branch protection (required check `gate`, exigir PR e bloquear force-push na
 # branch default) continua sendo passo manual no GitHub do adotante.
 name: CI
@@ -28,11 +28,11 @@ jobs:
 
       - name: Run shellcheck
         run: >
-          shellcheck .engrama/scripts/*.sh
-          .engrama/githooks/pre-commit
+          shellcheck .engrama/engine/scripts/*.sh
+          .engrama/engine/githooks/pre-commit
 
       - name: Run Engrama lint
-        run: bash ./.engrama/scripts/lint.sh
+        run: bash ./.engrama/engine/scripts/lint.sh
 
       - name: Fetch pull request base
         if: github.event_name == 'pull_request'
@@ -49,7 +49,7 @@ jobs:
           PR_FILES: ${{ runner.temp }}/critique-gate-pr-files.zlist
         run: |
           git diff --name-only -z "origin/${{ github.base_ref }}...HEAD" > "$PR_FILES"
-          bash ./.engrama/scripts/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
+          bash ./.engrama/engine/scripts/critique-gate-ci.sh --branch "$PR_BRANCH" --base-ref "$PR_BASE_REF" --files-from "$PR_FILES"
 
       - name: Notice on multi-commit diff-binding
         if: always() && github.event_name == 'pull_request'

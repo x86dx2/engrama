@@ -1,11 +1,21 @@
 # Log — Memória factual append-only
 
-Mais recente no topo. Cabeçalho: `## [YYYY-MM-DD] {tipo} | título`. Logar **antes** de cada commit não-trivial. O item mais recente no topo **é** o checkpoint vivo (estado de retomada) — ver [[governance/continuidade-de-sessao]].
+Mais recente no topo. Cabeçalho: `## [YYYY-MM-DD] {tipo} | título`. Logar **antes** de cada commit não-trivial. O item mais recente no topo **é** o checkpoint vivo (estado de retomada) — ver [[memory/governance/continuidade-de-sessao]].
 
 Tipos comuns: `decision` · `ingest` · `update` · `slice` · `fix` · `chore` · `audit` · `phase`.
 Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
+
+## [2026-06-22] refactor | reorg de .engrama/ por contexto: memory/ + engine/ + evidence/ (opcao B)
+- Branch `feat/reorg-engrama-por-contexto`. FASE 1 critica READ-ONLY (codex-session 019eef98, `ajuste-menor`) + FASE 2 execucao (codex-session 019eeffb, `ajuste-menor`). Orquestrador auditou.
+- **Decisao da Autoridade:** ninguem usa o pack alem desta instancia + template, entao o custo de migracao de adotantes saiu da conta -> reorg viavel. A pedido da Autoridade, separei **critica de acao**: critica read-only do plano ANTES de mutar, veredito mostrado, OK, e so entao execucao.
+- **A FASE 1 (read-only) pegou 4 gaps reais** que meu plano omitia: harness `.claude/settings.json`, wrapper `critique-gate-hook.sh`, ~34+29 paths literais em prosa, `roadmap/` canonico, `template/.engrama/VERSION` no topo — + riscos de ordering. Todos incorporados antes da execucao. Prova viva do valor de separar critica de acao.
+- **Estrutura:** topo fixo `{CLAUDE.md,index.md,log.md,VERSION,.gitignore}`; `memory/{governance,decisions,domain,specs,project,gaps,roadmap}`; `engine/{scripts,githooks}`; `evidence/{qa,transcripts}`. Espelhado no template. `roadmap/` = namespace canonico (sem dir fisico).
+- **Reescrita:** ~183 wikilinks + source_refs (path-based) + ~63 docs com paths literais em prosa + classify/lint/exec-bridge/diff-hash/gate/hook/settings + sync-template (vars + heredoc do classify) + CI + install/bootstrap + toda a suite. Ledger e log.md: so cabecalho; entradas historicas intactas (append-only).
+- **Bug achado+corrigido pelo Executor na FASE 2:** o guard de re-exec do bridge herdava `ENGRAMA_BRIDGE_REEXEC/HERE` do ambiente e pulava a copia estavel; blindou com `ENGRAMA_BRIDGE_SELF` (so honra reexec se o processo E a copia apontada) + ajustou REPO_ROOT p/ o novo depth de engine/scripts.
+- **Orquestrador (pos-run):** realocou transcripts vivo -> evidence/transcripts (60 .md); `git config core.hooksPath .engrama/engine/githooks` (o antigo virou morto).
+- **QA (ADR 0005):** suite TODAS VERDES; lint=0; markdownlint 0/77; sync idempotente + sync.test 21; shellcheck -S info limpo; grep de completude = zero path antigo em superficie ATIVA (so historico/verbatim em log.md + evidence/transcripts). 174 arquivos, +1458/-1080.
 
 ## [2026-06-22] fix | endurecer exec-bridge.sh contra auto-edicao (re-exec de copia estavel) — dobrado no PR #14
 - Branch `feat/consolidar-root-em-engrama` (mesmo PR #14, squash p/ 1 commit). Executor via copia estavel do bridge (codex-session `019eef66`, veredito `ajuste-menor`). Orquestrador auditou.
