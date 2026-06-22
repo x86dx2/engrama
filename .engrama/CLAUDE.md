@@ -100,11 +100,12 @@ critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   #
 5. Só então iniciar trabalho de produto.
 
 ### Ingest (decisão / fato novo)
-1. Identificar o tipo da página.
-2. Criar/atualizar a página com frontmatter.
-3. Atualizar `index.md` (seção certa).
-4. Logar em `log.md`: `## [YYYY-MM-DD] {ingest|decision|update} | título`.
-5. Atualizar cross-links (`touches`) nas páginas afetadas.
+1. Decidir se o conteúdo merece página durável ou só checkpoint em `log.md`.
+2. Rodar a **Fase I** de [[specs/ingestao-memoria-dois-fases]]: tipo correto, frontmatter válido, `source_refs` relativos e, para `domain/`, fonte concreta no repo.
+3. Rodar a **Fase II** de [[specs/ingestao-memoria-dois-fases]]: buscar duplicata/overlap com `rg`/`grep` e explicitar `reconcilia: ADD|UPDATE|DELETE|NOOP`.
+4. Atualizar `index.md` (seção certa).
+5. Logar em `log.md`: `## [YYYY-MM-DD] {ingest|decision|update} | título`.
+6. Atualizar cross-links (`touches`) nas páginas afetadas e rodar o lint quando a mudança criar/renomear nós de memória.
 
 ### Query (responder pergunta)
 1. Ler `index.md` → localizar páginas candidatas.
