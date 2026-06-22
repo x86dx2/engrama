@@ -30,6 +30,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[governance/index]] → 
 - [[specs/README]] — índice + princípio (spec ≠ subagente).
 - [[specs/orquestrador]] · [[specs/executor]] — papéis (Orquestrador / Executor nas variações).
 - [[specs/executor-order]] — template da ordem ao Executor · [[specs/commit]] — checklist de commit.
+- [[specs/ingestao-memoria-dois-fases]] — ingestão durável: candidato → reconciliação explícita com `reconcilia:`.
 - [[specs/test-writing]] — convenções do harness · [[specs/infra-runbook]] — infra/stack/{{DEV_URL}}.
 - [[specs/licao-aprendida]] — loop falha→regra (a memória que compõe).
 

@@ -1,7 +1,7 @@
 ---
 type: spec
 status: active
-touches: [specs/orquestrador, specs/executor, specs/executor-order, specs/commit, specs/test-writing, specs/infra-runbook]
+touches: [specs/orquestrador, specs/executor, specs/executor-order, specs/ingestao-memoria-dois-fases, specs/commit, specs/test-writing, specs/infra-runbook]
 date: {{DATA}}
 source_refs:
   - .engrama/specs/
@@ -20,6 +20,7 @@ Biblioteca de **specs operacionais** — playbooks/checklists reaproveitáveis p
 | [[specs/orquestrador]] | playbook do Orquestrador (rotear tier, dispatch, auditar, commitar, colar I/O) | Orquestrador |
 | [[specs/executor]] | invocar o Executor nas 3 variações (código · crítica · computer-use) | Orquestrador→Executor |
 | [[specs/executor-order]] | template da ordem ao Executor (10 itens + tier + aceite) | Orquestrador |
+| [[specs/ingestao-memoria-dois-fases]] | ingestão durável: candidato válido → reconciliação explícita (`ADD/UPDATE/DELETE/NOOP`) | Orquestrador/Executor |
 | [[specs/commit]] | checklist de commit | Orquestrador |
 | [[specs/test-writing]] | convenções do harness de teste do seu projeto (framework de unit/integração/e2e, golden files, ciclo RED→GREEN) | Executor (sob spec) |
 | [[specs/infra-runbook]] | ops: provisionar/seedar ambiente, subir/matar o dev server local (`{{DEV_URL}}`), recriar golden/baseline | Orquestrador/Executor |

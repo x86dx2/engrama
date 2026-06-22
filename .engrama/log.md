@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-H — absorcao mem0/Honcho: nomear padroes (domain) + spec de ingestao (fecha a absorcao)
+- Branch `feat/absorcao-domain-ingestao`. Executor via `exec-bridge.sh` (codex-session da run prH, veredito `ajuste-menor`). Orquestrador auditou.
+- **Segunda fatia da absorcao (docs).** Nomeia padroes que o engrama JA pratica + formaliza o fluxo de ingestao. Zero infra.
+- **Framework (raiz+template):** `specs/ingestao-memoria-dois-fases.md` (Fase I candidato -> Fase II reconciliacao via grep + arvore ADD/UPDATE/DELETE/NOOP, casa com ADR 0012; teto honesto: dedup humano+grep ~500-1000 fatos) · secao memoria quente/fria em `continuidade-de-sessao.md` (de Honcho working/long-term, **explicitamente SEM decay** — consolidacao manual via ADR) · nota de contraste estrutural no ADR 0006 · workflow Ingest alinhado no schema.
+- **Instancia-so (raiz):** 3 paginas `domain/` nomeando padroes vivos — `validacao-cruzada-estrutural` (engrama supera mem0: papeis separados vs mesmo-modelo-extrai-e-valida; teto R1) · `escopo-e-identidade` (namespacing mem0 user/session/agent/org -> papel/branch/categoria/codex-session) · `ponto-de-vista-e-representacao` (auto-rep vs rep-do-Executor, de Honcho theory-of-mind; so nomeia, nao resolve R1). Todas com `reconcilia: ADD` (dogfood do ADR 0012).
+- **Decisao framework/instancia:** domain/ fica so na instancia viva (o adotante cria as suas); o template referencia em PROSA (nao wikilink) p/ nao quebrar o lint do adotante. O Executor (ajuste-menor) estendeu os catalogos espelhados (index/specs-README raiz+template) p/ nao deixar drift.
+- **QA (ADR 0005):** suite verde; lint exit 0 (sem orfa/wikilink quebrado — paginas linkadas no index); sync 21. Confirmei: reconcilia: ADD nas 3 domain pages, source_refs relativos, template sem link quebrado p/ domain.
+- **Conclusao:** absorcao Honcho/mem0 fechada (PR-G feature + PR-H docs). Ganho real = maturacao de disciplina/doc (a infra de runtime nao encaixa por arquitetura). O grosso do valor o engrama ja tinha.
+
 ## [2026-06-21] feat | PR-G — absorcao mem0/Honcho: reconciliacao de memoria + metricas (ADR 0012)
 - Branch `feat/absorcao-reconciliacao-metricas`. Executor via `exec-bridge.sh` (codex-session da run prG, veredito `concordo`, mérito do ADR 0012 favorável). Orquestrador auditou + provou empiricamente.
 - **Origem:** analise multiagente de absorcao (Honcho/mem0, 25 candidatos -> 8 aprovados na critica de coerencia). Esses sao sistemas de memoria de RUNTIME; o ganho real e de PADRAO/disciplina, nao infra. Esta fatia implementa o cluster "operacoes de memoria + metricas".

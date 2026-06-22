@@ -26,6 +26,7 @@ Escopo amplo: `.engrama/governance/*`, ADRs, `AGENTS.md`, seções de governanç
 ## Consequências
 - Toda regra do projeto nasce criticada por um agente independente.
 - **Bootstrap:** este engrama inicial é submetido à crítica do Executor e aprovado pela Autoridade; a partir daí a regra se aplica a si mesma.
+- **Validação cruzada estrutural:** a separação escritor≠auditor não é metáfora; é um fato de processo. O contraste útil é um caso como mem0, em que o mesmo modelo pode extrair e validar fatos. Aqui a tríade existe justamente para evitar essa autocorrelação; registre a página de domínio correspondente na sua instância quando ela existir.
 - Registrar o estado da crítica em cada commit de governança (`consenso`/`incorporado`/`escalado`/`dispensado`).
 
 ## Promoção a gate de commit mecânico ({{DATA}})

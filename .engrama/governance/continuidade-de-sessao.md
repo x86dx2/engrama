@@ -82,6 +82,15 @@ Risco material de: perda de dados; quebra do fluxo principal; violação de gove
 - Ações que exigem autorização da Autoridade
 - **Discordâncias Executor↔Orquestrador a arbitrar** (objeção fiel do Executor + leitura do Orquestrador)
 
+## Memória quente vs fria
+
+Inspirado na distinção de working vs long-term representation do Honcho, o Engrama separa duas camadas operacionais:
+
+- **Memória quente** = o checkpoint vivo no topo de [[log]] e o contexto factual recompilável da sessão atual. Ela muda por append e serve para retomada rápida.
+- **Memória fria** = `governance/`, `decisions/`, `specs/` e as páginas duráveis de domínio do projeto. Ela muda devagar e por revisão explícita.
+
+O Engrama **não** faz decay, expiry ou TTL automático em nenhuma das duas camadas. O que sai da memória quente e entra na fria passa por **consolidação manual**, normalmente via ADR, spec ou página de domínio; o que perde utilidade no topo do `log.md` some só porque novos fatos append-only empurram o checkpoint adiante.
+
 ## Checkpoint vivo (estado de retomada)
 
 O **estado vivo** (onde o trabalho parou, próximo passo) mora no **topo do [[log]]** — padrão recomendado. É versionado e portável (sobrevive a clone), centralizando memória factual e ponto-de-retomada num lugar só. O `log.md` permanece append-only; o item mais recente no topo **é** o checkpoint. (Trade-off aceito: mistura registro factual com estado-de-retomada — escolha por simplicidade e fonte única.)

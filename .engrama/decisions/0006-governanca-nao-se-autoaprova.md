@@ -26,6 +26,7 @@ Escopo amplo: `.engrama/governance/*`, ADRs, `AGENTS.md`, seções de governanç
 ## Consequências
 - Toda regra de governança **passa pela crítica do Executor antes do commit** — exceto o bootstrap inicial, cuja crítica foi `dispensada` pela Autoridade (chicken-and-egg; ver abaixo).
 - **Bootstrap (chicken-and-egg, honesto):** o engrama **inicial** teve a crítica externa **dispensada** pela Autoridade (registrado como `dispensada` em [[qa/criticas-do-executor]]) — o gate precisava existir antes de poder exigir a prova de crítica. A partir do primeiro engrama, a regra passa a se aplicar a si mesma (toda edição de governança seguinte vai à crítica do Executor).
+- **Validação cruzada estrutural:** a separação escritor≠auditor não é metáfora; é um fato de processo. O contraste útil é um caso como mem0, em que o mesmo modelo pode extrair e validar fatos. Aqui a tríade existe justamente para evitar essa autocorrelação. Ver [[domain/validacao-cruzada-estrutural]].
 - Registrar o estado da crítica em cada commit de governança (`consenso`/`incorporado`/`escalado`/`dispensado`).
 
 ## Promoção a gate de commit mecânico (2026-06-20)
