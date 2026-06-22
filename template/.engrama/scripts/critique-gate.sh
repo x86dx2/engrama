@@ -11,7 +11,7 @@
 # no papel de crítica, read-only). O gate exige o REGISTRO da crítica antes do
 # commit — ele NÃO prova que um modelo independente de fato a produziu, e é um
 # freio COOPERATIVO LOCAL (burlável por --no-verify / fora do harness). A CI
-# reexecuta este gate contra o PR (critique-gate-ci.sh), calculando o
+# reexecuta este gate contra o PR (.engrama/scripts/critique-gate-ci.sh), calculando o
 # fingerprint sobre o diff real do PR e reusando o repo sintético só para
 # classify() + parsing do ledger — ver ADR 0006.
 #
@@ -100,7 +100,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/governance/*|.engrama/decisions/*|.engrama/specs/*|.engrama/project/*|.engrama/qa/*) addcat governance ;;
     .engrama/gaps/*|.engrama/roadmap/*|.engrama/domain/*) addcat governance ;;
-    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json|.engrama/scripts/exec-bridge.sh) addcat gate ;;
+    .engrama/VERSION|.engrama/scripts/*.sh|.engrama/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;

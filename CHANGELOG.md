@@ -11,9 +11,10 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 ### Mudado
 - **Estrutura reorganizada (padrão do ai-memory/Akita):** o root passou a conter
   só metadados/manifests; o tooling e os guias foram para pastas por preocupação.
-  `install.sh`/`bootstrap.sh`/`sync-template.sh`/`critique-gate-ci.sh` → **`bin/`**;
-  `lint.sh`/`engrama-diff-hash.sh` → **`.engrama/scripts/`** (junto do gate, deixando
-  o `.engrama/` autocontido e distribuível); `INSTALL.md`/`INSTANTIATE.md` → **`docs/`**.
+  `install.sh`/`bootstrap.sh`/`sync-template.sh` → **`bin/`**;
+  `critique-gate-ci.sh`/`lint.sh`/`engrama-diff-hash.sh` → **`.engrama/scripts/`**
+  (junto do gate, deixando o `.engrama/` autocontido e distribuível);
+  `INSTALL.md`/`INSTANTIATE.md` → **`docs/`**.
   Comandos de instalação agora usam `bash bin/install.sh` / `bash bin/bootstrap.sh`.
 - **Adaptadores de vendor documentados honestamente:** `EXECUTOR_CMD`, ids de modelo
   e `.claude/settings.json` passam a ser descritos como **camada concreta e trocável**.

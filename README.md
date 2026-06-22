@@ -64,7 +64,7 @@ O mapeamento é direto:
 
 > Em uma frase: o Karpathy resolve *"humanos abandonam wikis porque manter cansa"*; este pack aplica isso à governança — **o modelo operacional não apodrece** porque o agente o mantém, e o **gate** lembra/impõe a crítica no caminho cooperativo do commit.
 
-> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exige **enforcement server-side**. A CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) **reexecuta o gate contra o diff do PR** via [bin/critique-gate-ci.sh](bin/critique-gate-ci.sh) — o controle passa a existir num lugar **não-burlável pelo autor** (reusa a mesma `classify()` + parsing do ledger por campo e injeta o fingerprint do **diff real do PR**). O job `test` da CI (que **embute** o gate-contra-PR) está entre os ***required checks*** do *branch protection* — então o gate é **vinculante no merge** (push direto na `main` bloqueado; o furo **R1** fica **mitigado server-side**). O **modo estrito do diff-binding** (`ENGRAMA_REQUIRE_DIFF_BIND=1`) voltou a ficar **ligado na CI** porque o fingerprint foi unificado entre local e CI pela mesma fonte única (`engrama-diff-hash.sh`, local = staged; CI = `--range <base>...HEAD`). *Ressalva honesta:* em PRs com múltiplos commits, o binding cobre o **diff cumulativo** de `base...HEAD`, não cada commit isoladamente; o fluxo recomendado continua sendo squash/1 commit. Hoje: hook local = atrito útil + registro; **CI = enforcement vinculante** (required check). O gate garante que a crítica esteja **registrada** — **não** que um agente independente de fato a tenha produzido (ver [plano de remediação](.engrama/gaps/auditoria-e-plano-de-remediacao.md)).
+> **Honestidade sobre o enforcement (o que o gate é e o que não é).** O `critique-gate.sh` é um **freio cooperativo local**: bloqueia o commit pelo hook do git **e** pelo `PreToolUse` do harness do Orquestrador. Mas um hook local é **deliberadamente burlável** — `git commit --no-verify`, `git -c core.hooksPath=/dev/null`, ou um commit fora desse harness passam por cima dele. A garantia vinculante de "escritor ≠ auditor" exige **enforcement server-side**. A CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) **reexecuta o gate contra o diff do PR** via [.engrama/scripts/critique-gate-ci.sh](.engrama/scripts/critique-gate-ci.sh) — o controle passa a existir num lugar **não-burlável pelo autor** (reusa a mesma `classify()` + parsing do ledger por campo e injeta o fingerprint do **diff real do PR**). O job `test` da CI (que **embute** o gate-contra-PR) está entre os ***required checks*** do *branch protection* — então o gate é **vinculante no merge** (push direto na `main` bloqueado; o furo **R1** fica **mitigado server-side**). O **modo estrito do diff-binding** (`ENGRAMA_REQUIRE_DIFF_BIND=1`) voltou a ficar **ligado na CI** porque o fingerprint foi unificado entre local e CI pela mesma fonte única (`engrama-diff-hash.sh`, local = staged; CI = `--range <base>...HEAD`). *Ressalva honesta:* em PRs com múltiplos commits, o binding cobre o **diff cumulativo** de `base...HEAD`, não cada commit isoladamente; o fluxo recomendado continua sendo squash/1 commit. Hoje: hook local = atrito útil + registro; **CI = enforcement vinculante** (required check). O gate garante que a crítica esteja **registrada** — **não** que um agente independente de fato a tenha produzido (ver [plano de remediação](.engrama/gaps/auditoria-e-plano-de-remediacao.md)).
 
 ---
 
@@ -97,8 +97,7 @@ O mapeamento é direto:
 ├── bin/                           # tooling do pack (repo-fonte)
 │   ├── bootstrap.sh
 │   ├── install.sh
-│   ├── sync-template.sh
-│   └── critique-gate-ci.sh
+│   └── sync-template.sh
 ├── docs/                          # guias detalhados do repo-fonte
 │   ├── INSTALL.md
 │   └── INSTANTIATE.md
@@ -107,6 +106,7 @@ O mapeamento é direto:
 │   ├── governance/ · decisions/ · project/ · specs/ · qa/
 │   ├── scripts/
 │   │   ├── critique-gate.sh
+│   │   ├── critique-gate-ci.sh
 │   │   ├── critique-gate-hook.sh
 │   │   ├── session-context.sh
 │   │   ├── lint.sh
@@ -116,15 +116,16 @@ O mapeamento é direto:
     ├── CLAUDE.md / AGENTS.md
     ├── .github/workflows/ci.yml
     ├── .markdownlint-cli2.yaml
-    ├── bin/critique-gate-ci.sh
     └── .engrama/
         ├── governance/ · decisions/ · project/ · specs/ · qa/
         ├── scripts/
         │   ├── critique-gate.sh
+        │   ├── critique-gate-ci.sh
         │   ├── critique-gate-hook.sh
         │   ├── session-context.sh
         │   ├── lint.sh
         │   └── engrama-diff-hash.sh
+        ├── .engrama/transcripts/README.md
         └── githooks/pre-commit
 ```
 
@@ -136,7 +137,7 @@ O mapeamento é direto:
 
 Dois caminhos:
 
-- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` e o CI portátil (`.github/workflows/ci.yml`, `bin/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) na raiz e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
+- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` e o CI portátil (`.github/workflows/ci.yml`, `.engrama/scripts/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) no artefato instalado e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
 - **Manual (referência):** **[docs/INSTANTIATE.md](docs/INSTANTIATE.md)** — os mesmos passos feitos à mão, com o glossário completo dos 12 placeholders.
 
 Em ambos vale o **ritual de bootstrap** (ADR 0006): a governança se aplica a si mesma — o Engrama inicial vai à crítica do Executor e à aprovação da Autoridade antes do 1º commit. E, em ambos, o passo final de enforcement **server-side** continua manual no GitHub do adotante: **dar push** e marcar o job `gate` como *required check* no *branch protection*.
