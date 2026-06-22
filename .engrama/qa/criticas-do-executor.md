@@ -180,3 +180,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Escopo:** classify() imperativo (raiz+gerador do template), INSTALL/INSTANTIATE Passo 3/4/5/6, bin/bootstrap.sh seed vinculado, dica do gate p/ ledger vazio. chmod +x do hook do template feito pelo Orquestrador (operacao de indice).
 - **Consenso.** Sem objecao aberta; nada pendente de Autoridade nesta fatia.
 - **Fix de CI (pos-PR):** shellcheck do CI (mais novo) pegou SC2015 em `bin/bootstrap.sh:188` (`A && B || C`). Executor corrigiu (codex-session 019eecb9-e0bd-76b3-99d3-d8592fa5e7f7; subshell + `if !`). Reexecutei shellcheck `-S info` (0 achados) + suite. Tambem removi um `feature.txt` que vazou de um smoke do Executor. Commit reconstruido single-commit; fingerprint atualizado.
+
+## [2026-06-21] feat/p2-enforcement-server-side | [governance][gate][contract] PR-E: enforcement server-side portatil no template (ci.yml + gate-CI + docs branch-protection) | confirmo | sha256:7765848ea1e12a9eb8b9de2543cdea85c4387b3ef44f81b4dfc0a2f71bee52e5 codex-session:019eecc5-c261-7350-87aa-a8e65dacd9c8 executor codex via exec-bridge + auditoria orquestrador
+- **Veredito do Executor `concordo`.** Sem objecao material; tratou o risco de drift (pin gitleaks + gate-CI) com sync mecanico + contrato.
+- **Isolamento respeitado (regra pos-incidente do PR-D):** o Executor NAO alterou a config nem gravou nada no repo real; minha identidade ficou intacta (reverificada antes de gravar a fatia).
+- **Auditoria (ADR 0005):** suite verde (sync 21 asserts); lint/shellcheck(-S info)/sync exit 0; ci.yml do template validado com parser YAML real; confirmei: portatil (nao cita a suite do framework), gate-CI identico raiz<->template, pin gitleaks v8.30.1 em paridade, ADR 0006 do template cita o job `gate` (e o da raiz cita `test`) corretamente.
+- **Nao exercivel local:** o workflow do template so roda num repo adotante no GitHub + o branch protection (passo manual documentado). **Consenso.**

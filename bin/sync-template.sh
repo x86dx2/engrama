@@ -15,6 +15,8 @@ ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/scripts/session-context.sh"
 ROOT_LINT="$REPO_ROOT/.engrama/scripts/lint.sh"
 ROOT_DIFF_HASH="$REPO_ROOT/.engrama/scripts/engrama-diff-hash.sh"
 ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/scripts/exec-bridge.sh"
+ROOT_CI_GATE="$REPO_ROOT/bin/critique-gate-ci.sh"
+ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/scripts/critique-gate.sh"
 TEMPLATE_HOOK="$REPO_ROOT/template/.engrama/scripts/critique-gate-hook.sh"
@@ -22,6 +24,8 @@ TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/scripts/session-context.s
 TEMPLATE_LINT="$REPO_ROOT/template/.engrama/scripts/lint.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/scripts/engrama-diff-hash.sh"
 TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/scripts/exec-bridge.sh"
+TEMPLATE_CI_GATE="$REPO_ROOT/template/bin/critique-gate-ci.sh"
+TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
 
@@ -143,12 +147,16 @@ main() {
   need_file "$ROOT_LINT"
   need_file "$ROOT_DIFF_HASH"
   need_file "$ROOT_EXEC_BRIDGE"
+  need_file "$ROOT_CI_GATE"
+  need_file "$ROOT_MARKDOWNLINT"
   need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
   need_file "$TEMPLATE_HOOK"
   need_file "$TEMPLATE_SESSION_CONTEXT"
   need_file "$TEMPLATE_LINT"
   need_file "$TEMPLATE_DIFF_HASH"
+  need_file "$TEMPLATE_CI_GATE"
+  need_file "$TEMPLATE_MARKDOWNLINT"
   need_file "$TEMPLATE_SETTINGS"
 
   TMPDIR_SYNC="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-sync)"
@@ -160,6 +168,8 @@ main() {
   cp "$ROOT_LINT" "$TMPDIR_SYNC/lint.sh"
   cp "$ROOT_DIFF_HASH" "$TMPDIR_SYNC/engrama-diff-hash.sh"
   cp "$ROOT_EXEC_BRIDGE" "$TMPDIR_SYNC/exec-bridge.sh"
+  cp "$ROOT_CI_GATE" "$TMPDIR_SYNC/critique-gate-ci.sh"
+  cp "$ROOT_MARKDOWNLINT" "$TMPDIR_SYNC/markdownlint-cli2.yaml"
   cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"
 
   write_if_changed "$TMPDIR_SYNC/critique-gate.sh" "$TEMPLATE_GATE"
@@ -168,9 +178,11 @@ main() {
   write_if_changed "$TMPDIR_SYNC/lint.sh" "$TEMPLATE_LINT"
   write_if_changed "$TMPDIR_SYNC/engrama-diff-hash.sh" "$TEMPLATE_DIFF_HASH"
   write_if_changed "$TMPDIR_SYNC/exec-bridge.sh" "$TEMPLATE_EXEC_BRIDGE"
+  write_if_changed "$TMPDIR_SYNC/critique-gate-ci.sh" "$TEMPLATE_CI_GATE"
+  write_if_changed "$TMPDIR_SYNC/markdownlint-cli2.yaml" "$TEMPLATE_MARKDOWNLINT"
   write_if_changed "$TMPDIR_SYNC/settings.json" "$TEMPLATE_SETTINGS"
 
-  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" "$TEMPLATE_EXEC_BRIDGE" 2>/dev/null || true
+  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" "$TEMPLATE_EXEC_BRIDGE" "$TEMPLATE_CI_GATE" 2>/dev/null || true
 }
 
 main "$@"

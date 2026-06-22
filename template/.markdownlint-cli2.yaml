@@ -1,0 +1,38 @@
+# Config do markdownlint-cli2 (auto-descoberto na raiz).
+# Filosofia: rede leve, nao reformatador. Mantem as regras que pegam PROBLEMA
+# REAL (links quebrados, headings malformados, trailing space, etc.) e desliga
+# as de PURO ESTILO (a casa usa docs densos e consistentes, com 500+ "violacoes"
+# de blank-lines que nao agregam) + o falso-positivo dos wikilinks [[...]].
+config:
+  default: true
+
+  # --- estilo da casa (blank-lines / tabelas / listas) — nao reformatar ---
+  MD013: false   # line-length
+  MD022: false   # blanks-around-headings
+  MD024: false   # no-duplicate-heading
+  MD028: false   # no-blanks-blockquote
+  MD029: false   # ol-prefix (estilo de numeracao de lista ordenada)
+  MD031: false   # blanks-around-fences
+  MD032: false   # blanks-around-lists
+  MD033: false   # no-inline-html (tabelas/HTML pontual)
+  MD036: false   # no-emphasis-as-heading
+  MD038: false   # no-space-in-code-span
+  MD040: false   # fenced-code-language
+  MD041: false   # first-line-heading
+  MD058: false   # blanks-around-tables
+  MD060: false   # table-column-style (espacamento de pipe)
+
+  # --- wikilinks [[slug]] estilo Obsidian disparam falso-positivo de
+  #     reference-link; o proprio lint.sh ja valida wikilinks de verdade ---
+  MD052: false   # reference-links-images
+
+globs:
+  - "**/*.md"
+
+ignores:
+  - "node_modules"
+  - ".git"
+  # transcripts/ guarda registros VERBATIM do executor-bridge (ordem + resposta do
+  # codex). Sao evidencia, nao docs autorais — nao se aplica estilo de markdown a eles.
+  - "transcripts"
+  - "template/transcripts"

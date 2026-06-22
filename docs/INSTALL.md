@@ -2,7 +2,7 @@
 
 > **Você (agente) está lendo isto** no repo-fonte do Engrama e pediram para **bootstrapar / instalar** o Engrama em outro projeto. Execute os passos abaixo na ordem. Onde estiver marcado **PERGUNTAR**, pergunte ao humano e **não invente**. Onde estiver **INFERIR**, descubra do repositório e **confirme** com o humano antes de gravar.
 
-Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.md`, o `.engrama/` de governança, o `.claude/settings.json` com o hook do gate mecânico, e o primeiro commit feito sob as próprias regras. A partir daí, qualquer agente que abrir o repo cai no gate de governança e, no **primeiro startup**, é forçado a completar o bootstrap do projeto.
+Resultado final: o repo passa a ter, na **raiz**, os gates `CLAUDE.md`/`AGENTS.md`, o `.engrama/` de governança, o `.claude/settings.json` com o hook do gate mecânico, o CI portátil (`.github/workflows/ci.yml`, `bin/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) e o primeiro commit feito sob as próprias regras. A partir daí, qualquer agente que abrir o repo cai no gate de governança e, no **primeiro startup**, é forçado a completar o bootstrap do projeto.
 
 ---
 
@@ -97,11 +97,63 @@ Se você usou `bin/bootstrap.sh`, o instalador **já semeia** no ledger uma linh
 4. **Antes de commitar** (logar precede commit): registre a crítica em `.engrama/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo seed; inclua o próximo passo seguro) sempre que o diff já não for mais o snapshot puro do instalador.
 5. **Consenso** → aprovação da **Autoridade** → 1º commit. **Impasse** → a Autoridade arbitra (o Executor tem voz, não veto).
 
-## Passo 6 — Verificação final (prove que replicou)
+## Passo 6 — Ativar enforcement server-side
+
+O template já trouxe `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` para o repo-alvo. Isso **não** vira freio vinculante sozinho: sem push no GitHub + *branch protection*, o projeto novo fica só com o **freio local burlável**.
+
+1. Dê push do repo-alvo para o GitHub (ou confirme que a branch default já está lá).
+2. Descubra `owner/repo` e a branch default, se precisar:
+
+```bash
+gh api repos/<owner>/<repo> --jq '{full_name: .full_name, default_branch: .default_branch}'
+```
+
+3. Aplique o *branch protection* tornando o job `gate` um *required check*, exigindo PR e bloqueando *force-push*:
+
+```bash
+OWNER_REPO="<owner>/<repo>"
+DEFAULT_BRANCH="<default>"
+
+gh api -X PUT "repos/$OWNER_REPO/branches/$DEFAULT_BRANCH/protection" --input - <<'JSON'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["gate"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 1
+  },
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "block_creations": false,
+  "required_conversation_resolution": true,
+  "lock_branch": false,
+  "allow_fork_syncing": false
+}
+JSON
+```
+
+4. Confirme o estado aplicado:
+
+```bash
+gh api "repos/$OWNER_REPO/branches/$DEFAULT_BRANCH/protection" --jq '{
+  required_checks: .required_status_checks.contexts,
+  enforce_admins: .enforce_admins.enabled,
+  approving_reviews: .required_pull_request_reviews.required_approving_review_count,
+  allow_force_pushes: .allow_force_pushes.enabled
+}'
+```
+
+## Passo 7 — Verificação final (prove que replicou)
 
 - [ ] `grep -rho '{{[A-Z_]*}}' CLAUDE.md AGENTS.md .engrama` retorna **vazio**.
 - [ ] `git config core.hooksPath` = `.engrama/githooks`.
 - [ ] `.claude/settings.json` existe e chama `.engrama/scripts/critique-gate-hook.sh`.
+- [ ] `.github/workflows/ci.yml`, `bin/critique-gate-ci.sh` e `.markdownlint-cli2.yaml` existem na raiz do repo-alvo.
 - [ ] **Teste do gate (deterministico):** num repo limpo, rode em branch descartável para não herdar a entrada do bootstrap na `main`:
 
   ```bash
@@ -114,6 +166,7 @@ Se você usou `bin/bootstrap.sh`, o instalador **já semeia** no ledger uma linh
   ```
 
   A linha do bootstrap na `main` cobriria `governance`; na branch descartável não há entrada cobrindo esse diff, então o bloqueio é real.
+- [ ] No GitHub do repo-alvo, o *branch protection* da branch default exige PR, bloqueia *force-push* e marca o check `gate` como obrigatório. Sem isso, o enforcement segue só local/cooperativo.
 - [ ] Declare o **handshake** de abertura: papel · alçada · estado factual (topo do `.engrama/log.md`) · próximo passo seguro · o que depende da Autoridade.
 - [ ] O repo-alvo ficou com `CLAUDE.md`, `AGENTS.md`, `.engrama/` e `.claude/settings.json` na raiz, sem copiar `docs/engrama/`.
 - [ ] `project/bootstrap-do-projeto.md` foi lido e, se ainda estiver `proposed`, o Orquestrador iniciou a entrevista de bootstrap com a Autoridade.

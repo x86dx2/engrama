@@ -1,8 +1,8 @@
 # Governance Pack — modelo portável de governança entre agentes (padrão LLM-Wiki)
 
-Este diretório é um **template auto-contido** para replicar, em **qualquer projeto novo**, o modelo de governança entre agentes que amadurecemos no Ruflos — estruturado no **mesmo padrão do "LLM Wiki" de Andrej Karpathy** ([gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)).
+Este diretório é um **template quase auto-contido** para replicar, em **qualquer projeto novo**, o modelo de governança entre agentes que amadurecemos no Ruflos — estruturado no **mesmo padrão do "LLM Wiki" de Andrej Karpathy** ([gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)). Ele já entrega o **freio local** e o **CI portátil de enforcement**; o último passo para tornar isso **vinculante** no projeto adotante continua sendo **manual**: marcar o job `gate` como *required check* no *branch protection* do GitHub.
 
-- **`template/`** — a árvore que você **copia para a raiz** do projeto novo (gates + `.engrama/`).
+- **`template/`** — a árvore que você **copia para a raiz** do projeto novo (gates + `.engrama/` + CI portátil).
 - **[`docs/INSTALL.md`](docs/INSTALL.md)** — playbook do agente para bootstrap/install.
 - **[`docs/INSTANTIATE.md`](docs/INSTANTIATE.md)** — passo a passo manual de adoção.
 - **este `README.md`** — a análise do padrão e como o pack o encarna.
@@ -114,6 +114,9 @@ O mapeamento é direto:
 │   └── githooks/pre-commit
 └── template/                      # artefato distribuível para projetos novos
     ├── CLAUDE.md / AGENTS.md
+    ├── .github/workflows/ci.yml
+    ├── .markdownlint-cli2.yaml
+    ├── bin/critique-gate-ci.sh
     └── .engrama/
         ├── governance/ · decisions/ · project/ · specs/ · qa/
         ├── scripts/
@@ -133,7 +136,7 @@ O mapeamento é direto:
 
 Dois caminhos:
 
-- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` na raiz e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
+- **Auto-instalação pelo agente (recomendado):** rode o bootstrap do repo-fonte apontando para o projeto novo: `bash /caminho/do/engrama/bin/bootstrap.sh /caminho/do/projeto-novo`. O **[docs/INSTALL.md](docs/INSTALL.md)** é o playbook imperativo: ele usa os defaults padrão do pack herdados do `Ruflos`, infere o que der do repo-alvo, instala `CLAUDE.md`/`AGENTS.md`/`.engrama/`/`.claude/settings.json` e o CI portátil (`.github/workflows/ci.yml`, `bin/critique-gate-ci.sh`, `.markdownlint-cli2.yaml`) na raiz e, no **primeiro startup**, força o Orquestrador a entrevistar a Autoridade para fechar finalidade, stack, comandos e superfícies sensíveis do projeto.
 - **Manual (referência):** **[docs/INSTANTIATE.md](docs/INSTANTIATE.md)** — os mesmos passos feitos à mão, com o glossário completo dos 12 placeholders.
 
-Em ambos vale o **ritual de bootstrap** (ADR 0006): a governança se aplica a si mesma — o Engrama inicial vai à crítica do Executor e à aprovação da Autoridade antes do 1º commit.
+Em ambos vale o **ritual de bootstrap** (ADR 0006): a governança se aplica a si mesma — o Engrama inicial vai à crítica do Executor e à aprovação da Autoridade antes do 1º commit. E, em ambos, o passo final de enforcement **server-side** continua manual no GitHub do adotante: **dar push** e marcar o job `gate` como *required check* no *branch protection*.
