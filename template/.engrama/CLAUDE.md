@@ -59,9 +59,18 @@ touches: [slug-relacionado, outro-slug]
 date: {{DATA}}
 source_refs:                       # caminhos relativos à raiz do repo
   - .engrama/...
+reconcilia: ADD                   # opcional; ou: UPDATE slug | DELETE slug | NOOP slug
 critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   # só em gaps de superfície sensível (ADR 0006/item 7)
 ---
 ```
+
+### Convenções opcionais
+- `reconcilia:` é opcional. Sintaxe: `ADD` (com alvo opcional) ou `<OP> <slug>` com `OP ∈ {UPDATE, DELETE, NOOP}`.
+- `ADD` marca conteúdo genuinamente novo; o slug-alvo pode ficar ausente.
+- `UPDATE <slug>` complementa ou ajusta uma página existente sem invalidá-la.
+- `DELETE <slug>` supersede/invalida uma página existente; combinar com `status: superseded` + ponteiro para a substituta quando aplicável.
+- `NOOP <slug>` registra reavaliação sem mudança material; usar com parcimônia.
+- `reconcilia:` é disciplina validável, não automação semântica: detectar duplicata/overlap continua sendo trabalho humano e `grep`.
 
 ### Body
 - Primeira linha após o frontmatter: resumo em 1–3 frases.

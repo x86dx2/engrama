@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-21] feat | PR-G — absorcao mem0/Honcho: reconciliacao de memoria + metricas (ADR 0012)
+- Branch `feat/absorcao-reconciliacao-metricas`. Executor via `exec-bridge.sh` (codex-session da run prG, veredito `concordo`, mérito do ADR 0012 favorável). Orquestrador auditou + provou empiricamente.
+- **Origem:** analise multiagente de absorcao (Honcho/mem0, 25 candidatos -> 8 aprovados na critica de coerencia). Esses sao sistemas de memoria de RUNTIME; o ganho real e de PADRAO/disciplina, nao infra. Esta fatia implementa o cluster "operacoes de memoria + metricas".
+- **ADR 0012 (de mem0 + RFC IETF Obsoletes/Updates):** campo de frontmatter **opcional** `reconcilia: <ADD|UPDATE|DELETE|NOOP> <slug>` — marca se um fato/ADR e novo, complementa, supersede ou reafirma. Disciplina validavel, NAO deduplicacao automatica (limite honesto documentado). O Executor rejeitou a alternativa "obrigatorio em toda pagina" (manteve opcional). Dogfood: o proprio 0012 usa `reconcilia: ADD`.
+- **lint.sh:** valida `reconcilia:` quando presente (enum + slug resolve a pagina existente; malformado = erro bloqueante; ausente = ok); **staleness** como WARNING nao-bloqueante (> 90d sem commit em governance/specs/decisions `active`, via `git log %ct` — clone-stable, nao mtime; override `ENGRAMA_NOW` p/ teste); nomeou a deteccao de orfas como metrica de densidade de enlaces. Canal de warning separado do de erro (exit so depende de ERRORS).
+- **gaps/metricas-de-engrama.md (proposed):** registra metricas implementadas (densidade de enlaces, staleness) + abertas como pesquisa (cobertura, coerencia semantica) — explicitamente SEM infra de runtime. Fica so na instancia viva (template nao carrega gaps/).
+- **QA (ADR 0005):** suite verde (lint.test 22, sync 21); lint/shellcheck(-S info) exit 0; provei: staleness com `ENGRAMA_NOW` futuro emite 23 warnings mas exit 0; reconcilia com alvo inexistente bloqueia (exit 1). Schema/lint espelhados no template (ADR 0012 manual, pois sync-template nao propaga ADRs).
+- **PROXIMO:** PR-H (paginas domain/ que nomeiam padroes ja vivos + spec de ingestao + working/long-term).
+
 ## [2026-06-21] feat | PR-F — polimento de docs/install do bootstrap (P2/P3, fecha a remediacao)
 - Branch `feat/p3-docs-install-polish`. Executor via `exec-bridge.sh` (codex-session da run prF, veredito `concordo`). Orquestrador auditou + smoke proprio.
 - **Fecha a lista P2/P3 da auditoria de prontidao.** Itens:

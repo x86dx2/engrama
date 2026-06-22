@@ -43,6 +43,15 @@ new_temp_dir() {
   mktemp -d 2>/dev/null || mktemp -d -t engrama-lint-test
 }
 
+commit_all_with_date() {
+  local repo="$1" epoch="$2" message="${3:-seed}"
+  (
+    cd "$repo" || exit 2
+    git add . >/dev/null 2>&1
+    GIT_AUTHOR_DATE="@$epoch" GIT_COMMITTER_DATE="@$epoch" git commit -qm "$message" >/dev/null 2>&1
+  )
+}
+
 write_file() {
   local path="$1"
   mkdir -p "$(dirname "$path")"
@@ -457,8 +466,98 @@ rc="$(run_lint "$R")"
 if is_zero "$rc"; then _r=0; else _r=1; fi
 check L17 CORRETO "$_r" "TODO no bootstrap continua permitido"
 
+# L18: reconcilia UPDATE para slug existente => PASSA
+R="$(new_repo)"
+seed_clean_repo "$R"
+write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+---
+type: decision
+status: active
+date: 2026-06-21
+source_refs:
+  - .engrama/log.md
+reconcilia: UPDATE governance/regras
+---
+
+ADR inicial. Ver [[governance/regras]].
+EOF
+rc="$(run_lint "$R")"
+if is_zero "$rc"; then _r=0; else _r=1; fi
+check L18 CORRETO "$_r" "reconcilia UPDATE com slug existente passa"
+
+# L19: reconcilia com operacao invalida => BLOQUEIA
+R="$(new_repo)"
+seed_clean_repo "$R"
+write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+---
+type: decision
+status: active
+date: 2026-06-21
+source_refs:
+  - .engrama/log.md
+reconcilia: XPTO governance/regras
+---
+
+ADR inicial. Ver [[governance/regras]].
+EOF
+rc="$(run_lint "$R")"
+if is_one "$rc"; then _r=0; else _r=1; fi
+check L19 CORRETO "$_r" "reconcilia com operacao fora do enum derruba o lint"
+
+# L20: reconcilia UPDATE para slug inexistente => BLOQUEIA
+R="$(new_repo)"
+seed_clean_repo "$R"
+write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+---
+type: decision
+status: active
+date: 2026-06-21
+source_refs:
+  - .engrama/log.md
+reconcilia: UPDATE governance/nao-existe
+---
+
+ADR inicial. Ver [[governance/regras]].
+EOF
+rc="$(run_lint "$R")"
+if is_one "$rc"; then _r=0; else _r=1; fi
+check L20 CORRETO "$_r" "reconcilia UPDATE com slug inexistente derruba o lint"
+
+# L21: ausencia de reconcilia continua ok
+R="$(new_repo)"
+seed_clean_repo "$R"
+write_file "$R/.engrama/decisions/0001-primeira.md" <<'EOF'
+---
+type: decision
+status: active
+date: 2026-06-21
+source_refs:
+  - .engrama/log.md
+---
+
+ADR inicial. Ver [[governance/regras]].
+EOF
+rc="$(run_lint "$R")"
+if is_zero "$rc"; then _r=0; else _r=1; fi
+check L21 CORRETO "$_r" "reconcilia ausente continua permitido"
+
+# L22: staleness gera warning, mas nao bloqueia
+R="$(new_repo)"
+seed_clean_repo "$R"
+commit_all_with_date "$R" 1704067200 "seed"
+out="$(
+  cd "$R" || exit 2
+  ENGRAMA_NOW=1712448000 bash ./.engrama/scripts/lint.sh 2>&1
+  printf '\n__RC__=%s\n' "$?"
+)"
+case "$out" in
+  *"WARN .engrama/"*"staleness:"*"__RC__=0"*) _r=0 ;;
+  *) _r=1 ;;
+esac
+check L22 CORRETO "$_r" "staleness avisa sem alterar o exit code"
+
 printf '%b\n' "$RESULTS"
 echo ""
 echo "Resumo: $PASS asserts batidos, $FAIL divergentes | $HOLES casos marcados FURO (a corrigir)"
-echo "Legenda: CORRETO = contrato esperado; os pares L10/L11, L12/L13, L14/L15 e L16/L17 provam sensibilidade dos checks novos."
+echo "Legenda: CORRETO = contrato esperado; os pares L10/L11, L12/L13, L14/L15, L16/L17 e os blocos L18-L22 provam sensibilidade dos checks novos."
 [ "$FAIL" -eq 0 ] || exit 1

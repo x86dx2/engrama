@@ -192,3 +192,8 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Isolamento respeitado:** Executor nao alterou config nem gravou no repo real; identidade reverificada antes de gravar.
 - **Auditoria (ADR 0005):** suite verde; lint/shellcheck(-S info)/sync exit 0; confirmei ADR max=0011 (logo "comeca em 0012" correto), tabela com os 17 placeholders, os 2 Ruflos restantes sao prosa/exemplo (nao tabela). Smoke proprio via bootstrap.sh: 5 scripts OK + sha256 valido + Passos 7/8 no checklist.
 - **Fecha a remediacao** P1/P2/P3 da auditoria de prontidao. **Consenso.**
+
+## [2026-06-21] feat/absorcao-reconciliacao-metricas | [governance][gate][contract] PR-G: ADR 0012 reconciliacao de memoria + metricas no lint (absorcao mem0/Honcho) | confirmo | sha256:331f4901ddbcc6302f22c6c571433afdcafd05b794e4916b1069032db9a2e223 codex-session:019eecfc-218a-73a0-8993-b37a21ece384 executor codex via exec-bridge + auditoria orquestrador
+- **Veredito do Executor `concordo`** (merito do ADR 0012 favoravel). Rejeitou a alternativa "reconcilia obrigatorio em toda pagina" e fixou o limite honesto: e disciplina validavel, nao deduplicacao automatica. Captou que sync-template nao propaga ADRs e espelhou o 0012 manualmente.
+- **Isolamento respeitado:** nao alterou config nem gravou no repo real; identidade reverificada antes de gravar.
+- **Auditoria (ADR 0005):** suite verde (lint.test 22, sync 21); lint/shellcheck(-S info) exit 0. Provei eu mesmo: staleness com ENGRAMA_NOW futuro emite warnings mas mantem exit 0 (nao-bloqueante via canal separado); reconcilia com alvo inexistente bloqueia (exit 1); ADR 0012 dogfooda reconcilia: ADD; staleness usa git log %ct (clone-stable). **Consenso.**
