@@ -210,12 +210,19 @@ extract_model_from_args() {
 
 extract_response_text() {
   local events_file="$1"
+  # Suporta dois schemas do `codex exec --json`:
+  #  - antigo: response_item/message/assistant + content[].output_text
+  #  - novo (codex-cli >= 0.142.0): item.completed com item.type == agent_message + item.text
+  # O item.completed do tipo "error" (ex.: warning de plugin) NAO e a resposta -> excluido.
   jq -Rr '
     fromjson? |
-    select(.type == "response_item" and .payload.type == "message" and .payload.role == "assistant") |
-    .payload.content[]? |
-    select(.type == "output_text") |
-    .text, ""
+    if (.type == "response_item" and .payload.type == "message" and .payload.role == "assistant") then
+      (.payload.content[]? | select(.type == "output_text") | .text)
+    elif (.type == "item.completed" and (.item.type? == "agent_message")) then
+      .item.text
+    else
+      empty
+    end
   ' "$events_file"
 }
 

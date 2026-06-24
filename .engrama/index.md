@@ -25,6 +25,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/decisions/0010-roteamento-modelo-effort-do-executor]] — Orquestrador decide modelo+effort do Executor por tarefa (tiers T1–T4; conservador-pra-cima; risco=piso).
 - [[memory/decisions/0011-diff-binding-atestacao-verificavel]] — ledger pode vincular a crítica ao diff staged por `sha256`, com modo estrito opt-in/CI.
 - [[memory/decisions/0012-reconciliacao-de-memoria]] — `reconcilia:` explicita ADD/UPDATE/DELETE/NOOP contra a memória já versionada.
+- [[memory/decisions/0013-bridge-resiliente-a-version-drift-do-codex]] — bridge parseia múltiplos schemas do `codex --json` + teste de contrato com o stream real (E3A não-vácuo).
 
 ## Specs (playbooks operacionais — o "como")
 - [[memory/specs/README]] — índice + princípio (spec ≠ subagente).
