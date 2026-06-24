@@ -26,6 +26,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/decisions/0011-diff-binding-atestacao-verificavel]] — ledger pode vincular a crítica ao diff staged por `sha256`, com modo estrito opt-in/CI.
 - [[memory/decisions/0012-reconciliacao-de-memoria]] — `reconcilia:` explicita ADD/UPDATE/DELETE/NOOP contra a memória já versionada.
 - [[memory/decisions/0013-bridge-resiliente-a-version-drift-do-codex]] — bridge parseia múltiplos schemas do `codex --json` + teste de contrato com o stream real (E3A não-vácuo).
+- [[memory/decisions/0014-gate-de-release-repo-central]] — gate de release repo-central-only (CI derruba o job `test`; manifest explícito; escape `sem-release` bound-by-hash).
 
 ## Specs (playbooks operacionais — o "como")
 - [[memory/specs/README]] — índice + princípio (spec ≠ subagente).

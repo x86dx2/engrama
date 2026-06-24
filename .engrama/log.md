@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-24] feat | fatia 2 — release-gate repo-central-only (ADR 0014)
+- Branch `feat/disciplina-de-release-0.2.0`. Fatia 1 (bridge-hardening, ADR 0013) ja committada (`f68b56b`). Esta e a fatia 2 do plano de disciplina de release.
+- **Desenho fechado (Executor read-only, `019efa28`, `pronto para FASE 2`):** pegou 3 catches do meu pedido — `bin/release-gate.sh` root-only (NAO `engine/scripts/`, que vaza pelo sync-template), `.markdownlint-cli2.yaml` na superficie distribuivel, flags explicitas no hasher.
+- **Execucao (Executor workspace-write, `019efa34`, `ajuste-menor`):** `bin/release-gate.sh` (modos ci/warn; exit 0/1/2), manifest root-only `.engrama/release-surface.manifest`, escape `.engrama/evidence/qa/release-waivers.md` (`sem-release` bound-by-hash), `engrama-diff-hash.sh` com flags OPT-IN (`--manifest/--include/--exclude`; default legado intacto), step na CI (job `test`, PR+ubuntu), testes `release-gate.test` 11 + `release-surface.test` 4 + extensoes em diffbind/bootstrap.
+- **Risco #1 (nao quebrar o critique-gate):** mitigado — `D10`/`D11` provam `--cached`/`--range` batendo o fingerprint legado bit-a-bit; default volta ao legado por construcao (wrapper); critique-gate exit 0 na auditoria.
+- **Governanca (ADR 0006, `019efa4c`):** ADR 0014 + nota CONTRIBUTING; veredito `ressalvas` (3 pontos de honestidade) TODOS incorporados (CI "vinculante"->"derruba job test, bloqueia merge se required-check"; source_refs +release-surface.test; +obrigacao de sincronia do manifest + recalc com origin/<base>).
+- **Auditoria (ADR 0005):** suite TODAS VERDES; shellcheck -S info limpo; lint=0; escopo SEM VERSION/CHANGELOG; release-gate fora do template (RS2/RS4). Ledger com sha256 + 3 codex-session.
+- **PROXIMO:** fatia 3 — bump `VERSION` 0.2.0 + `CHANGELOG` (data real; restaurar verdade historica do 0.1.0). ATENCAO: a CI derrubaria o job `test` ate o bump (payload mudou nas fatias 1-2) — fatia 3 precede o push. Depois, fatia 4 (disciplina-no-template, decisao separada).
+
 ## [2026-06-24] fix | break-glass exec-bridge (schema codex 0.142.0) + re-run critica FASE 1 da disciplina de release 0.2.0
 - Branch `feat/disciplina-de-release-0.2.0` (em paridade com main; nada commitado ainda). Sessao de abertura: gate lido, handshake feito.
 - **Sintoma:** o par de transcripts `2026-06-22-release-disciplina-critica-*` tinha **resposta vazia** (session `derived`, model `unknown`). Causa-raiz diagnosticada: o **`codex-cli 0.142.0` mudou o schema do `--json`** — resposta agora em `item.completed`/`item.type==agent_message`/`.item.text`; session em `thread.started`/`.thread_id`. O `exec-bridge.sh` parseava o schema ANTIGO (`response_item`/`message`/`output_text`), entao descartava a resposta em silencio. **Canal de governanca quebrado por version-drift, sem teste de contrato pegando** — mesma classe da licao do PR-B.

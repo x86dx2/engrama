@@ -63,6 +63,29 @@ run_diff_hash_range() {
   )
 }
 
+manual_legacy_hash() {
+  local repo="$1" mode="$2" range="${3:-}"
+  (
+    cd "$repo" || exit 2
+    case "$mode" in
+      cached)
+        git diff --cached --raw -z -- . ':(exclude).engrama/evidence/qa/criticas-do-executor.md'
+        ;;
+      range)
+        git diff --raw -z "$range" -- . ':(exclude).engrama/evidence/qa/criticas-do-executor.md'
+        ;;
+      *)
+        exit 2
+        ;;
+    esac |
+      if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum
+      else
+        shasum -a 256
+      fi | awk 'NR == 1 { print "sha256:" $1 }'
+  )
+}
+
 check() {
   local id="$1" tag="$2" exp="$3" got="$4" desc="$5" mark
   if [ "$exp" = "$got" ]; then mark="ok"; PASS=$((PASS+1)); else mark="XX"; FAIL=$((FAIL+1)); fi
@@ -169,6 +192,37 @@ git -C "$r" add .engrama/memory/governance/p.md
 write_ledger "$r" "## [2026-06-20] main | [governance] x | confirmo | ref sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
 git -C "$r" add .engrama/evidence/qa/criticas-do-executor.md
 check D9 CORRETO 2 "$(run_gate "$r" 1 "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")" "modo estrito bloqueia quando o override diverge do sha256 registrado"
+
+# D10: caminho default --cached segue bit-a-bit o pipeline legado
+r="$(new_repo main)"
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
+hash_default="$(run_diff_hash_cached "$r")"
+hash_legacy="$(manual_legacy_hash "$r" cached)"
+if [ "$hash_default" = "$hash_legacy" ]; then
+  ok=0
+else
+  ok=1
+fi
+check D10 CORRETO 0 "$ok" "--cached preserva exatamente o fingerprint legado do critique-gate"
+
+# D11: caminho default --range segue bit-a-bit o pipeline legado
+r="$(new_repo main)"
+git -C "$r" add .engrama/engine/scripts/critique-gate.sh .engrama/engine/scripts/engrama-diff-hash.sh .engrama/evidence/qa/criticas-do-executor.md
+git -C "$r" commit -qm base
+git -C "$r" branch base
+git -C "$r" checkout -q -b pr/d11
+printf 'x\n' > "$r/.engrama/memory/governance/p.md"
+git -C "$r" add .engrama/memory/governance/p.md
+git -C "$r" commit -qm pr
+hash_default="$(run_diff_hash_range "$r" "base...HEAD")"
+hash_legacy="$(manual_legacy_hash "$r" range "base...HEAD")"
+if [ "$hash_default" = "$hash_legacy" ]; then
+  ok=0
+else
+  ok=1
+fi
+check D11 CORRETO 0 "$ok" "--range preserva exatamente o fingerprint legado do critique-gate"
 
 printf '%b\n' "$RESULTS"
 echo ""

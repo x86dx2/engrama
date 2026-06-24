@@ -1,0 +1,20 @@
+# Superficie distribuivel do pack sujeita ao release-gate repo-central-only.
+# Regras:
+# - caminho literal = match exato
+# - sufixo /** = qualquer arquivo sob o prefixo
+
+template/**
+VERSION
+.engrama/CLAUDE.md
+.claude/settings.json
+.markdownlint-cli2.yaml
+.engrama/engine/githooks/**
+.engrama/engine/scripts/critique-gate.sh
+.engrama/engine/scripts/critique-gate-hook.sh
+.engrama/engine/scripts/session-context.sh
+.engrama/engine/scripts/lint.sh
+.engrama/engine/scripts/engrama-diff-hash.sh
+.engrama/engine/scripts/exec-bridge.sh
+.engrama/engine/scripts/critique-gate-ci.sh
+bin/bootstrap.sh
+bin/install.sh

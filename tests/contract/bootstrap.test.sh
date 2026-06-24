@@ -135,6 +135,16 @@ else
 fi
 check C11 CORRETO "$_r" "bootstrap instala .engrama/engine/scripts/exec-bridge.sh e .engrama/evidence/transcripts/README.md no projeto-alvo"
 
+# C11B: release-gate repo-central-only nao e distribuido ao adotante.
+if [ ! -e "$T8/bin/release-gate.sh" ] \
+  && [ ! -e "$T8/.engrama/release-surface.manifest" ] \
+  && [ ! -e "$T8/.engrama/evidence/qa/release-waivers.md" ]; then
+  _r=0
+else
+  _r=1
+fi
+check C11B CORRETO "$_r" "bootstrap do adotante nao instala release-gate/manifests/waivers root-only"
+
 # C12: bootstrap semeia a dispensa inicial vinculada por sha256 e deixa o 1o commit passar.
 seed_line="$(grep -m 1 '^## \[[0-9-]\{10\}\] .*| \[governance\]\[gate\] bootstrap inicial' "$T8/.engrama/evidence/qa/criticas-do-executor.md" 2>/dev/null || true)"
 git -C "$T8" config user.email t@t
