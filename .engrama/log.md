@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-24] feat | fatia 3 — release 0.2.0 (VERSION + CHANGELOG) + restauracao do anacronismo 0.1.0
+- Branch `feat/disciplina-de-release-0.2.0`. Fatias 1 (`f68b56b`) e 2 (`e2a2ee6`) committadas. Esta fecha o ciclo da disciplina de release.
+- **Bump:** `VERSION` 0.1.0 -> 0.2.0; `CHANGELOG` ganhou `## [0.2.0] - 2026-06-24` + nova `## [Nao lancado]`. **Restauracao do anacronismo 0.1.0:** o path-rewrite da reorg (#15) reescreveu paths historicos na entrada `## [0.1.0]` (`.engrama/scripts/`->`engine/scripts/` etc.); restaurei ao texto exato da tag `v0.1.0` (Executor confirmou paridade bit-a-bit).
+- **Freio ativo do Executor (ADR 0004) em acao:** 1a critica = **`discordo` MATERIAL** (gatilho 4, contradicao com estado real/princ. 12) — a entrada 0.2.0 subcontava o delta real desde `v0.1.0` (so #14/#15/ADR0013/0014; faltavam PR-A..PR-H + ADR 0012). **Concordei com a objecao (sem impasse a arbitrar) e incorporei:** reescrevi a 0.2.0 cobrindo todo `v0.1.0..HEAD` (#6-#15 + fatias). Re-critica = `ressalvas` (movi/removi o item de diff-binding mal-datado — ADR 0011 ja era de 0.1.0; nuance temporal inerente ao commit de release). Consenso.
+- **Dogfood do release-gate:** com bump+CHANGELOG, o gate passa a APROVAR pos-commit (payload mudou + VERSION mudou + 1o heading versionado = 0.2.0) — antes do bump ele derrubaria o job `test`.
+- **Auditoria (ADR 0005):** suite TODAS VERDES; lint=0; restauracao 0.1.0 == `git show v0.1.0:CHANGELOG.md`. Ledger com sha256 + codex-session (critica+re-critica).
+- **PROXIMO:** branch **PR-ready**. Push/PR/merge + **tag `v0.2.0`** = alcada da Autoridade (branch protection). Fatia 4 (disciplina-no-template) = decisao separada da Autoridade.
+
 ## [2026-06-24] feat | fatia 2 — release-gate repo-central-only (ADR 0014)
 - Branch `feat/disciplina-de-release-0.2.0`. Fatia 1 (bridge-hardening, ADR 0013) ja committada (`f68b56b`). Esta e a fatia 2 do plano de disciplina de release.
 - **Desenho fechado (Executor read-only, `019efa28`, `pronto para FASE 2`):** pegou 3 catches do meu pedido — `bin/release-gate.sh` root-only (NAO `engine/scripts/`, que vaza pelo sync-template), `.markdownlint-cli2.yaml` na superficie distribuivel, flags explicitas no hasher.
