@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-27] release | fechamento da release 0.2.0 — PR #16 + re-bind do diff COMBINADO (critica fresca do agregado)
+- Branch `feat/disciplina-de-release-0.2.0` **PR-ready** virou **PR #16** (push + PR contra `main`). Fatias 1-3 ja committadas (`f68b56b`/`e2a2ee6`/`6f58c42`).
+- **Gate de PR pegou furo real (nao-flake):** o `critique-gate-ci.sh` em modo estrito roda sobre o diff COMBINADO `origin/main...HEAD`; as 3 fatias foram criticadas individualmente mas faltava critica vinculada ao agregado (critica das partes != do todo). Precedente: re-bind do PR #14.
+- **Critica fresca do agregado (Executor read-only, codex-session `019f0995`, source stream):** veredito **`ressalvas`** (nao-bloqueante). Conferiu: sem contradicao inter-fatias; agregado-de-conteudo = `c2752cf0`; CHANGELOG 0.2.0 cobre `v0.1.0..HEAD`; secao 0.1.0 == `git show v0.1.0:CHANGELOG.md` (por hash); paridade raiz<->template (bridge+hasher); release-gate root-only.
+- **2 ressalvas dispositadas como follow-up (NAO reabrem 0.2.0):** (1) `bin/release-gate.sh` parser de waiver usa heredoc/tempfile (falha em sandbox read-only; CI tem /tmp; gate saiu 0); (2) `engrama.values.example` + `docs/INSTANTIATE.md` mostram `ENGRAMA_VERSION=0.1.0` (caminho automatico le VERSION=0.2.0). Registradas em [[memory/gaps/follow-ups-pos-0.2.0]].
+- **Binding (sem `--no-verify`, mantendo as 3 fatias):** o commit de evidencia (transcript+log+ledger+gap) muda o fingerprint do agregado (inclui o transcript desta critica; exclui o ledger). Entrada substantiva [governance][gate][contract] vinculada ao novo sha256 + auto-vinculacao `N/A` do commit de evidencia (satisfaz o gate local).
+- **PROXIMO:** push -> CI verde (4 required checks) -> merge (alcada da Autoridade; `required_approving_review_count=0`, basta CI) -> **tag `v0.2.0`**.
+
 ## [2026-06-24] feat | fatia 3 — release 0.2.0 (VERSION + CHANGELOG) + restauracao do anacronismo 0.1.0
 - Branch `feat/disciplina-de-release-0.2.0`. Fatias 1 (`f68b56b`) e 2 (`e2a2ee6`) committadas. Esta fecha o ciclo da disciplina de release.
 - **Bump:** `VERSION` 0.1.0 -> 0.2.0; `CHANGELOG` ganhou `## [0.2.0] - 2026-06-24` + nova `## [Nao lancado]`. **Restauracao do anacronismo 0.1.0:** o path-rewrite da reorg (#15) reescreveu paths historicos na entrada `## [0.1.0]` (`.engrama/scripts/`->`engine/scripts/` etc.); restaurei ao texto exato da tag `v0.1.0` (Executor confirmou paridade bit-a-bit).
