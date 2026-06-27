@@ -25,6 +25,8 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/decisions/0010-roteamento-modelo-effort-do-executor]] — Orquestrador decide modelo+effort do Executor por tarefa (tiers T1–T4; conservador-pra-cima; risco=piso).
 - [[memory/decisions/0011-diff-binding-atestacao-verificavel]] — ledger pode vincular a crítica ao diff staged por `sha256`, com modo estrito opt-in/CI.
 - [[memory/decisions/0012-reconciliacao-de-memoria]] — `reconcilia:` explicita ADD/UPDATE/DELETE/NOOP contra a memória já versionada.
+- [[memory/decisions/0013-bridge-resiliente-a-version-drift-do-codex]] — bridge parseia múltiplos schemas do `codex --json` + teste de contrato com o stream real (E3A não-vácuo).
+- [[memory/decisions/0014-gate-de-release-repo-central]] — gate de release repo-central-only (CI derruba o job `test`; manifest explícito; escape `sem-release` bound-by-hash).
 
 ## Specs (playbooks operacionais — o "como")
 - [[memory/specs/README]] — índice + princípio (spec ≠ subagente).
@@ -45,5 +47,6 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 ## Páginas do seu projeto (domínio · roadmap · QA · gaps)
 
 - [[memory/gaps/metricas-de-engrama]] — estado das métricas mecanizadas do Engrama (densidade de enlaces, staleness) e pesquisas futuras sem runtime extra.
+- [[memory/gaps/follow-ups-pos-0.2.0]] — ressalvas não-bloqueantes da crítica do agregado do PR #16 (release-gate heredoc; `ENGRAMA_VERSION` stale em example/docs), deferidas para pós-`v0.2.0`.
 
 > Template: aqui entram as páginas de `memory/domain/`, `memory/roadmap/`, `memory/gaps/` e `evidence/qa/` DO SEU PROJETO (criadas conforme o trabalho avança). Este pack entrega só o esqueleto de governança/processo; o conteúdo de domínio, sequenciamento e cobertura é específico de cada projeto. Ao criá-las, registre-as nesta seção com um blurb curto e mantenha os cross-links (`touches`) em dia.

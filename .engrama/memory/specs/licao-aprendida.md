@@ -43,5 +43,6 @@ Nem toda falha exige todos os destinos. **Trivial mecânico** (typo, link quebra
 - **Overclaim "a CI garante"**: crítica do Executor → princípio 12 + correção de prosa + esta spec.
 - **Template distribuía o gate bugado** (EX2): auditoria → `sync-template.sh` + `sync.test.sh` (drift vira erro de CI).
 - **"Prega TDD, zero testes"**: auditoria → suíte `tests/` + CI.
+- **Version-drift do `codex` arrombou o bridge** (2ª ocorrência confirmada da classe "stub não replica o formato real" — PR-B corpo; precursor em PR-A com o session-id): o `codex-cli 0.142.0` mudou o `--json` (`item.completed`/`agent_message`) e o `exec-bridge.sh` descartava a resposta em silêncio; a suíte de contrato ficava **verde-vácua** porque os stubs E1–E7 estavam no schema antigo. Destino: dual-parse + **teste de contrato exercitando o stream REAL** (hoje inline no teste) e prova de não-vacuidade (`E3A` mostra o parser legado vazio no mesmo stream) → [[memory/decisions/0013-bridge-resiliente-a-version-drift-do-codex]]. **Regra: os eventos do contrato vêm da saída real, sempre — e recapturados quando o codex mudar.**
 
 > Em uma frase: cada falha é matéria-prima de uma regra. O Engrama fica mais valioso a cada incidente — não apesar deles.

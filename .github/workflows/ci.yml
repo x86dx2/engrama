@@ -51,6 +51,10 @@ jobs:
           git fetch --no-tags origin
           "refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
 
+      - name: Enforce release gate against pull request diff
+        if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest'
+        run: bash ./bin/release-gate.sh --mode ci --base-ref "origin/${{ github.base_ref }}"
+
       - name: Re-run critique gate against pull request diff
         if: github.event_name == 'pull_request'
         env:

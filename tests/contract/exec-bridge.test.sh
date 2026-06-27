@@ -32,7 +32,29 @@ new_repo() {
   printf '%s' "$d"
 }
 
-write_stream_stub() {
+write_real_stream_events() {
+  local path="$1"
+  cat > "$path" <<'JSON'
+{"type":"thread.started","thread_id":"019ef9f3-e493-7a71-a5b2-688716a1281a"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"failed to parse plugin hooks config ... unknown field `description`"}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"PONG"}}
+{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}
+JSON
+}
+
+legacy_extract_response_text() {
+  local events_file="$1"
+  jq -Rr '
+    fromjson? |
+    select(.type == "response_item" and .payload.type == "message" and .payload.role == "assistant") |
+    .payload.content[]? |
+    select(.type == "output_text") |
+    .text
+  ' "$events_file"
+}
+
+write_real_stream_stub() {
   local path="$1"
   cat > "$path" <<'EOF'
 #!/usr/bin/env bash
@@ -41,9 +63,28 @@ set -u
 [ "${1:-}" = "exec" ] || { echo "stub recebeu comando inesperado: ${1:-<vazio>}" >&2; exit 9; }
 cat >/dev/null
 cat <<'JSON'
-{"type":"session_meta","payload":{"id":"sessao-fake-123"}}
+{"type":"thread.started","thread_id":"019ef9f3-e493-7a71-a5b2-688716a1281a"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"failed to parse plugin hooks config ... unknown field `description`"}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"PONG"}}
+{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}
+JSON
+EOF
+  chmod +x "$path"
+}
+
+write_legacy_stream_stub() {
+  local path="$1"
+  cat > "$path" <<'EOF'
+#!/usr/bin/env bash
+set -u
+
+[ "${1:-}" = "exec" ] || { echo "stub recebeu comando inesperado: ${1:-<vazio>}" >&2; exit 9; }
+cat >/dev/null
+cat <<'JSON'
+{"type":"session_meta","payload":{"id":"sessao-legacy-321"}}
 {"type":"turn_context","payload":{"model":"gpt-5.4-mini"}}
-{"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Leitura da ordem\nCritica tecnica\nVeredito: concordo"}],"phase":"final_answer"}}
+{"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"RESPOSTA-LEGACY-CAPTURADA"}],"phase":"final_answer"}}
 JSON
 EOF
   chmod +x "$path"
@@ -65,12 +106,12 @@ EOF
   chmod +x "$path"
 }
 
-# E1/E2/E3: salva os dois arquivos, response com cabecalho e imprime codex-session.
+# E1/E2/E3: contrato do schema REAL do codex-cli 0.142.0.
 R="$(new_repo)"
 ORDER="$R/ordem.md"
 STUB="$R/codex-stub.sh"
 printf 'ORDEM VERBATIM\n- item 1\n' > "$ORDER"
-write_stream_stub "$STUB"
+write_real_stream_stub "$STUB"
 OUT="$(
   cd "$R" || exit 2
   ENGRAMA_CODEX_BIN="$STUB" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$ORDER" --label demo --date 2026-06-21
@@ -85,24 +126,57 @@ else
 fi
 check E1 CORRETO "$_r" "salva order+response em .engrama/evidence/transcripts/ com data fixa e copia verbatim da ordem"
 
-if grep -Fq 'codex-session: sessao-fake-123' "$RESPONSE_OUT" \
-  && grep -Fq 'model: gpt-5.4-mini' "$RESPONSE_OUT" \
+if grep -Fq 'codex-session: 019ef9f3-e493-7a71-a5b2-688716a1281a' "$RESPONSE_OUT" \
+  && grep -Fq 'codex-session-source: stream' "$RESPONSE_OUT" \
+  && grep -Fq 'model: unknown' "$RESPONSE_OUT" \
   && grep -Fq 'sandbox: read-only' "$RESPONSE_OUT" \
-  && grep -Fq 'label: demo' "$RESPONSE_OUT"; then
+  && grep -Fq 'label: demo' "$RESPONSE_OUT" \
+  && grep -Fq 'PONG' "$RESPONSE_OUT" \
+  && ! grep -Fq "unknown field \`description\`" "$RESPONSE_OUT"; then
   _r=0
 else
   _r=1
 fi
-check E2 CORRETO "$_r" "response.md carrega cabecalho YAML com codex-session/model/sandbox/label"
+check E2 CORRETO "$_r" "schema real 0.142.0: transcript captura agent_message, ignora item.completed/error e preserva codex-session do stream"
 
 if printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-order.md' \
   && printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-response.md' \
-  && printf '%s\n' "$OUT" | grep -Fqx 'codex-session:sessao-fake-123'; then
+  && printf '%s\n' "$OUT" | grep -Fqx 'codex-session:019ef9f3-e493-7a71-a5b2-688716a1281a'; then
   _r=0
 else
   _r=1
 fi
 check E3 CORRETO "$_r" "stdout imprime os dois caminhos salvos e a linha codex-session:<id>"
+
+REAL_EVENTS="$R/codex-real-0.142.0.jsonl"
+write_real_stream_events "$REAL_EVENTS"
+REAL_RESPONSE_BODY="$(awk 'BEGIN { sep = 0 } /^---$/ { sep++; next } sep >= 2 { print }' "$RESPONSE_OUT")"
+LEGACY_ON_REAL="$(legacy_extract_response_text "$REAL_EVENTS")"
+if [ -n "$REAL_RESPONSE_BODY" ] && [ -z "$LEGACY_ON_REAL" ]; then
+  _r=0
+else
+  _r=1
+fi
+check E3A CORRETO "$_r" "nao-vacuo: o mesmo stream real fica vazio no parser legado (so response_item) e so passa com o fix break-glass"
+
+RLEG="$(new_repo)"
+ORDERLEG="$RLEG/ordem.md"
+STUBLEG="$RLEG/codex-legacy-stub.sh"
+printf 'ORDEM LEGACY\n' > "$ORDERLEG"
+write_legacy_stream_stub "$STUBLEG"
+(
+  cd "$RLEG" || exit 2
+  ENGRAMA_CODEX_BIN="$STUBLEG" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$ORDERLEG" --label legacy --date 2026-06-21 >/dev/null 2>&1
+)
+RESPONSE_OUT_LEG="$RLEG/.engrama/evidence/transcripts/2026-06-21-legacy-response.md"
+if grep -Fq 'codex-session: sessao-legacy-321' "$RESPONSE_OUT_LEG" \
+  && grep -Fq 'model: gpt-5.4-mini' "$RESPONSE_OUT_LEG" \
+  && grep -Fq 'RESPOSTA-LEGACY-CAPTURADA' "$RESPONSE_OUT_LEG"; then
+  _r=0
+else
+  _r=1
+fi
+check E3B CORRETO "$_r" "compat retroativa: schema antigo continua capturando a resposta"
 
 # E4: fallback derived quando o stream nao expoe sessao.
 R2="$(new_repo)"
@@ -126,7 +200,7 @@ check E4 CORRETO "$_r" "se o stream nao expoe sessao, deriva um id deterministic
 # E5/E6: args obrigatorios faltando degradam com erro claro.
 R3="$(new_repo)"
 STUB3="$R3/codex-stub.sh"
-write_stream_stub "$STUB3"
+write_real_stream_stub "$STUB3"
 OUT3="$(
   cd "$R3" || exit 2
   ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/engine/scripts/exec-bridge.sh --label sem-ordem --date 2026-06-21 2>&1
@@ -152,10 +226,7 @@ else
 fi
 check E6 CORRETO "$_r" "falta de --label falha com mensagem clara"
 
-# E7: FALLBACK do session file — replica o codex REAL (o output_text final do
-# assistant NAO vem no stream --json; so no ~/.codex/sessions/.../<id>.jsonl).
-# Stub emite session_meta SEM response_item; o wrapper deve achar o session file
-# (via CODEX_HOME) e extrair a resposta de la. (Regressao que o bug de PR-A passou.)
+# E7: fallback do session file com session id no schema NOVO do stream.
 R7="$(new_repo)"
 STUB7="$R7/codex-stub.sh"
 cat > "$STUB7" <<'EOF'
@@ -163,9 +234,10 @@ cat > "$STUB7" <<'EOF'
 set -u
 [ "${1:-}" = "exec" ] || { echo "stub recebeu comando inesperado" >&2; exit 9; }
 cat >/dev/null
-# stream com session_meta mas SEM o output_text do assistant (como o codex real)
-printf '%s\n' '{"type":"session_meta","payload":{"id":"sessao-fb-777"}}'
-printf '%s\n' '{"type":"turn_context","payload":{"model":"gpt-5.4"}}'
+# stream no schema 0.142.0 com thread.started, mas SEM agent_message.
+printf '%s\n' '{"type":"thread.started","thread_id":"sessao-fb-777"}'
+printf '%s\n' '{"type":"turn.started"}'
+printf '%s\n' '{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}'
 EOF
 chmod +x "$STUB7"
 HOME7="$(mktemp -d 2>/dev/null || mktemp -d -t eg-home)"
@@ -198,9 +270,11 @@ set -u
 # mutated during contract test
 BROKEN
 cat <<'JSON'
-{"type":"session_meta","payload":{"id":"sessao-self-edit-888"}}
-{"type":"turn_context","payload":{"model":"gpt-5.4-mini"}}
-{"type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"RUN IMUNE A AUTO-EDICAO"}],"phase":"final_answer"}}
+{"type":"thread.started","thread_id":"019ef9f3-e493-7a71-a5b2-688716a1288"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"failed to parse plugin hooks config ... unknown field `description`"}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"RUN IMUNE A AUTO-EDICAO"}}
+{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}
 JSON
 EOF
 chmod +x "$STUB8"
@@ -216,8 +290,9 @@ if [ "$RC8" -eq 0 ] \
   && [ -f "$ORDER_OUT8" ] \
   && [ -f "$RESPONSE_OUT8" ] \
   && grep -Fq 'RUN IMUNE A AUTO-EDICAO' "$RESPONSE_OUT8" \
+  && ! grep -Fq "unknown field \`description\`" "$RESPONSE_OUT8" \
   && grep -Fq 'mutated during contract test' "$R8/.engrama/engine/scripts/exec-bridge.sh" \
-  && printf '%s\n' "$OUT8" | grep -Fqx 'codex-session:sessao-self-edit-888'; then
+  && printf '%s\n' "$OUT8" | grep -Fqx 'codex-session:019ef9f3-e493-7a71-a5b2-688716a1288'; then
   _r=0
 else
   _r=1
