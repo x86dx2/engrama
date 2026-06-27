@@ -1,6 +1,6 @@
 ---
 type: spec
-status: proposed
+status: active
 touches: [memory/specs/test-writing, memory/specs/executor, memory/decisions/0005-orquestrador-qa-reexecucao-e-metricas, memory/decisions/0015-absorcao-seletiva-metodologia-superpowers]
 date: 2026-06-27
 source_refs:
