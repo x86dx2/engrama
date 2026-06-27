@@ -1,7 +1,7 @@
 ---
 type: spec
 status: active
-touches: [memory/specs/orquestrador, memory/specs/executor, memory/specs/executor-order, memory/specs/ingestao-memoria-dois-fases, memory/specs/commit, memory/specs/test-writing, memory/specs/infra-runbook]
+touches: [memory/specs/orquestrador, memory/specs/executor, memory/specs/executor-order, memory/specs/ingestao-memoria-dois-fases, memory/specs/commit, memory/specs/test-writing, memory/specs/infra-runbook, memory/specs/tdd-red-green-refactor, memory/specs/planejamento-de-fatia, memory/specs/depuracao-sistematica]
 date: 2026-06-20
 source_refs:
   - .engrama/memory/specs/
@@ -25,6 +25,9 @@ Biblioteca de **specs operacionais** — playbooks/checklists reaproveitáveis p
 | [[memory/specs/test-writing]] | convenções do harness de teste do seu projeto (framework de unit/integração/e2e, golden files, ciclo RED→GREEN) | Executor (sob spec) |
 | [[memory/specs/infra-runbook]] | ops: provisionar/seedar ambiente, subir/matar o dev server local (`N/A (sem servidor local)`), recriar golden/baseline | Orquestrador/Executor |
 | [[memory/specs/licao-aprendida]] | loop **falha→regra**: toda falha relevante vira regra durável (gate/lint/teste/ADR) | Orquestrador |
+| [[memory/specs/tdd-red-green-refactor]] | disciplina test-first em loop estrito (RED→GREEN→REFACTOR) — `proposed` (ADR 0015) | Executor (sob spec) |
+| [[memory/specs/planejamento-de-fatia]] | brainstorming + plano em fatias pequenas antes da ordem ao Executor — `proposed` (ADR 0015) | Orquestrador→Executor |
+| [[memory/specs/depuracao-sistematica]] | RCA em 4 fases antes de corrigir — `proposed` (ADR 0015) | Orquestrador/Executor |
 
 > Template: as linhas `test-writing` e `infra-runbook` são **agnósticas de stack** no pack. Preencha-as com as ferramentas concretas do seu projeto (runner de teste, banco/migrations, comando de dev server, host de CI/git) sem alterar os papéis nem o princípio spec ≠ subagente.
 
