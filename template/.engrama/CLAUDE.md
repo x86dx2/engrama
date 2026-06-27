@@ -42,7 +42,8 @@ NÃO replica: estrutura de pastas do código, assinaturas/tipos/schemas, estado 
 │   ├── project/     # bootstrap do projeto
 │   ├── specs/       # playbooks operacionais
 │   ├── domain/      # opcional por projeto
-│   └── gaps/        # opcional por projeto
+│   ├── gaps/        # opcional por projeto
+│   └── workflows/   # narrativas/fluxogramas end-to-end (opcional por projeto)
 ├── engine/
 │   ├── scripts/     # gate, lint, bridge, sync helpers
 │   └── githooks/    # hooks versionados
@@ -87,7 +88,7 @@ critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   #
 ### Tipos
 - **decision** — `memory/decisions/NNNN-slug.md`. Contexto, decisão, alternativas, consequências, status.
 - **domain** — `memory/domain/conceito.md`. Um invariante/conceito; sempre linka a fonte no repo.
-- **workflow** — `workflows/fluxo.md`. Narrativa end-to-end.
+- **workflow** — `memory/workflows/fluxo.md`. Narrativa/fluxograma end-to-end.
 - **roadmap** — `memory/roadmap/wp-XX-slug.md`. Histórico de uma fatia.
 - **gap** — `memory/gaps/slug.md`. Algo em aberto.
 - **governance** — `memory/governance/slug.md`. Processo operacional entre agentes.

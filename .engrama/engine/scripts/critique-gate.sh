@@ -98,7 +98,7 @@ classify() {
     docs/*) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/memory/governance/*|.engrama/memory/decisions/*|.engrama/memory/specs/*|.engrama/memory/project/*|.engrama/evidence/qa/*) addcat governance ;;
-    .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*) addcat governance ;;
+    .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*|.engrama/memory/workflows/*) addcat governance ;;
 
     # Template distribuivel. Mudancas aqui alteram o que novos projetos recebem.
     template/CLAUDE.md|template/AGENTS.md) addcat governance ;;
