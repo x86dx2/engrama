@@ -27,6 +27,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/decisions/0012-reconciliacao-de-memoria]] — `reconcilia:` explicita ADD/UPDATE/DELETE/NOOP contra a memória já versionada.
 - [[memory/decisions/0013-bridge-resiliente-a-version-drift-do-codex]] — bridge parseia múltiplos schemas do `codex --json` + teste de contrato com o stream real (E3A não-vácuo).
 - [[memory/decisions/0014-gate-de-release-repo-central]] — gate de release repo-central-only (CI derruba o job `test`; manifest explícito; escape `sem-release` bound-by-hash).
+- [[memory/decisions/0015-absorcao-seletiva-metodologia-superpowers]] — absorve do Superpowers só a camada de método (TDD/planejamento/depuração) como specs; rejeita subagent-escreve-código + runtime/cross-platform. **`proposed`**.
 
 ## Specs (playbooks operacionais — o "como")
 - [[memory/specs/README]] — índice + princípio (spec ≠ subagente).
@@ -35,6 +36,9 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/specs/ingestao-memoria-dois-fases]] — ingestão durável: candidato → reconciliação explícita com `reconcilia:`.
 - [[memory/specs/test-writing]] — convenções do harness · [[memory/specs/infra-runbook]] — infra/stack/N/A (sem servidor local).
 - [[memory/specs/licao-aprendida]] — loop falha→regra (a memória que compõe).
+- [[memory/specs/tdd-red-green-refactor]] — disciplina test-first em loop estrito (RED→GREEN→REFACTOR). **`proposed`** (ADR 0015).
+- [[memory/specs/planejamento-de-fatia]] — brainstorming + plano em fatias pequenas antes da ordem ao Executor. **`proposed`** (ADR 0015).
+- [[memory/specs/depuracao-sistematica]] — RCA em 4 fases antes de corrigir; alimenta o loop falha→regra. **`proposed`** (ADR 0015).
 
 ## Domain (padrões nomeados desta instância)
 - [[memory/domain/validacao-cruzada-estrutural]] — separação estrutural entre escritor, auditor e árbitro; o gate prova cobertura, não identidade do crítico.
