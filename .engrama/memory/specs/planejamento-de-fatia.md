@@ -1,6 +1,6 @@
 ---
 type: spec
-status: proposed
+status: active
 touches: [memory/specs/executor-order, memory/governance/cadeia-de-comando, memory/domain/validacao-cruzada-estrutural, memory/decisions/0008-subagentes-so-na-lane-do-orquestrador, memory/decisions/0015-absorcao-seletiva-metodologia-superpowers]
 date: 2026-06-27
 source_refs:

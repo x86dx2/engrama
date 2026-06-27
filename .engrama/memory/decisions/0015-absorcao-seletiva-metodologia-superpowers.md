@@ -1,6 +1,6 @@
 ---
 type: decision
-status: proposed
+status: active
 touches: [memory/decisions/0002-orquestrador-dono-do-git-executor-escreve, memory/decisions/0006-governanca-nao-se-autoaprova, memory/decisions/0008-subagentes-so-na-lane-do-orquestrador, memory/decisions/0005-orquestrador-qa-reexecucao-e-metricas, memory/specs/tdd-red-green-refactor, memory/specs/planejamento-de-fatia, memory/specs/depuracao-sistematica]
 date: 2026-06-27
 source_refs:
@@ -59,4 +59,4 @@ Inspiração: **Superpowers** (obra / Jesse Vincent), <https://github.com/obra/S
 
 ## Status
 
-`proposed`. Por ser mudança de governança/processo, depende da **crítica do Executor** ([[memory/decisions/0006-governanca-nao-se-autoaprova]]) e da **aprovação da Autoridade** antes do commit. Na aprovação: ADR → `active`, specs → `active`.
+`active`. Criticada pelo Executor (ADR 0006, `codex-session:019f0a08`, veredito `ressalvas` incorporado — consenso) e **aprovada pela Autoridade** no merge do **PR #17** (2026-06-27). Esta versão `active` foi ativada por PR de flip `proposed → active` após a aprovação. ADR + 3 specs (`tdd-red-green-refactor`, `planejamento-de-fatia`, `depuracao-sistematica`) ficam `active`.

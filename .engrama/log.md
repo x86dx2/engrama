@@ -7,6 +7,12 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-27] update | ativacao do ADR 0015 + 3 specs (flip proposed -> active) pos-merge do PR #17
+- Branch `chore/ativar-adr-0015`. O PR #17 (ADR 0015 absorcao Superpowers) foi **mergeado** (merge commit `29e15f7`), mas os arquivos entraram como `status: proposed`. A opcao aprovada pela Autoridade previa specs `active` no merge -> este flip honra isso.
+- **Flip:** `status: proposed -> active` em ADR 0015 + `tdd-red-green-refactor` + `planejamento-de-fatia` + `depuracao-sistematica`; removidos os marcadores "proposed" do `index.md`/`specs/README.md`; secao Status do ADR atualizada (aprovada no #17, critica 019f0a08).
+- **Binding:** so flip de status, ZERO conteudo novo. Crítica do conteudo ja feita (codex-session 019f0a08, ressalvas incorporadas, consenso) e aprovada pela Autoridade no merge do #17. Ledger registra **`N/A: ativacao mecanica`** vinculado ao diff (decisao da Autoridade: "flip", sem re-critica redundante).
+- **PROXIMO:** push + PR + merge (alcada da Autoridade). Pos-merge, ADR 0015 + 3 specs ficam `active` na `main`.
+
 ## [2026-06-27] decision | PROPOSTA (proposed) — absorcao seletiva da metodologia Superpowers como specs (ADR 0015)
 - Branch `feat/absorcao-seletiva-superpowers`. **Proposta a pedido da Autoridade**, em resposta a "este projeto agrega valor a governanca se incorporado? (obra/Superpowers)".
 - **Diagnostico:** Superpowers e craft/workflow, nao governanca; onde toca governanca o Engrama ja e mais forte (code-review = gate mecanico + papeis + diff-binding; verification = ADR 0005). Valor real = camada de METODO.
