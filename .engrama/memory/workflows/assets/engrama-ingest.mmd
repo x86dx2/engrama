@@ -1,0 +1,15 @@
+flowchart TD
+    I0["Fato / decisão novo"] --> I1{"Página durável ou só checkpoint?"}
+    I1 -->|"só checkpoint"| ILog["Append no topo do log.md (memória quente)"]
+    I1 -->|"página durável"| I2["Fase I: tipo correto + frontmatter válido + source_refs (fonte real p/ domain)"]
+    I2 --> I3["Fase II: grep/rg por duplicata/overlap → declara reconcilia: ADD | UPDATE | DELETE | NOOP"]
+    I3 --> I4["Atualiza index.md + cross-links (touches) + roda lint"]
+    I4 --> I5["log.md: ## [data] ingest|decision|update"]
+    I5 --> I6{"Toca governança / superfície sensível?"}
+    I6 -->|"sim"| I7["→ caminho 'governança' do fluxo principal (crítica do Executor antes do commit)"]
+    I6 -->|"não"| I8["Commit livre (memória fria atualizada)"]
+
+    classDef decision fill:#fff3cd,stroke:#b8860b,color:#000;
+    classDef role fill:#e7f0ff,stroke:#2c6fbb,color:#000;
+    class I1,I6 decision;
+    class I2,I3,I4,I5,I8,ILog role;
