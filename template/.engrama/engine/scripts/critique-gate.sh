@@ -99,7 +99,7 @@ classify() {
     AGENTS.md|CLAUDE.md) addcat governance ;;
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/memory/governance/*|.engrama/memory/decisions/*|.engrama/memory/specs/*|.engrama/memory/project/*|.engrama/evidence/qa/*) addcat governance ;;
-    .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*) addcat governance ;;
+    .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*|.engrama/memory/workflows/*) addcat governance ;;
     .engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;

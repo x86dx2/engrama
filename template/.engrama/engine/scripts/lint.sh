@@ -101,7 +101,7 @@ report_warning() {
 requires_frontmatter() {
   local file="$1" base
   case "$file" in
-    .engrama/memory/decisions/*|.engrama/memory/governance/*|.engrama/memory/specs/*|.engrama/memory/gaps/*|.engrama/memory/project/*|.engrama/evidence/qa/*)
+    .engrama/memory/decisions/*|.engrama/memory/governance/*|.engrama/memory/specs/*|.engrama/memory/gaps/*|.engrama/memory/project/*|.engrama/memory/workflows/*|.engrama/evidence/qa/*)
       base="$(basename "$file")"
       [ "$base" = "index.md" ] && return 1
       [ "$base" = "log.md" ] && return 1
@@ -128,7 +128,8 @@ list_orphan_candidates() {
     .engrama/memory/governance/*.md \
     .engrama/memory/specs/*.md \
     .engrama/memory/gaps/*.md \
-    .engrama/memory/project/*.md
+    .engrama/memory/project/*.md \
+    .engrama/memory/workflows/*.md
   do
     [ -f "$file" ] || continue
     base="$(basename "$file")"
