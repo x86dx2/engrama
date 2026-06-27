@@ -45,6 +45,9 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/domain/escopo-e-identidade]] — namespacing de papel/agente/sessão/repo/branch+categoria que delimita memória e crítica.
 - [[memory/domain/ponto-de-vista-e-representacao]] — auto-representação do sistema vs observação externa do Executor sobre a fatia.
 
+## Workflows (narrativas end-to-end)
+- [[memory/workflows/fluxo-operacional]] — fluxograma do Engrama com todos os caminhos (sessão · fatia código/governança/computer-use · gate · escalonamento · PR/CI/merge/release) + ingestão em duas fases. Mermaid inline + PNG/`.mmd` em `assets/`.
+
 ## Processo
 - [[evidence/qa/criticas-do-executor]] — ledger de críticas do Executor (gpt-5.5) + gate mecânico de commit (ADR 0006/0010).
 
