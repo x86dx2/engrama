@@ -34,7 +34,7 @@ if [ "$RC" -eq 0 ] \
   && printf '%s\n' "$OUT" | grep -Fq 'Unknown-token runs: 2' \
   && printf '%s\n' "$OUT" | grep -Fq -- '- gpt-5.4: 2 runs' \
   && printf '%s\n' "$OUT" | grep -Fq -- '- critique: 1 runs' \
-  && printf '%s\n' "$OUT" | grep -Fq 'Effective cost per run: US$33.33'; then
+  && printf '%s\n' "$OUT" | grep -Fq "Effective cost per run: US\$33.33"; then
   _r=0
 else
   _r=1

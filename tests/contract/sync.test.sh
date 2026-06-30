@@ -25,9 +25,7 @@ ROOT_CI_GATE="$REPO_ROOT/.engrama/engine/scripts/critique-gate-ci.sh"
 TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate-ci.sh"
 ROOT_CODEX_ADAPTER="$REPO_ROOT/.engrama/engine/adapters/codex.sh"
 TEMPLATE_CODEX_ADAPTER="$REPO_ROOT/template/.engrama/engine/adapters/codex.sh"
-ROOT_MODELS_CONF="$REPO_ROOT/.engrama/engine/config/models.conf"
 TEMPLATE_MODELS_CONF="$REPO_ROOT/template/.engrama/engine/config/models.conf"
-ROOT_SUBSCRIPTIONS_CONF="$REPO_ROOT/.engrama/engine/config/subscriptions.conf"
 TEMPLATE_SUBSCRIPTIONS_CONF="$REPO_ROOT/template/.engrama/engine/config/subscriptions.conf"
 ROOT_PRICES_CONF="$REPO_ROOT/.engrama/engine/config/prices.conf"
 TEMPLATE_PRICES_CONF="$REPO_ROOT/template/.engrama/engine/config/prices.conf"
@@ -167,7 +165,7 @@ check S3E CORRETO "$_r" "sync-template sincroniza gate-ci/router/adapter e neutr
 
 if grep -Fq 'CRITIQUE_ROLE="critique"' "$TEMPLATE_GATE" \
   && grep -Fq 'CRITIQUE_TIER="T4"' "$TEMPLATE_GATE" \
-  && grep -Fq 'exec-bridge.sh --role $CRITIQUE_ROLE --tier $CRITIQUE_TIER' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
+  && grep -Fq "exec-bridge.sh --role \$CRITIQUE_ROLE --tier \$CRITIQUE_TIER" "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
 check S4 CORRETO "$_r" "template orienta critica pelo exec-bridge roteado"
 
 if grep -Fq 'ENGRAMA_T1_MODEL={{MODELO_EXECUTOR_LEVE}}' "$TEMPLATE_MODELS_CONF" \

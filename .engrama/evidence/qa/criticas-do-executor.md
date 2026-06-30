@@ -47,6 +47,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [contract][governance] CI PR #20 shellcheck em tests/contract | waiver Autoridade 2026-06-30 (execucao direta aprovada; falha de CI corrigida) | sha256:30d932e043176dad2dcb10a5a8b0b7a3e03860e96cbdb10b14832b22d025e615
+- **Contexto:** correção da falha do job `test (ubuntu-latest)` no PR #20. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
+- **Escopo coberto pelo hash:** `tests/contract/sync.test.sh` e `tests/contract/usage-report.test.sh` ajustados para o shellcheck exato da CI; log atualizado.
+- **Evidência de QA:** shellcheck exato da CI verde; `sync` 27/27 verde; `usage-report` 5/5 verde; `tests/run.sh` verde.
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] review P2 exec-bridge sem events JSONL | waiver Autoridade 2026-06-30 (execucao direta aprovada; achado P2 incorporado) | sha256:eac5ded8c88a88794d180527f396e2f9620245089efa42947b676c2f97a042ab
 - **Contexto:** correção adicional do review da fatia ADR 0016. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
 - **Escopo coberto pelo hash:** `exec-bridge.sh` captura stderr do adapter, aborta sem parsers/transcript de resposta/ledger quando não há `events_file` com eventos; template sincronizado; contrato E10 cobre binário Codex inexistente; ADR/changelog/log alinhados.

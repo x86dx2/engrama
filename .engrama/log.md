@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | CI PR #20: shellcheck tambem cobre tests/contract
+- Branch `feat-runtime-model-router-usage-ledger`, PR #20. A CI falhou no job `test (ubuntu-latest)` durante `Run shellcheck`.
+- **Causa:** localmente eu havia rodado shellcheck só em `bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh`; a CI roda também `tests/run.sh tests/gate/*.test.sh tests/contract/*.test.sh`. Com isso, pegou `SC2034` em variáveis mortas no `sync.test.sh` e `SC2016` em literais com `$` intencionais.
+- **Implementado:** removidas as variáveis raiz que ficaram sem uso no contrato de sync; literais com `$` em `sync.test.sh` e `usage-report.test.sh` agora usam aspas duplas com escape explícito.
+- **QA executado:** shellcheck exato da CI (`shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/githooks/pre-commit tests/run.sh tests/gate/*.test.sh tests/contract/*.test.sh`) -> 0; `sync` 27/27 verde; `usage-report` 5/5 verde; `bash tests/run.sh` -> TODAS AS SUITES VERDES.
+- **PROXIMO:** registrar waiver/diff-binding, rodar gates finais, commitar e pushar para reexecutar a CI do PR #20.
+
 ## [2026-06-30] fix | review P2 do exec-bridge: falha inicial do adapter sem ledger sintético
 - Branch `feat-runtime-model-router-usage-ledger`. Correção adicional do review sobre ADR 0016: `exec-bridge.sh` assumia que o adapter sempre criava `codex-events.jsonl`.
 - **Problema:** se `ENGRAMA_CODEX_BIN` apontasse para binário ausente, o adapter falhava antes de criar eventos; o bridge ainda rodava parsers `jq`, derivava sessão de resposta vazia e podia escrever transcript/usage artificiais.
