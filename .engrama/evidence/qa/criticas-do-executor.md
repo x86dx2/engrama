@@ -47,6 +47,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] review P2 exec-bridge sem events JSONL | waiver Autoridade 2026-06-30 (execucao direta aprovada; achado P2 incorporado) | sha256:eac5ded8c88a88794d180527f396e2f9620245089efa42947b676c2f97a042ab
+- **Contexto:** correção adicional do review da fatia ADR 0016. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
+- **Escopo coberto pelo hash:** `exec-bridge.sh` captura stderr do adapter, aborta sem parsers/transcript de resposta/ledger quando não há `events_file` com eventos; template sincronizado; contrato E10 cobre binário Codex inexistente; ADR/changelog/log alinhados.
+- **Evidência de QA:** `tests/run.sh` verde; `lint.sh` verde; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` verde; contratos focados `exec-bridge` e `sync` verdes.
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] review P2 do router/ledger ADR 0016 | waiver Autoridade 2026-06-30 (execucao direta aprovada; achados P2 incorporados) | sha256:407b5cdd8e058bef63b2e5e6f5f12ff025c1df9258f7e17912e01f920b263cf5
 - **Contexto:** esta correção responde aos 3 achados P2 do review da fatia ADR 0016. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
 - **Escopo coberto pelo hash:** `exec-bridge.sh` passa a distinguir `model` efetivo, `configured_model` e `observed_model`; `usage-report --month current` usa UTC; `sync-template.sh` gera `subscriptions.conf` neutro para o template; contratos e docs normativos foram alinhados.

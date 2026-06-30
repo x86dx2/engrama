@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | review P2 do exec-bridge: falha inicial do adapter sem ledger sintético
+- Branch `feat-runtime-model-router-usage-ledger`. Correção adicional do review sobre ADR 0016: `exec-bridge.sh` assumia que o adapter sempre criava `codex-events.jsonl`.
+- **Problema:** se `ENGRAMA_CODEX_BIN` apontasse para binário ausente, o adapter falhava antes de criar eventos; o bridge ainda rodava parsers `jq`, derivava sessão de resposta vazia e podia escrever transcript/usage artificiais.
+- **Implementado:** stderr do adapter é capturado no stderr temporário do bridge; se `events_file` não existe ou está vazio, o bridge imprime o erro do adapter, limpa transcripts da tentativa e aborta antes de parsing, response transcript e usage ledger. Falhas com eventos reais continuam auditáveis pelo fluxo existente.
+- **Contratos:** `exec-bridge.test.sh` ganhou E10 para binário ausente: sem `jq: Could not open file`, sem `usage-ledger:`, sem response/order persistidos e sem arquivo usage.
+- **QA executado:** `exec-bridge` 12/12 verde; `sync` 27/27 verde; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` -> 0.
+- **PROXIMO:** registrar waiver/diff-binding, rodar gates finais e commitar.
+
 ## [2026-06-30] fix | review P2 do router/ledger: modelo observado, mes UTC e template neutro
 - Branch `feat-runtime-model-router-usage-ledger`. Correção dos 3 achados P2 do review sobre a fatia ADR 0016 antes de PR/merge.
 - **Ledger/modelo:** `exec-bridge.sh` agora grava `model` como modelo efetivo (observado pelo stream quando existir; configurado como fallback), mais `configured_model` e `observed_model`. Plano e custo estimado usam o mesmo modelo efetivo, evitando atribuir custo ao modelo errado em fallback/drift.

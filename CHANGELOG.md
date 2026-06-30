@@ -27,6 +27,9 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 ### Mudado
 - **Executor-bridge agora é sempre roteado:** ausência de `--role/--tier` vira default
   explícito `execute/T2` registrado em transcript/ledger; `--role` sem `--tier` falha.
+- **Executor-bridge falha limpo sem eventos:** se o adapter falhar antes de produzir o
+  JSONL de eventos, o bridge aborta sem parsers `jq`, sem transcript de resposta e sem
+  usage ledger sintético.
 - **Critique gate orienta pelo bridge/router:** a mensagem de bloqueio sugere
   `exec-bridge.sh --role critique --tier T4 --sandbox read-only`, não `codex exec -m`.
 - **Template/bootstrap/sync:** projetos novos recebem router, report, adapter, configs e

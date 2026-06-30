@@ -363,6 +363,33 @@ else
 fi
 check E9 CORRETO "$_r" "role/tier explicitos com prompt inline geram auto-label, transcript roteado e usage ledger"
 
+# E10: se o adapter falha antes de produzir events JSONL, o bridge nao pode
+# chamar jq em arquivo inexistente nem gravar response/usage artificiais.
+R10="$(new_repo)"
+ORDER10="$R10/ordem.md"
+printf 'ORDEM BIN AUSENTE\n' > "$ORDER10"
+OUT10="$(
+  cd "$R10" || exit 2
+  ENGRAMA_CODEX_BIN="$R10/binario-inexistente" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$ORDER10" --label missing-bin --date 2026-06-21 2>&1
+)"
+RC10=$?
+ORDER_OUT10="$R10/.engrama/evidence/transcripts/2026-06-21-missing-bin-order.md"
+RESPONSE_OUT10="$R10/.engrama/evidence/transcripts/2026-06-21-missing-bin-response.md"
+LEDGER_COUNT10="$(find "$R10/.engrama/evidence/usage" -type f -name 'usage-*.jsonl' | wc -l | tr -d ' ')"
+if [ "$RC10" -ne 0 ] \
+  && printf '%s\n' "$OUT10" | grep -Fq 'codex bin nao encontrado' \
+  && printf '%s\n' "$OUT10" | grep -Fq 'adapter nao produziu eventos JSONL' \
+  && ! printf '%s\n' "$OUT10" | grep -Fq 'jq: Could not open file' \
+  && ! printf '%s\n' "$OUT10" | grep -Fq 'usage-ledger:' \
+  && [ ! -e "$ORDER_OUT10" ] \
+  && [ ! -e "$RESPONSE_OUT10" ] \
+  && [ "$LEDGER_COUNT10" -eq 0 ]; then
+  _r=0
+else
+  _r=1
+fi
+check E10 CORRETO "$_r" "falha inicial do adapter sem events JSONL aborta sem jq noise, transcript de resposta ou usage ledger"
+
 printf '%b\n' "$RESULTS"
 echo ""
 echo "Resumo: $PASS asserts batidos, $FAIL divergentes | $HOLES casos marcados FURO (a corrigir)"

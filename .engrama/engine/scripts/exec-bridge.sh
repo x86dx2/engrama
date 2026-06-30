@@ -593,6 +593,7 @@ main() {
   ensure_tmpdir
   events_file="$TMPDIR_BRIDGE/codex-events.jsonl"
   stderr_file="$TMPDIR_BRIDGE/codex-stderr.log"
+  : > "$stderr_file" || fail "nao consegui criar stderr temporario"
 
   adapter_script="$REPO_ROOT/.engrama/engine/adapters/$ADAPTER.sh"
   [ -f "$adapter_script" ] || fail "adapter ausente: $adapter_script"
@@ -603,13 +604,25 @@ main() {
 
   started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   started_epoch="$(date +%s)"
-  if "${adapter_cmd[@]}"; then
+  if "${adapter_cmd[@]}" 2>> "$stderr_file"; then
     codex_rc=0
   else
     codex_rc=$?
   fi
   finished_epoch="$(date +%s)"
   finished_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  if [ ! -s "$events_file" ]; then
+    rm -f "$order_path" "$response_path"
+    if [ -s "$stderr_file" ]; then
+      cat "$stderr_file" >&2
+    fi
+    echo "exec-bridge: adapter nao produziu eventos JSONL; abortando sem transcript/usage ledger" >&2
+    if [ "$codex_rc" -ne 0 ]; then
+      exit "$codex_rc"
+    fi
+    exit 2
+  fi
 
   codex_session="$(extract_session_id "$events_file")"
 
