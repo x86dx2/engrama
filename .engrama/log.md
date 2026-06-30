@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] slice | governanca de contratos exposta no Engrama Observatory
+- Branch `feat/expose-role-contract-governance-in-observatory`, aberta a partir de `main` apos o merge da fundacao do observatory (PR #25).
+- **Implementado:** `tools/engrama-observatory/` agora aceita `governance_mode`, `role_contract` e `role_contract_hash` no parser/tipagem, mantendo compatibilidade com ledgers antigos; o Overview ganhou o card `Runs governadas por contrato`; o painel `Atencao` avisa sobre `legacy/defaulted`; a aba Runs ganhou filtro por `governance_mode`, badge `contract|legacy|unknown` e detalhes expandidos com governanca e hash do contrato.
+- **Compatibilidade:** ledgers antigos sem os campos novos continuam parseando como `null`/`unknown`; nenhum script de runtime, router, adapter, billing, template ou gate foi alterado.
+- **QA executado:** `cd tools/engrama-observatory && npm test` -> 17 testes verdes; `npm run typecheck` -> 0; `npm run build` -> 0; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+- **Fora de escopo mantido:** sem ajuste de dependencias, sem update de Recharts, sem `npm audit fix`, sem novas integracoes e sem mudanca de runtime.
+- **PROXIMO:** abrir PR `feat: expose role contract governance in observatory`; follow-up de dependencias continua separado.
+
 ## [2026-06-30] slice | canonizacao da fundacao do Engrama Observatory
 - Branch `feat/add-cognitive-observability-foundation`, criada em worktree limpo a partir de `origin/main` para reconciliar a divergencia entre docs/governanca e a superficie Git: `tools/engrama-observatory/` ja era citado como ferramenta oficial, mas ainda nao existia no indice.
 - **Implementado:** adiciona `.gitignore` para `tools/engrama-observatory/{node_modules,dist}` e canoniza `tools/engrama-observatory/` com app local Vite/React/TypeScript, parser/agregacoes do usage ledger, dashboard, tabela de runs, control plane local e testes.

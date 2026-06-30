@@ -297,7 +297,7 @@ a {
 }
 
 .priority-grid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 .overview-charts {
@@ -492,7 +492,7 @@ a {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  grid-template-columns: repeat(7, minmax(130px, 1fr));
   gap: 10px;
   margin-top: 16px;
   padding: 12px;
@@ -560,6 +560,16 @@ th {
   color: oklch(0.92 0.03 40);
 }
 
+.pill-contract {
+  background: var(--success-bg);
+  color: oklch(0.9 0.05 155);
+}
+
+.pill-legacy {
+  background: var(--warning-bg);
+  color: oklch(0.94 0.03 78);
+}
+
 .pill-unknown {
   background: var(--unknown-bg);
   color: var(--soft);
@@ -604,6 +614,15 @@ th {
 .tier-card dd {
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.run-details code {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--accent);
 }
 
 .drift-cell {

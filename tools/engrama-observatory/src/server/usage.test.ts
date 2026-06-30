@@ -50,18 +50,26 @@ not-json
 
     expect(runs[0]?.role).toBeNull();
     expect(runs[0]?.model).toBeNull();
+    expect(runs[0]?.governance_mode).toBeNull();
+    expect(runs[0]?.role_contract).toBeNull();
+    expect(runs[0]?.role_contract_hash).toBeNull();
     expect(runs[0]?.project).toBe("engrama");
   });
 
-  it("ignores unknown extra fields without breaking base parsing", () => {
+  it("parses governance contract fields when present", () => {
     const { runs, invalidLines } = parseUsageLedger(`
-{"schema":"engrama.usage.v1","run_id":"r3","project":"engrama","branch":"main","role":"critique","tier":"T4","adapter":"codex","provider":"openai","surface":"exec","model":"gpt-5.5","configured_model":"gpt-5.5","observed_model":null,"effort":"xhigh","billing_mode":"subscription","plan":"codex-pro","started_at":"2026-06-30T16:49:35Z","finished_at":"2026-06-30T16:49:44Z","duration_seconds":9,"input_tokens":16497,"output_tokens":33,"cached_input_tokens":4992,"total_tokens":16530,"turns":1,"estimated_api_cost_usd":null,"allocated_subscription_cost_usd":null,"routing_reason":"x","extra_flag":"future-field","trace_id":"abc123","transcript_path":"t.md","codex_session":"s1","success":true}
+{"schema":"engrama.usage.v1","run_id":"r3","project":"engrama","branch":"main","role":"critique","tier":"T4","adapter":"codex","provider":"openai","surface":"exec","model":"gpt-5.5","configured_model":"gpt-5.5","observed_model":null,"effort":"xhigh","billing_mode":"subscription","plan":"codex-pro","started_at":"2026-06-30T16:49:35Z","finished_at":"2026-06-30T16:49:44Z","duration_seconds":9,"input_tokens":16497,"output_tokens":33,"cached_input_tokens":4992,"total_tokens":16530,"turns":1,"estimated_api_cost_usd":null,"allocated_subscription_cost_usd":null,"routing_reason":"x","role_contract":".engrama/memory/governance/roles/critique.md","role_contract_hash":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","governance_mode":"role-contract","transcript_path":"t.md","codex_session":"s1","success":true}
 `);
 
     expect(invalidLines).toBe(0);
     expect(runs).toHaveLength(1);
     expect(runs[0]?.role).toBe("critique");
     expect(runs[0]?.tier).toBe("T4");
+    expect(runs[0]?.governance_mode).toBe("role-contract");
+    expect(runs[0]?.role_contract).toBe(".engrama/memory/governance/roles/critique.md");
+    expect(runs[0]?.role_contract_hash).toBe(
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    );
     expect(runs[0]?.total_tokens).toBe(16530);
   });
 

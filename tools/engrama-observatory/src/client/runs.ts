@@ -9,10 +9,52 @@ export type RunFilterState = {
   model: string;
   success: string;
   branch: string;
+  governanceMode: string;
+};
+
+export type GovernanceIndicator = "contract" | "legacy" | "unknown";
+
+export type GovernanceSummary = {
+  governedRuns: number;
+  governedShare: number | null;
+  legacyDefaultedRuns: number;
 };
 
 export function valueOrUnknown(value: string | null | undefined): string {
   return value || "unknown";
+}
+
+export function getGovernanceModeValue(run: UsageRecord): string {
+  return valueOrUnknown(run.governance_mode);
+}
+
+export function isLegacyDefaultedGovernance(value: string | null | undefined): boolean {
+  return value === "legacy/defaulted";
+}
+
+export function getGovernanceIndicator(run: UsageRecord): GovernanceIndicator {
+  if (run.role_contract) {
+    return "contract";
+  }
+
+  if (isLegacyDefaultedGovernance(run.governance_mode)) {
+    return "legacy";
+  }
+
+  return "unknown";
+}
+
+export function summarizeGovernance(runs: UsageRecord[]): GovernanceSummary {
+  const governedRuns = runs.filter((run) => Boolean(run.role_contract)).length;
+  const legacyDefaultedRuns = runs.filter((run) =>
+    isLegacyDefaultedGovernance(run.governance_mode),
+  ).length;
+
+  return {
+    governedRuns,
+    governedShare: runs.length > 0 ? (governedRuns / runs.length) * 100 : null,
+    legacyDefaultedRuns,
+  };
 }
 
 export function filterRuns(runs: UsageRecord[], filters: RunFilterState): UsageRecord[] {
@@ -30,6 +72,12 @@ export function filterRuns(runs: UsageRecord[], filters: RunFilterState): UsageR
       return false;
     }
     if (filters.model !== "all" && valueOrUnknown(run.model) !== filters.model) {
+      return false;
+    }
+    if (
+      filters.governanceMode !== "all" &&
+      getGovernanceModeValue(run) !== filters.governanceMode
+    ) {
       return false;
     }
     if (filters.branch !== "all" && run.branch !== filters.branch) {
