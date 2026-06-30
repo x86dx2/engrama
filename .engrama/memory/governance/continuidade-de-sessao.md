@@ -37,6 +37,34 @@ Toda invocação pelo executor-bridge carrega, no mínimo:
 9. próximo passo seguro após a execução;
 10. **role/tier** escolhido e por quê; o modelo/effort são resolvidos pelo `model-router.sh`.
 
+### Runtime rastreável
+
+O caminho operacional preferencial é:
+
+```bash
+.engrama/engine/scripts/exec-bridge.sh --role <role> --tier <tier> -- "prompt"
+```
+
+Evite `codex exec` direto em tarefa governada: sem bridge, o Engrama perde roteamento `role+tier`, transcript enriquecido e usage ledger. Uso direto só como exceção operacional explícita, registrada em [[log]] e no handoff.
+
+Roles aceitas: `orchestrate`, `execute`, `critique`, `review`, `audit`, `authority`. Tiers aceitos: `T1`, `T2`, `T3`, `T4`, `T4+`.
+
+Regra de roteamento: `execute` normalmente usa `T2`/`T3`; `review` normalmente `T3`; `critique`/`audit` usam `T4` ou superior; `authority` usa `T4+`; `critique` e `authority` não fazem fallback silencioso.
+
+Observabilidade: execução roteada deve produzir transcript em `.engrama/evidence/transcripts/` e usage ledger mensal em `.engrama/evidence/usage/usage-YYYY-MM.jsonl`. O relatório local é:
+
+```bash
+.engrama/engine/scripts/usage-report.sh --month current
+.engrama/engine/scripts/usage-report.sh --month current --by model
+.engrama/engine/scripts/usage-report.sh --month current --by role
+.engrama/engine/scripts/usage-report.sh --month current --by tier
+.engrama/engine/scripts/usage-report.sh --month current --by adapter
+```
+
+Não há dashboard/UI nesta versão; o portal de billing atual é ledger JSONL + `usage-report.sh`.
+
+Segurança: nunca ler `.env`; não registrar secrets em prompt, transcript, ledger ou handoff. Se um segredo aparecer por acidente, mascarar e escalar à Autoridade.
+
 ## Resposta mínima obrigatória do Executor
 
 1. **Leitura da ordem** — o que entendeu.
@@ -72,6 +100,8 @@ Risco material de: perda de dados; quebra do fluxo principal; violação de gove
 ## Pacote mínimo de handoff
 
 1. Fase do projeto · 2. Objetivo da sessão · 3. Branch atual · 4. Commit base e final · 5. Destino do commit · 6. Arquivos alterados · 7. ADRs/logs relevantes · 8. Ambiente(s) tocado(s) · 9. Comandos executados · 10. Validações (saída real) · 11. Riscos abertos · 12. Bloqueios · 13. Próximo passo seguro · 14. O que depende de aprovação da Autoridade · 15. Discordâncias do Executor pendentes de arbitragem.
+
+Se houve execução via bridge, o handoff também informa: `role`, `tier`, adapter, modelo efetivo quando disponível, path do transcript quando disponível, ledger mensal atualizado e comando de validação executado. Se o bridge falhou antes de gerar transcript/usage, declarar isso explicitamente.
 
 ## Devolutiva mínima do Orquestrador para a Autoridade
 

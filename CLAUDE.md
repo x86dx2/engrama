@@ -18,10 +18,46 @@ No **primeiro retorno útil** da sessão, declarar: papel assumido · alçada ·
 
 Se `.engrama/memory/project/bootstrap-do-projeto.md` estiver com `status: proposed` ou com campos `TODO`, a **primeira tarefa do Orquestrador** é conduzir o bootstrap do projeto com a Autoridade: confirmar finalidade, stack, comandos canônicos, fronteiras e superfícies sensíveis; ajustar `classify()` e só então seguir para trabalho de produto.
 
+## Runtime e observabilidade
+
+Tarefa governada deve usar o executor-bridge roteado, não `codex exec` direto:
+
+```bash
+.engrama/engine/scripts/exec-bridge.sh --role <role> --tier <tier> -- "prompt"
+```
+
+Uso direto de `codex exec` só é aceitável como exceção operacional explícita, registrada no handoff/log, porque perde roteamento runtime, transcript enriquecido e usage ledger.
+
+Roles: `orchestrate`, `execute`, `critique`, `review`, `audit`, `authority`.
+Tiers: `T1`, `T2`, `T3`, `T4`, `T4+`.
+Regra curta: `execute` normalmente `T2`/`T3`; `review` normalmente `T3`; `critique`/`audit` `T4` ou superior; `authority` `T4+`; `critique` e `authority` não fazem fallback silencioso.
+
+Toda execução roteada deve gerar evidência local:
+
+- transcript: `.engrama/evidence/transcripts/`
+- usage ledger: `.engrama/evidence/usage/usage-YYYY-MM.jsonl`
+- relatório: `.engrama/engine/scripts/usage-report.sh --month current`
+
+Se o bridge falhar antes de gerar transcript/usage, declare a falha explicitamente no handoff.
+
+Relatórios úteis:
+
+```bash
+.engrama/engine/scripts/usage-report.sh --month current
+.engrama/engine/scripts/usage-report.sh --month current --by model
+.engrama/engine/scripts/usage-report.sh --month current --by role
+.engrama/engine/scripts/usage-report.sh --month current --by tier
+.engrama/engine/scripts/usage-report.sh --month current --by adapter
+```
+
+Não há dashboard/UI nesta versão. O portal de billing atual é ledger JSONL + `usage-report.sh`.
+
+Nunca leia `.env`; não registre secrets em prompt, transcript, ledger ou handoff. Se algum output trouxer segredo acidentalmente, masque e escale à Autoridade.
+
 ## Modelo em uma página
 
 - **Tríade (por função, não por vendor):** **Orquestrador** = Orquestrador/Auditor/QA/Arquiteto (dono do git; **não escreve código de fatia**) · **Executor Crítico** = escreve o código; critica ativamente · **Autoridade de Mudança** = arbitra discordâncias; aprova produção.
-- **Executor-bridge:** o Orquestrador invoca o Executor direto (`codex exec`, adaptador concreto deste repo); **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003)
+- **Executor-bridge:** o Orquestrador invoca o Executor direto por `.engrama/engine/scripts/exec-bridge.sh --role <role> --tier <tier>`; **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003/0016)
 - **Executor é freio ativo:** objeção material → escala à Autoridade; o Orquestrador **não tem overrule**. (ADR 0004)
 - **Governança não se autoaprova:** edição de governança vai à **crítica do Executor antes do commit** — imposto pelo gate mecânico `.engrama/engine/scripts/critique-gate.sh`. (ADR 0006)
 - **Reconciliação explícita:** ADRs e páginas novas podem declarar `reconcilia:` (`ADD`/`UPDATE`/`DELETE`/`NOOP`) para explicitar como dialogam com a memória existente; schema e lint vivem em `.engrama/CLAUDE.md`.

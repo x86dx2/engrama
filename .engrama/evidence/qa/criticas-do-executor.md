@@ -57,6 +57,25 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Escopo coberto pelo hash:** `.engrama/log.md`, `.engrama/index.md`, `metricas-de-engrama` mantido como gap proposto de pesquisa markdown-puro, e `auditoria-e-plano-de-remediacao` reclassificado como `resolved`/historico.
 - **Evidencia de QA:** `lint.sh` verde antes do binding; `critique-gate` sera reexecutado no indice final pelo Orquestrador. Nao ha alteracao de codigo, template, VERSION ou CHANGELOG.
 
+## [2026-06-30] docs/runtime-usage-gateways | [governance] gateways expõem exec-bridge roteado + usage ledger local | confirmo | sha256:3076aa057fb4513d0d410d68dc8f30de6e1aaf8fe1ccb32c42ac395179db5689 codex-session:019f197b-21a3-74d0-b8af-6152d0018db9
+- **Contexto:** documentação operacional dos gateways para ADR 0016. Um agente novo lendo `AGENTS.md`/`CLAUDE.md` deve entender bridge `role+tier`, roles/tiers, usage ledger, `usage-report.sh`, ausência de dashboard/UI e segurança de secrets.
+- **Veredito do Executor:** `concordo` em crítica T4 read-only. Ajuste menor incorporado: explicitar que falha do bridge antes de transcript/usage deve ser declarada no handoff.
+- **Evidencia:** transcripts `2026-06-30-runtime-usage-gateways-critique-{order,response}.md`; lint verde antes do binding; sem alteração funcional.
+
+## [2026-06-30] docs/runtime-usage-gateways | [governance] waiver sem-release para payload documental do PR #23 | ressalvas | sha256:4a8843cf06fd1f801fd610afe24ca6c2f8651b5283becfb12d976cc2a063dfe5 codex-session:019f1989-769c-71a0-9c98-f8463772b8b8
+- **Contexto:** ajuste incremental apos CI: `release-gate` exigiu waiver porque o payload distribuivel do PR mudou sem bump de `VERSION`/`CHANGELOG`.
+- **Veredito do Executor:** `ajuste-menor`/`ressalvas`, sem objecao material. Waiver bound-by-hash e coerente; ressalva incorporada para nao afirmar que `AGENTS.md`/`CLAUDE.md` sao literalmente a causa mecanica no manifest.
+- **Evidencia:** transcripts `2026-06-30-runtime-usage-gateways-waiver-critique-{order,response}.md`; `release-gate --print-hash --base-ref origin/main` bate com `sha256:e297a2d24ca2f1695d19b8f20bddd16c03cde16f226d6760e8cf02559a5547e8`.
+
+## [2026-06-30] docs/runtime-usage-gateways | [governance] rebind cumulativo PR #23 pos-waiver release-gate | ressalvas | sha256:dd1af202cac37e0c5b72fe541e32e4b954b0015c6c67eaa4cc57380950bd34ec codex-session:019f197b-21a3-74d0-b8af-6152d0018db9 codex-session:019f1989-769c-71a0-9c98-f8463772b8b8
+- **Contexto:** binding cumulativo para o diff `origin/main...HEAD` apos incluir o waiver `sem-release` exigido pela CI do PR #23.
+- **Escopo coberto:** gateways e continuidade documentam bridge roteado/usage ledger/ausencia de dashboard; waiver/log documentam release-gate sem bump. Sem alteracao funcional em scripts, router, adapter, configs, dashboard ou template.
+- **Evidencia:** crítica T4 inicial `concordo` + crítica T4 incremental `ajuste-menor` com ressalva incorporada; hash calculado por `engrama-diff-hash.sh --range origin/main...HEAD`.
+
+## [2026-06-30] docs/runtime-usage-gateways | [governance] auto-vinculacao do ledger de rebind cumulativo PR #23 | N/A:registro-mecanico-do-proprio-ledger | sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 executor n/a -- ledger excluido do fingerprint; evita loop apos registrar o hash cumulativo ja coberto pelas criticas T4
+
+## [2026-06-30] docs/runtime-usage-gateways | [governance] correcao mecanica markdownlint no waiver PR #23 | N/A:correcao-mecanica-md026 | sha256:3f5459e40bf77fd0a0a3d9174cc849f2e9a551a9ea4a4d40a5ab3d2c8fcffbf2 executor n/a -- remove ponto final do heading de `release-waivers.md`; conteudo do waiver ja criticado em 019f1989
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] rebind cumulativo PR #20 pos-fix CI | waiver Autoridade 2026-06-30 (execucao direta aprovada; rebind de CI) | sha256:b5b45b30bf333d96a14a452fbe583cc7341c9af4c0bcb0204c4b68465646f410
 - **Contexto:** apos o fix `bdd4c4b`, shellcheck/lint/test suite passaram, mas o gate de critica da CI passou a exigir o fingerprint cumulativo atualizado do PR #20 (`origin/main...HEAD`) em modo estrito.
 - **Escopo coberto pelo hash:** diff final esperado do PR #20, calculado a partir de commit temporario da arvore staged para incluir o novo checkpoint em `log.md` e excluir o proprio ledger conforme ADR 0011.

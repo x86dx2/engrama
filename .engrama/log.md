@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] docs | gateways expõem runtime roteado e usage ledger
+- Branch `docs/runtime-usage-gateways`. A Autoridade aprovou tornar operacionalmente explícito nos gateways que tarefas governadas usam `exec-bridge.sh --role <role> --tier <tier>` e que observabilidade/billing local vivem no usage ledger + `usage-report.sh`.
+- **Atualizado:** `AGENTS.md` e `CLAUDE.md` agora mostram comando mínimo do bridge, roles (`orchestrate`, `execute`, `critique`, `review`, `audit`, `authority`), tiers (`T1`, `T2`, `T3`, `T4`, `T4+`), comandos do `usage-report.sh`, ausência de dashboard/UI e regra de secrets. `continuidade-de-sessao` ganhou runtime rastreável e handoff obrigatório com role/tier/adapter/modelo/transcript/ledger. `.engrama/CLAUDE.md` ganhou workflow operacional de execução governada e observabilidade.
+- **Crítica do Executor:** `exec-bridge.sh --role critique --tier T4 --sandbox read-only`, codex-session `019f197b-21a3-74d0-b8af-6152d0018db9`, veredito `concordo`. Ajuste menor incorporado: explicitar nos gateways de raiz que falha do bridge antes de transcript/usage deve ser declarada no handoff.
+- **Observabilidade da propria fatia:** a crítica gerou transcript em `.engrama/evidence/transcripts/2026-06-30-runtime-usage-gateways-critique-response.md` e usage ledger local em `.engrama/evidence/usage/usage-2026-06.jsonl`.
+- **Release-gate:** o payload distribuivel do PR mudou (inclui `.engrama/CLAUDE.md`); como a fatia e documental e nao corta release isolada, foi registrado waiver `sem-release` bound-by-hash `sha256:e297a2d24ca2f1695d19b8f20bddd16c03cde16f226d6760e8cf02559a5547e8` em `.engrama/evidence/qa/release-waivers.md`. Crítica incremental do waiver/log: codex-session `019f1989-769c-71a0-9c98-f8463772b8b8`, veredito `ajuste-menor`; redação causal ajustada.
+- **Fora do escopo:** nao altera scripts, router, adapter, configs, dashboard ou template; arquivos locais untracked preexistentes (`docs/PRD2.md` e evidencias de smoke local) nao entram no PR.
+- **PROXIMO:** revalidar gates apos waiver, atualizar diff-binding da crítica, amend/push no PR #23 e aguardar CI. Merge depende da Autoridade.
+
 ## [2026-06-30] audit | checkpoint pos-PR #21 + revisao dos gaps restantes
 - Branch `chore/checkpoint-gap-review`. Estado factual: PR #21 (`fix/follow-ups-pos-0.2.0`) foi mergeado em `main` pelo merge commit `20b5f57`; `main` local estava alinhado com `origin/main` antes desta branch; `v0.3.0` segue como a ultima tag de release deliberada; `docs/PRD.md` continua untracked e fora do escopo versionado.
 - **Checkpoint corrigido:** o topo anterior ainda apontava para registrar binding/commitar/abrir PR da fatia #21, mas tudo isso ja foi executado e mergeado.

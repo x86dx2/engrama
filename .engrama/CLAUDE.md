@@ -110,6 +110,18 @@ critica_tecnica: pendente | confirmada | incorporada | escalada | dispensada   #
 4. Registrar o bootstrap em `log.md`.
 5. Só então iniciar trabalho de produto.
 
+### Execução governada e observabilidade
+1. Para tarefa governada, usar `.engrama/engine/scripts/exec-bridge.sh --role <role> --tier <tier> -- "prompt"`.
+2. Evitar `codex exec` direto; se for inevitável, registrar como exceção operacional porque perde roteamento, transcript enriquecido e usage ledger.
+3. Conferir evidências geradas:
+   - transcript em `.engrama/evidence/transcripts/`;
+   - usage ledger em `.engrama/evidence/usage/usage-YYYY-MM.jsonl`;
+   - relatório via `.engrama/engine/scripts/usage-report.sh --month current`.
+4. Para análise local, usar `usage-report.sh --month current --by model|role|tier|adapter`.
+5. Registrar no handoff: role, tier, adapter, modelo efetivo quando disponível, transcript, ledger mensal e validações.
+6. Não há dashboard/UI nesta versão; o portal de billing atual é ledger JSONL + `usage-report.sh`.
+7. Nunca ler `.env` nem registrar secrets em prompt/transcript/ledger/handoff; se ocorrer vazamento acidental, mascarar e escalar.
+
 ### Ingest (decisão / fato novo)
 1. Decidir se o conteúdo merece página durável ou só checkpoint em `log.md`.
 2. Rodar a **Fase I** de [[memory/specs/ingestao-memoria-dois-fases]]: tipo correto, frontmatter válido, `source_refs` relativos e, para `memory/domain/`, fonte concreta no repo.
