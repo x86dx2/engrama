@@ -322,3 +322,9 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Causa raiz:** `.engrama/index.md` passou a listar `[[memory/decisions/0017-observabilidade-cognitiva-local]]`, mas o arquivo `0017-observabilidade-cognitiva-local.md` nao faz parte desta fatia e nao entrou no PR. O lint do merge commit falhava com `wikilink orfao`.
 - **Critica tecnica:** o ajuste correto e remover a referencia orfa do PR, nao puxar o ADR 0017 para dentro do changeset. Isso preserva o escopo autorizado de role runtime contracts/template sync e elimina a unica quebra observada na CI.
 - **Validacao local:** `bash ./.engrama/engine/scripts/lint.sh` verde apos remover a linha.
+
+## [2026-06-30] feat/cognitive-observability-foundation | [governance][contract] fix de CI do PR #24: alinhar E9 ao T4 efetivamente versionado | confirmo | sha256:9a8609dadaebab94a7100309ecb133d9c7a91cfb35621fe72ed0ff4392790929 executor manual -- ajuste minimo no teste de contrato
+- **Job que falhou:** `test (ubuntu-latest)`, passo `Run test suite`; no log, a suite falha em `exec-bridge.test.sh`, assert `E9`.
+- **Causa raiz:** o PR comitou `tests/contract/exec-bridge.test.sh` esperando `effort: xhigh` para `--role critique --tier T4`, mas o `models.conf` versionado no PR continua definindo `ENGRAMA_T4_EFFORT=high`. O teste refletia um drift do workspace local, nao o contrato realmente commitado.
+- **Critica tecnica:** o fix minimo e corrigir a expectativa do teste para `high`. Puxar `models.conf`/`template models.conf`/`model-router.test.sh` para este PR ampliaria escopo e misturaria um estado local nao aprovado com a fatia atual.
+- **Validacao local:** `bash tests/contract/exec-bridge.test.sh` verde em export limpo do indice atual (sem interferencia das mudancas locais fora do PR).

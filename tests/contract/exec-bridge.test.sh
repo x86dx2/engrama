@@ -387,7 +387,7 @@ if [ "$RC9" -eq 0 ] \
   && grep -Fq 'role: critique' "$RESP_OUT9" \
   && grep -Fq 'tier: T4' "$RESP_OUT9" \
   && grep -Fq 'model: gpt-5.5' "$RESP_OUT9" \
-  && grep -Fq 'effort: xhigh' "$RESP_OUT9" \
+  && grep -Fq 'effort: high' "$RESP_OUT9" \
   && grep -Fq 'routing-mode: explicit' "$RESP_OUT9" \
   && grep -Fq 'role-contract: .engrama/memory/governance/roles/critique.md' "$RESP_OUT9" \
   && grep -Eq '^role-contract-hash: [0-9a-f]{64}$' "$RESP_OUT9" \
