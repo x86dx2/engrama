@@ -5,7 +5,7 @@
 # --- INFERÍVEIS / OVERRIDE OPCIONAL ---
 PROJETO=MeuProjeto
 REPO_PATH=/caminho/absoluto/do/repo
-ENGRAMA_VERSION=0.1.0
+ENGRAMA_VERSION=0.3.0
 ORQUESTRADOR=Claude (Claude Code)
 AUTORIDADE=Humano (voce@exemplo.com)
 DATA=2026-01-01

@@ -47,6 +47,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] fix/follow-ups-pos-0.2.0 | [governance][gate][contract] fechamento follow-ups pos-0.2.0 (release-gate sem heredoc + exemplos 0.3.0) | waiver Autoridade 2026-06-30 (execucao direta aprovada; bridge sem events JSONL; QA do Orquestrador) | sha256:448fca61e7aab59ddabc23787a40b2ddb9c8db969cb65a794d62042fcfa2441e
+- **Contexto:** a tentativa de execucao via `exec-bridge.sh --role execute --tier T3` nao finalizou com events JSONL/transcript/usage ledger. A excecao operacional segue a aprovacao explicita da Autoridade nesta sessao; esta entrada nao afirma critica independente do Executor.
+- **Escopo coberto pelo hash:** `bin/release-gate.sh` remove heredoc do parser de waiver; `tests/gate/release-gate.test.sh` adiciona regressao RG10..RG10D; `engrama.values.example` e `docs/INSTANTIATE.md` alinham `ENGRAMA_VERSION` a `0.3.0`; gap/log registram fechamento.
+- **Evidencia de QA:** shellcheck focado e shellcheck amplo da CI -> 0; `release-gate.test` 16/16 verde; `tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `release-gate --mode warn --base-ref main` -> 0; payload hash de release -> vazio.
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] rebind cumulativo PR #20 pos-fix CI | waiver Autoridade 2026-06-30 (execucao direta aprovada; rebind de CI) | sha256:b5b45b30bf333d96a14a452fbe583cc7341c9af4c0bcb0204c4b68465646f410
 - **Contexto:** apos o fix `bdd4c4b`, shellcheck/lint/test suite passaram, mas o gate de critica da CI passou a exigir o fingerprint cumulativo atualizado do PR #20 (`origin/main...HEAD`) em modo estrito.
 - **Escopo coberto pelo hash:** diff final esperado do PR #20, calculado a partir de commit temporario da arvore staged para incluir o novo checkpoint em `log.md` e excluir o proprio ledger conforme ADR 0011.

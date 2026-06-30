@@ -40,6 +40,13 @@ check_text() {
   RESULTS="$RESULTS\n  [$mark] $id  ($tag)  -> texto  | $desc"
 }
 
+check_absent_text() {
+  local id="$1" tag="$2" needle="$3" haystack="$4" desc="$5" mark
+  if printf '%s' "$haystack" | grep -Fq "$needle"; then mark="XX"; FAIL=$((FAIL + 1)); else mark="ok"; PASS=$((PASS + 1)); fi
+  [ "$tag" = "FURO" ] && HOLES=$((HOLES + 1))
+  RESULTS="$RESULTS\n  [$mark] $id  ($tag)  -> texto-ausente  | $desc"
+}
+
 new_repo() {
   local branch="$1" d
   d="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-release-gate)"
@@ -241,6 +248,14 @@ r="$(new_repo topic)"
 capture="$(run_gate_capture "$r" warn)"
 check RG9 CORRETO 0 "$(printf '%s\n' "$capture" | sed -n '1p')" "warn sem base branch nem tag nao quebra"
 check_text RG9A CORRETO "pulando em --mode warn" "$capture" "warn sem base/tag emite skip explicito"
+
+# RG10: parser de waiver nao volta a depender de heredoc/here-string/tempfile
+parser_source="$(sed -n '/^has_valid_release_waiver() {$/,/^}/p' "$RELEASE_GATE_SRC")"
+check_text RG10 CORRETO "field2=\"\${rest%%|*}\"" "$parser_source" "parser usa split por expansion de shell"
+check_absent_text RG10A CORRETO "<<" "$parser_source" "parser nao usa heredoc"
+check_absent_text RG10B CORRETO "<<<" "$parser_source" "parser nao usa here-string"
+check_absent_text RG10C CORRETO "mktemp" "$parser_source" "parser nao cria tempfile"
+check_absent_text RG10D CORRETO "/tmp" "$parser_source" "parser nao depende de caminho temporario fixo"
 
 printf '%b\n' "$RESULTS"
 echo ""
