@@ -47,6 +47,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] rebind cumulativo PR #20 pos-fix CI | waiver Autoridade 2026-06-30 (execucao direta aprovada; rebind de CI) | sha256:b5b45b30bf333d96a14a452fbe583cc7341c9af4c0bcb0204c4b68465646f410
+- **Contexto:** apos o fix `bdd4c4b`, shellcheck/lint/test suite passaram, mas o gate de critica da CI passou a exigir o fingerprint cumulativo atualizado do PR #20 (`origin/main...HEAD`) em modo estrito.
+- **Escopo coberto pelo hash:** diff final esperado do PR #20, calculado a partir de commit temporario da arvore staged para incluir o novo checkpoint em `log.md` e excluir o proprio ledger conforme ADR 0011.
+- **Evidencia de QA:** shellcheck exato da CI verde; `tests/run.sh` verde; `release-gate` verde; `critique-gate` validado com `ENGRAMA_DIFF_HASH` cumulativo.
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [contract][governance] CI PR #20 shellcheck em tests/contract | waiver Autoridade 2026-06-30 (execucao direta aprovada; falha de CI corrigida) | sha256:30d932e043176dad2dcb10a5a8b0b7a3e03860e96cbdb10b14832b22d025e615
 - **Contexto:** correção da falha do job `test (ubuntu-latest)` no PR #20. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
 - **Escopo coberto pelo hash:** `tests/contract/sync.test.sh` e `tests/contract/usage-report.test.sh` ajustados para o shellcheck exato da CI; log atualizado.

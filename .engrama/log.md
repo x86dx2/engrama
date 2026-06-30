@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | CI PR #20: rebind cumulativo apos fix de shellcheck
+- Branch `feat-runtime-model-router-usage-ledger`, PR #20. Shellcheck/lint/suite passaram no novo run, mas o gate de crítica da CI falhou no passo `Re-run critique gate against pull request diff`.
+- **Causa:** o commit `bdd4c4b` mudou o diff cumulativo `origin/main...HEAD`; as entradas anteriores de diff-binding passaram a cobrir diffs antigos. A CI roda com `ENGRAMA_REQUIRE_DIFF_BIND=1`, portanto exige um `sha256` que bata o PR inteiro, não apenas o último commit.
+- **Implementado:** rebind agregado do PR #20 no ledger com o hash calculado contra o diff final esperado do PR, usando commit temporário da árvore staged para antecipar o fingerprint de CI sem mover a branch.
+- **QA base já executado nesta correção:** shellcheck exato da CI -> 0; `sync` 27/27; `usage-report` 5/5; `tests/run.sh` -> TODAS AS SUITES VERDES.
+- **PROXIMO:** stagear ledger com o hash cumulativo, rodar `critique-gate`/`release-gate` finais, commitar e pushar.
+
 ## [2026-06-30] fix | CI PR #20: shellcheck tambem cobre tests/contract
 - Branch `feat-runtime-model-router-usage-ledger`, PR #20. A CI falhou no job `test (ubuntu-latest)` durante `Run shellcheck`.
 - **Causa:** localmente eu havia rodado shellcheck só em `bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh`; a CI roda também `tests/run.sh tests/gate/*.test.sh tests/contract/*.test.sh`. Com isso, pegou `SC2034` em variáveis mortas no `sync.test.sh` e `SC2016` em literais com `$` intencionais.
