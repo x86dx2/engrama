@@ -336,3 +336,7 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ## [2026-06-30] feat/cognitive-observability-foundation | [governance] auto-vinculacao mecanica do commit que atualiza o proprio ledger de critica | N/A:registro-de-evidencia | sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 executor n/a -- ledger excluido do fingerprint
 - **Por que N/A:** este commit toca apenas `.engrama/evidence/qa/criticas-do-executor.md`, que o `engrama-diff-hash.sh` exclui por definicao. O gate local enxerga categoria `governance`, mas o fingerprint resultante e o SHA-256 do diff vazio. Esta linha vincula mecanicamente o registro de evidencia ao hash vazio sem reabrir a critica substantiva do PR.
+
+## [2026-06-30] feat/cognitive-observability-foundation | [governance] fix de markdown no waiver sem-release do PR #24 | confirmo | sha256:ee1de22d9519cd66fccdbb5907278d597b3355f0981336de062c1c8c39d3225e executor manual -- heading sem pontuacao final
+- **Causa raiz:** `markdownlint-cli2` falhou no run `28478939511` com `MD026/no-trailing-punctuation` em `.engrama/evidence/qa/release-waivers.md:28`, porque a entrada append-only do waiver termina com `.` e o arquivo trata cada linha `## [...]` como heading.
+- **Critica tecnica:** o fix minimo e remover apenas a pontuacao final do heading. O hash do waiver `sem-release` permanece valido porque o `release-gate` exclui o proprio arquivo de waivers do payload hash.
