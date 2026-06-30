@@ -37,9 +37,9 @@ Todos os pontos variáveis usam `{{CHAVE}}`. Defina os valores do seu projeto:
 | `{{AUTORIDADE}}` | quem é a Autoridade de Mudança | `Humano (voce@exemplo.com)` |
 | `{{FINALIDADE_DO_PROJETO}}` | finalidade inicial registrada no bootstrap do projeto | `preencher na primeira abertura` |
 | `{{EXECUTOR_CMD}}` | comando que invoca o Executor (adaptador concreto do projeto) | `codex exec` |
-| `{{MODELO_CRITICA}}` | modelo independente usado na crítica | `gpt-5.5` *(exemplo; confirme o id real contra o seu `codex exec`)* |
-| `{{MODELO_EXECUTOR_PESADO}}` | modelo do Executor para tarefas pesadas | `gpt-5.4` *(exemplo; confirme o id real contra o seu `codex exec`)* |
-| `{{MODELO_EXECUTOR_LEVE}}` | modelo do Executor para tarefas leves | `gpt-5.4-mini` *(exemplo; confirme o id real contra o seu `codex exec`)* |
+| `{{MODELO_CRITICA}}` | modelo independente usado na crítica | `gpt-5.5` *(exemplo; gravado em `models.conf`, confirme no adapter real)* |
+| `{{MODELO_EXECUTOR_PESADO}}` | modelo do Executor para tarefas pesadas | `gpt-5.4` *(exemplo; gravado em `models.conf`, confirme no adapter real)* |
+| `{{MODELO_EXECUTOR_LEVE}}` | modelo do Executor para tarefas leves | `gpt-5.4-mini` *(exemplo; gravado em `models.conf`, confirme no adapter real)* |
 | `{{STACK}}` | stack do projeto | `Node + Postgres` |
 | `{{DEV_URL}}` | URL/porta do dev local | `localhost:3000` |
 | `{{CMD_DEV}}` | comando canônico de desenvolvimento | `npm run dev` |
@@ -127,7 +127,7 @@ Faca assim porque a entrada do bootstrap na `main` pode cobrir `governance`; na 
 Pelo **ADR 0006**, governança não se autoaprova. O Engrama inicial **é** uma edição de governança — então ele mesmo passa pelo gate:
 
 1. O **Orquestrador** revisa o Engrama instanciado (placeholders trocados, gate adaptado).
-2. Submete à **crítica do Executor** (`{{EXECUTOR_CMD}} -m {{MODELO_CRITICA}}`, read-only): coerência, contradições, riscos.
+2. Submete à **crítica do Executor** (`exec-bridge.sh --role critique --tier T4 --sandbox read-only`): coerência, contradições, riscos.
 3. **Antes de commitar (logar precede commit não-trivial):** registra a crítica no ledger `.engrama/evidence/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo, com o **próximo passo seguro**).
 4. **Consenso →** aprovação da **Autoridade** → 1º commit (Engrama + ledger + log no mesmo commit).
    **Impasse →** a Autoridade arbitra (o Executor tem voz, não veto).

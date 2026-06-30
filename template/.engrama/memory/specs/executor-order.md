@@ -8,10 +8,10 @@ source_refs:
   - .engrama/memory/decisions/0010-roteamento-modelo-effort-do-executor.md
 ---
 
-Template da **ordem ao Executor** (executor-bridge). Toda invocação `{{EXECUTOR_CMD}}` segue isto. Detalhe normativo: [[memory/governance/continuidade-de-sessao]] (ordem mínima) + [[memory/decisions/0010-roteamento-modelo-effort-do-executor]] (tier).
+Template da **ordem ao Executor** (executor-bridge). Toda invocação pelo bridge segue isto. Detalhe normativo: [[memory/governance/continuidade-de-sessao]] (ordem mínima) + [[memory/decisions/0010-roteamento-modelo-effort-do-executor]] (tier).
 
 ## Cabeçalho obrigatório (o Orquestrador declara)
-- **Tier + modelo + effort + porquê** (ADR 0010): ex. "T3: `{{MODELO_EXECUTOR_PESADO}}`/high — fatia de contrato, risco médio". Crítica → sempre `{{MODELO_CRITICA}}`.
+- **Role + tier + porquê** (ADR 0010): ex. "`role=execute tier=T3` — fatia de contrato, risco médio". Modelo/effort vêm de `.engrama/engine/config/models.conf`. Crítica → `role=critique tier=T4`.
 - Papel: "Você é o Executor, Executor Crítico."
 
 ## Corpo (10 itens mínimos)
@@ -22,13 +22,13 @@ Template da **ordem ao Executor** (executor-bridge). Toda invocação `{{EXECUTO
 ## Resposta exigida do Executor (6 itens)
 leitura · **crítica técnica (antes de executar)** · **veredito** (`concordo`/`ajuste-menor`/`discordo`) · execução · evidências · pendências.
 
-## Mecânica do `{{EXECUTOR_CMD}}` (lições operacionais — ADR 0003)
+## Mecânica do executor-bridge (lições operacionais — ADR 0003)
 - **Sempre fechar o stdin (`< /dev/null` ou equivalente)** (senão a invocação trava lendo input adicional do stdin esperando um EOF que não chega).
 - **Saída estruturada/streaming** (progresso ao vivo, para distinguir "trabalhando" de "travado") · **watchdog** generoso (≥600s; e2e/critique mais).
 - Seleção de modelo por invocação (flag de modelo) · esforço de raciocínio por invocação (flag de `model_reasoning_effort`, ex.: `low|medium|high|xhigh`).
 - **Transparência (ADR 0003):** colar à Autoridade a **ordem verbatim** e a **resposta na íntegra**.
 
-> **Template:** os flags exatos (fechar stdin, modo de saída JSON/streaming, flag de modelo, flag de esforço de raciocínio, watchdog) dependem da CLI do seu `{{EXECUTOR_CMD}}`. Fixe a sintaxe real do seu executor ao instanciar este pack; o que é universal é o princípio — stdin fechado, saída observável ao vivo, timeout folgado, e ordem+resposta expostas verbatim à Autoridade.
+> **Template:** os flags exatos de vendor vivem no adapter (`.engrama/engine/adapters/<adapter>.sh`). Fixe a sintaxe real ali; o contrato universal do Engrama é role+tier, stdin fechado, saída observável ao vivo, timeout folgado, e ordem+resposta expostas verbatim à Autoridade.
 
 ## Pós-resposta (Orquestrador)
 - `discordo` material → **apresentar à Autoridade** (sem overrule, ADR 0004).

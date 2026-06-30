@@ -25,7 +25,7 @@ Se [[memory/project/bootstrap-do-projeto]] estiver `proposed` ou com **campos pe
 
 ## Ordem mínima do Orquestrador para o Executor (executor-bridge)
 
-Toda invocação `codex exec` carrega, no mínimo:
+Toda invocação pelo executor-bridge carrega, no mínimo:
 1. objetivo da fatia;
 2. estado factual conhecido;
 3. escopo da execução;
@@ -35,7 +35,7 @@ Toda invocação `codex exec` carrega, no mínimo:
 7. riscos já conhecidos;
 8. o que depende de aprovação da Autoridade;
 9. próximo passo seguro após a execução;
-10. **modelo/tier** escolhido (ex.: um tier pesado e um leve do adaptador configurado; confirme os ids reais) e por quê.
+10. **role/tier** escolhido e por quê; o modelo/effort são resolvidos pelo `model-router.sh`.
 
 ## Resposta mínima obrigatória do Executor
 

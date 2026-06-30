@@ -17,8 +17,18 @@ ROOT_DIFF_HASH="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/engine/scripts/engrama-diff-hash.sh"
 ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/engine/scripts/exec-bridge.sh"
 TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/engine/scripts/exec-bridge.sh"
+ROOT_MODEL_ROUTER="$REPO_ROOT/.engrama/engine/scripts/model-router.sh"
+TEMPLATE_MODEL_ROUTER="$REPO_ROOT/template/.engrama/engine/scripts/model-router.sh"
+ROOT_USAGE_REPORT="$REPO_ROOT/.engrama/engine/scripts/usage-report.sh"
+TEMPLATE_USAGE_REPORT="$REPO_ROOT/template/.engrama/engine/scripts/usage-report.sh"
 ROOT_CI_GATE="$REPO_ROOT/.engrama/engine/scripts/critique-gate-ci.sh"
 TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate-ci.sh"
+ROOT_CODEX_ADAPTER="$REPO_ROOT/.engrama/engine/adapters/codex.sh"
+TEMPLATE_CODEX_ADAPTER="$REPO_ROOT/template/.engrama/engine/adapters/codex.sh"
+TEMPLATE_MODELS_CONF="$REPO_ROOT/template/.engrama/engine/config/models.conf"
+TEMPLATE_SUBSCRIPTIONS_CONF="$REPO_ROOT/template/.engrama/engine/config/subscriptions.conf"
+ROOT_PRICES_CONF="$REPO_ROOT/.engrama/engine/config/prices.conf"
+TEMPLATE_PRICES_CONF="$REPO_ROOT/template/.engrama/engine/config/prices.conf"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
@@ -44,7 +54,7 @@ extract_logic_without_template_config() {
   local src="$1" out="$2"
   awk '
     BEGIN { mode = "prefix" }
-    /^EXECUTOR_CMD=/{ mode = "skip_vars"; next }
+    /^CRITIQUE_ROLE=/{ mode = "skip_vars"; next }
     mode == "prefix" { print; next }
     mode == "skip_vars" && /^REPO_ROOT=/{ mode = "middle" }
     mode == "middle" && /CONFIG DO PROJETO:/{ mode = "skip_classify"; next }
@@ -106,8 +116,31 @@ check S3C CORRETO "$_r" "engrama-diff-hash.sh do template identico ao da raiz"
 if cmp -s "$ROOT_EXEC_BRIDGE" "$TEMPLATE_EXEC_BRIDGE"; then _r=0; else _r=1; fi
 check S3CA CORRETO "$_r" "exec-bridge.sh do template identico ao da raiz"
 
+if cmp -s "$ROOT_MODEL_ROUTER" "$TEMPLATE_MODEL_ROUTER"; then _r=0; else _r=1; fi
+check S3CAA CORRETO "$_r" "model-router.sh do template identico ao da raiz"
+
+if cmp -s "$ROOT_USAGE_REPORT" "$TEMPLATE_USAGE_REPORT"; then _r=0; else _r=1; fi
+check S3CAB CORRETO "$_r" "usage-report.sh do template identico ao da raiz"
+
 if cmp -s "$ROOT_CI_GATE" "$TEMPLATE_CI_GATE"; then _r=0; else _r=1; fi
 check S3CB CORRETO "$_r" "template/.engrama/engine/scripts/critique-gate-ci.sh identico ao da raiz"
+
+if cmp -s "$ROOT_CODEX_ADAPTER" "$TEMPLATE_CODEX_ADAPTER"; then _r=0; else _r=1; fi
+check S3CBA CORRETO "$_r" "codex adapter do template identico ao da raiz"
+
+if cmp -s "$ROOT_PRICES_CONF" "$TEMPLATE_PRICES_CONF"; then _r=0; else _r=1; fi
+check S3CBB CORRETO "$_r" "prices config do template identico ao da raiz"
+
+if grep -Fq 'ENGRAMA_CODEX_PRO_ENABLED=0' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && grep -Eq '^ENGRAMA_CODEX_PRO_MONTHLY_USD=$' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && grep -Fq 'ENGRAMA_CLAUDE_MAX_ENABLED=0' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && grep -Eq '^ENGRAMA_CLAUDE_MAX_MONTHLY_USD=$' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && ! grep -Fq 'ENGRAMA_CODEX_PRO_MONTHLY_USD=100' "$TEMPLATE_SUBSCRIPTIONS_CONF"; then
+  _r=0
+else
+  _r=1
+fi
+check S3CBC CORRETO "$_r" "subscriptions.conf do template nasce neutro, sem assinatura paga presumida"
 
 if cmp -s "$ROOT_MARKDOWNLINT" "$TEMPLATE_MARKDOWNLINT"; then _r=0; else _r=1; fi
 check S3CC CORRETO "$_r" "template/.markdownlint-cli2.yaml identico ao da raiz"
@@ -115,15 +148,34 @@ check S3CC CORRETO "$_r" "template/.markdownlint-cli2.yaml identico ao da raiz"
 if cmp -s "$ROOT_SETTINGS" "$TEMPLATE_SETTINGS"; then _r=0; else _r=1; fi
 check S3D CORRETO "$_r" "settings.json do template identico ao da raiz"
 
-if grep -Fq 'ROOT_CI_GATE=' "$SYNC_SCRIPT" && grep -Fq 'TEMPLATE_CI_GATE=' "$SYNC_SCRIPT" && grep -Fq 'ROOT_MARKDOWNLINT=' "$SYNC_SCRIPT" && grep -Fq 'TEMPLATE_MARKDOWNLINT=' "$SYNC_SCRIPT"; then
+if grep -Fq 'ROOT_CI_GATE=' "$SYNC_SCRIPT" \
+  && grep -Fq 'TEMPLATE_CI_GATE=' "$SYNC_SCRIPT" \
+  && grep -Fq 'ROOT_MODEL_ROUTER=' "$SYNC_SCRIPT" \
+  && grep -Fq 'TEMPLATE_MODEL_ROUTER=' "$SYNC_SCRIPT" \
+  && grep -Fq 'ROOT_CODEX_ADAPTER=' "$SYNC_SCRIPT" \
+  && grep -Fq 'TEMPLATE_CODEX_ADAPTER=' "$SYNC_SCRIPT" \
+  && grep -Fq 'ROOT_MARKDOWNLINT=' "$SYNC_SCRIPT" \
+  && grep -Fq 'TEMPLATE_MARKDOWNLINT=' "$SYNC_SCRIPT" \
+  && grep -Fq 'compose_template_subscriptions_conf' "$SYNC_SCRIPT"; then
   _r=0
 else
   _r=1
 fi
-check S3E CORRETO "$_r" "sync-template sincroniza critique-gate-ci.sh e .markdownlint-cli2.yaml"
+check S3E CORRETO "$_r" "sync-template sincroniza gate-ci/router/adapter e neutraliza subscriptions do template"
 
-if grep -Fq '{{EXECUTOR_CMD}}' "$TEMPLATE_GATE" && grep -Fq '{{MODELO_CRITICA}}' "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
-check S4 CORRETO "$_r" "template preserva placeholders do gate"
+if grep -Fq 'CRITIQUE_ROLE="critique"' "$TEMPLATE_GATE" \
+  && grep -Fq 'CRITIQUE_TIER="T4"' "$TEMPLATE_GATE" \
+  && grep -Fq "exec-bridge.sh --role \$CRITIQUE_ROLE --tier \$CRITIQUE_TIER" "$TEMPLATE_GATE"; then _r=0; else _r=1; fi
+check S4 CORRETO "$_r" "template orienta critica pelo exec-bridge roteado"
+
+if grep -Fq 'ENGRAMA_T1_MODEL={{MODELO_EXECUTOR_LEVE}}' "$TEMPLATE_MODELS_CONF" \
+  && grep -Fq 'ENGRAMA_T2_MODEL={{MODELO_EXECUTOR_PESADO}}' "$TEMPLATE_MODELS_CONF" \
+  && grep -Fq 'ENGRAMA_T4_MODEL={{MODELO_CRITICA}}' "$TEMPLATE_MODELS_CONF"; then
+  _r=0
+else
+  _r=1
+fi
+check S4C CORRETO "$_r" "models.conf do template preserva placeholders de modelo para o bootstrap"
 
 if grep -Fq '.engrama/VERSION' "$TEMPLATE_GATE"; then
   _r=0
@@ -132,12 +184,12 @@ else
 fi
 check S4A CORRETO "$_r" "gate do template classifica .engrama/VERSION como gate"
 
-if grep -Fq '.engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;' "$TEMPLATE_GATE"; then
+if grep -Fq '.engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/adapters/*.sh|.engrama/engine/config/*.conf|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;' "$TEMPLATE_GATE"; then
   _r=0
 else
   _r=1
 fi
-check S4B CORRETO "$_r" "gate do template classifica .engrama/engine/scripts/*.sh como gate"
+check S4B CORRETO "$_r" "gate do template classifica scripts/adapters/config como gate"
 
 if grep -Fq '# src/server/services/agreements.*|src/server/services/ledger.*)    addcat financial ;;' "$TEMPLATE_GATE" \
   && grep -Fq '# src/server/permissions.*|src/server/services/users.*)             addcat rbac ;;' "$TEMPLATE_GATE" \

@@ -15,7 +15,7 @@ O Orquestrador é o **agente principal**. Escopo:
 1. inspecionar o estado real (repo, evidências);
 2. definir estratégia, prioridade e sequência;
 3. decompor em fatias verificáveis e **abrir a branch** de cada fatia;
-4. **montar a ordem e invocar o Executor** (`codex exec`, modelo conforme o tier);
+4. **montar a ordem e invocar o Executor** pelo executor-bridge (`role+tier`, modelo conforme `models.conf`);
 5. fixar critérios de aceite e **métricas de qualidade**;
 6. **auditar** a devolutiva do Executor e **re-executar os gates** (QA);
 7. decidir o que/quando commitar e **comitar** (não comita trabalho não auditado);
@@ -50,8 +50,8 @@ A **Autoridade de Mudança**:
 
 ```
 1. Orquestrador inspeciona o estado real e define a fatia + critérios de aceite.
-2. Orquestrador abre a branch e consulta o roteamento (pesado/leve → modelo do Executor).
-3. Orquestrador monta a ORDEM mínima e invoca:  codex exec --model <tier> [--output-schema]
+2. Orquestrador abre a branch e define `role+tier`.
+3. Orquestrador monta a ORDEM mínima e invoca:  `.engrama/engine/scripts/exec-bridge.sh --role <role> --tier <tier> ...`
 4. Executor CRITICA a ordem ativamente:
      ├─ concorda / ajuste menor que assume → escreve o código + devolve os 6 itens
      └─ DISCORDA materialmente → NÃO executa; devolve objeção + justificativas

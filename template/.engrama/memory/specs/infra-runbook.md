@@ -57,4 +57,4 @@ Quando o app em construção sobe numa instância própria, **isole-a** das dema
 
 ## Executor-bridge + tooling auxiliar
 - Se o harness do Executor carrega tooling auxiliar (ex.: um servidor MCP de swarm/orquestração de subagentes) no boot, mitigue eventual hang de inicialização com timeout de startup. Esse tooling é **subordinado** ao modelo, não o canal de governança.
-- Sempre invocar o Executor com stdin fechado para evitar travas de boot: `{{EXECUTOR_CMD}} ... < /dev/null` (ver [[memory/specs/executor-order]]).
+- Sempre invocar o Executor pelo `exec-bridge.sh`; o adapter fecha stdin ao chamar o vendor e evita travas de boot (ver [[memory/specs/executor-order]]).

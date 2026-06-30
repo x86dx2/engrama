@@ -7,6 +7,46 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | CI PR #20: rebind cumulativo apos fix de shellcheck
+- Branch `feat-runtime-model-router-usage-ledger`, PR #20. Shellcheck/lint/suite passaram no novo run, mas o gate de crítica da CI falhou no passo `Re-run critique gate against pull request diff`.
+- **Causa:** o commit `bdd4c4b` mudou o diff cumulativo `origin/main...HEAD`; as entradas anteriores de diff-binding passaram a cobrir diffs antigos. A CI roda com `ENGRAMA_REQUIRE_DIFF_BIND=1`, portanto exige um `sha256` que bata o PR inteiro, não apenas o último commit.
+- **Implementado:** rebind agregado do PR #20 no ledger com o hash calculado contra o diff final esperado do PR, usando commit temporário da árvore staged para antecipar o fingerprint de CI sem mover a branch.
+- **QA base já executado nesta correção:** shellcheck exato da CI -> 0; `sync` 27/27; `usage-report` 5/5; `tests/run.sh` -> TODAS AS SUITES VERDES.
+- **PROXIMO:** stagear ledger com o hash cumulativo, rodar `critique-gate`/`release-gate` finais, commitar e pushar.
+
+## [2026-06-30] fix | CI PR #20: shellcheck tambem cobre tests/contract
+- Branch `feat-runtime-model-router-usage-ledger`, PR #20. A CI falhou no job `test (ubuntu-latest)` durante `Run shellcheck`.
+- **Causa:** localmente eu havia rodado shellcheck só em `bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh`; a CI roda também `tests/run.sh tests/gate/*.test.sh tests/contract/*.test.sh`. Com isso, pegou `SC2034` em variáveis mortas no `sync.test.sh` e `SC2016` em literais com `$` intencionais.
+- **Implementado:** removidas as variáveis raiz que ficaram sem uso no contrato de sync; literais com `$` em `sync.test.sh` e `usage-report.test.sh` agora usam aspas duplas com escape explícito.
+- **QA executado:** shellcheck exato da CI (`shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/githooks/pre-commit tests/run.sh tests/gate/*.test.sh tests/contract/*.test.sh`) -> 0; `sync` 27/27 verde; `usage-report` 5/5 verde; `bash tests/run.sh` -> TODAS AS SUITES VERDES.
+- **PROXIMO:** registrar waiver/diff-binding, rodar gates finais, commitar e pushar para reexecutar a CI do PR #20.
+
+## [2026-06-30] fix | review P2 do exec-bridge: falha inicial do adapter sem ledger sintético
+- Branch `feat-runtime-model-router-usage-ledger`. Correção adicional do review sobre ADR 0016: `exec-bridge.sh` assumia que o adapter sempre criava `codex-events.jsonl`.
+- **Problema:** se `ENGRAMA_CODEX_BIN` apontasse para binário ausente, o adapter falhava antes de criar eventos; o bridge ainda rodava parsers `jq`, derivava sessão de resposta vazia e podia escrever transcript/usage artificiais.
+- **Implementado:** stderr do adapter é capturado no stderr temporário do bridge; se `events_file` não existe ou está vazio, o bridge imprime o erro do adapter, limpa transcripts da tentativa e aborta antes de parsing, response transcript e usage ledger. Falhas com eventos reais continuam auditáveis pelo fluxo existente.
+- **Contratos:** `exec-bridge.test.sh` ganhou E10 para binário ausente: sem `jq: Could not open file`, sem `usage-ledger:`, sem response/order persistidos e sem arquivo usage.
+- **QA executado:** `exec-bridge` 12/12 verde; `sync` 27/27 verde; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` -> 0.
+- **PROXIMO:** registrar waiver/diff-binding, rodar gates finais e commitar.
+
+## [2026-06-30] fix | review P2 do router/ledger: modelo observado, mes UTC e template neutro
+- Branch `feat-runtime-model-router-usage-ledger`. Correção dos 3 achados P2 do review sobre a fatia ADR 0016 antes de PR/merge.
+- **Ledger/modelo:** `exec-bridge.sh` agora grava `model` como modelo efetivo (observado pelo stream quando existir; configurado como fallback), mais `configured_model` e `observed_model`. Plano e custo estimado usam o mesmo modelo efetivo, evitando atribuir custo ao modelo errado em fallback/drift.
+- **Mes do relatório:** `usage-report --month current` usa `date -u +%Y-%m`, mesma convenção UTC usada para criar `usage-YYYY-MM.jsonl`.
+- **Template honesto:** `template/.engrama/engine/config/subscriptions.conf` nasce com assinaturas desativadas e mensalidade vazia; `sync-template.sh` neutraliza esse config ao gerar template, mantendo a raiz livre para refletir a assinatura real do operador.
+- **Contratos atualizados:** `exec-bridge`, `usage-report`, `sync`, `bootstrap` e `release-surface` travam os 3 fixes e a superfície distribuível transformada.
+- **QA executado:** contratos focados verdes (`exec-bridge` 11/11, `usage-report` 5/5, `sync` 27/27, `bootstrap` 15/15, `release-surface` 4/4); `bash tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` -> 0.
+- **PROXIMO:** registrar waiver/diff-binding desta correção no ledger de críticas, rodar gates finais e commitar. `docs/PRD.md` segue untracked e fora do escopo do commit.
+
+## [2026-06-30] feat | runtime model-router + usage ledger local (ADR 0016) — release 0.3.0
+- Branch `feat-runtime-model-router-usage-ledger`. **Excecao aprovada pela Autoridade no chat:** sem Claude disponivel, Codex executou diretamente a fatia; sem claim de critica independente. A entrada de gate desta fatia sera waiver/diff-binding explicito, nao "confirmo" falso.
+- **Objetivo:** transformar a politica de modelos da ADR 0010 em runtime observavel: `role+tier -> adapter/provider/model/effort`, com adapter Codex explicito e ledger local de uso/billing.
+- **Implementado:** `.engrama/engine/config/{models,subscriptions,prices}.conf`; `.engrama/engine/scripts/model-router.sh`; `.engrama/engine/adapters/codex.sh`; `exec-bridge.sh` roteado (default explicito `execute/T2` quando role/tier ausentes; prompt inline; transcript com rota; usage ledger JSONL `engrama.usage.v1`); `usage-report.sh`; `evidence/usage/.gitkeep`.
+- **Gate/contract/template:** critique-gate orienta `exec-bridge.sh --role critique --tier T4 --sandbox read-only`; `classify()` cobre scripts/adapters/config; `sync-template.sh` sincroniza router/report/adapter/config e preserva placeholders em `template/.engrama/engine/config/models.conf`; bootstrap/install substituem `.conf`, instalam usage e smokeiam novos scripts.
+- **Governanca/docs:** ADR [[memory/decisions/0016-runtime-model-router-usage-ledger]] ativa; ADR 0010 marcada como runtime; schema `.engrama/CLAUDE.md`, specs e governanca atualizados para bridge/router; `VERSION` 0.2.0 -> 0.3.0 e `CHANGELOG.md` com 0.3.0. O `docs/PRD.md` foi tratado como insumo local, nao canonico; a canonizacao duravel e a ADR 0016.
+- **QA executado:** `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` -> 0; `bash bin/release-gate.sh --mode warn` -> 0; rechecks focados `exec-bridge`, `sync`, `release-surface`, `bootstrap` verdes.
+- **PROXIMO:** registrar waiver/diff-binding no ledger de criticas para esta excecao aprovada; rodar lint/gate final; commit/PR. Pos-merge: tag `v0.3.0` (alcada da Autoridade).
+
 ## [2026-06-27] decision | PROPOSTA (proposed) — pagina workflow fluxo-operacional (fluxograma do engrama) + governa namespace memory/workflows/
 - Branch `feat/workflow-fluxo-operacional`. A Autoridade pediu o fluxograma do engrama "com todos os caminhos" e escolheu versiona-lo como **pagina workflow no .engrama** (passar pelo gate).
 - **Conteudo:** `.engrama/memory/workflows/fluxo-operacional.md` (type workflow, `proposed`) com 2 Mermaid inline (fluxo principal + ingestao 2 fases) + legenda + assets (`engrama-fluxo.{mmd,png}`, `engrama-ingest.{mmd,png}`). E **visualizacao** dos normativos (cadeia/modelo/continuidade) — em divergencia prevalece o normativo.

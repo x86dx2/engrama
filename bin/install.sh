@@ -32,6 +32,9 @@ run_integrity_smoke() {
     "$root/.engrama/engine/scripts/engrama-diff-hash.sh" \
     "$root/.engrama/engine/scripts/critique-gate-hook.sh" \
     "$root/.engrama/engine/scripts/lint.sh" \
+    "$root/.engrama/engine/scripts/model-router.sh" \
+    "$root/.engrama/engine/scripts/usage-report.sh" \
+    "$root/.engrama/engine/adapters/codex.sh" \
     "$root/.engrama/engine/scripts/critique-gate-ci.sh"
   do
     rel="${script#"$root"/}"
@@ -155,7 +158,7 @@ while IFS= read -r -d '' f; do
   fi
 done < <(
   find "$ROOT/.engrama" "$ROOT/CLAUDE.md" "$ROOT/AGENTS.md" -type f \
-    \( -name '*.md' -o -name '*.sh' -o -name '.gitignore' -o -name 'pre-commit' -o -name 'VERSION' \) \
+    \( -name '*.md' -o -name '*.sh' -o -name '*.conf' -o -name '.gitignore' -o -name 'pre-commit' -o -name 'VERSION' \) \
     -print0 2>/dev/null
 )
 [ "$apply_failed" -eq 0 ] || {
@@ -164,7 +167,7 @@ done < <(
 }
 
 # 5) ativar o gate
-chmod +x "$ROOT"/.engrama/engine/scripts/*.sh "$ROOT"/.engrama/engine/githooks/* 2>/dev/null || true
+chmod +x "$ROOT"/.engrama/engine/scripts/*.sh "$ROOT"/.engrama/engine/adapters/*.sh "$ROOT"/.engrama/engine/githooks/* 2>/dev/null || true
 git -C "$ROOT" config core.hooksPath .engrama/engine/githooks
 echo "Gate ativado: core.hooksPath=.engrama/engine/githooks"
 

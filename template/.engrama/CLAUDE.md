@@ -45,16 +45,19 @@ NÃO replica: estrutura de pastas do código, assinaturas/tipos/schemas, estado 
 │   ├── gaps/        # opcional por projeto
 │   └── workflows/   # narrativas/fluxogramas end-to-end (opcional por projeto)
 ├── engine/
-│   ├── scripts/     # gate, lint, bridge, sync helpers
+│   ├── scripts/     # gate, lint, bridge, router, report, sync helpers
+│   ├── adapters/    # fronteiras vendor-specific do executor-bridge
+│   ├── config/      # models/subscriptions/prices runtime
 │   └── githooks/    # hooks versionados
 └── evidence/
     ├── qa/          # ledger de críticas do Executor
-    └── transcripts/ # evidência verbatim do executor-bridge
+    ├── transcripts/ # evidência verbatim do executor-bridge
+    └── usage/       # ledger JSONL de uso/billing local
 ```
 
 > `memory/roadmap/` é o namespace canônico para referências de roadmap, mas este pack não cria um diretório físico para ele. Use o slug `memory/roadmap/...` nas referências e materialize a pasta só se o seu projeto realmente decidir versionar roadmap em arquivo.
 
-> **Template:** vêm preenchidos neste pack: `memory/governance/`, `memory/decisions/`, `memory/project/`, `memory/specs/`, `evidence/qa/`, `engine/scripts/`, `engine/githooks/`, `CLAUDE.md`, `index.md`, `log.md`, `VERSION` e `.gitignore`. As pastas `memory/domain/` e `memory/gaps/` são específicas do seu projeto; `memory/roadmap/` fica só como namespace canônico até você optar por materializá-lo.
+> **Template:** vêm preenchidos neste pack: `memory/governance/`, `memory/decisions/`, `memory/project/`, `memory/specs/`, `evidence/qa/`, `evidence/usage/`, `engine/scripts/`, `engine/adapters/`, `engine/config/`, `engine/githooks/`, `CLAUDE.md`, `index.md`, `log.md`, `VERSION` e `.gitignore`. As pastas `memory/domain/` e `memory/gaps/` são específicas do seu projeto; `memory/roadmap/` fica só como namespace canônico até você optar por materializá-lo.
 
 ## Convenções de página
 

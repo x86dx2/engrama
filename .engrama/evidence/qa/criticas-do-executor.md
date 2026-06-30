@@ -7,9 +7,9 @@ source_refs:
   - .engrama/engine/scripts/critique-gate.sh
 ---
 
-# Ledger de críticas do Executor (gpt-5.5) — gate de superfície sensível
+# Ledger de críticas do Executor (modelo configurado de crítica) — gate de superfície sensível
 
-Registro **append-only** de toda **crítica do Executor no papel de crítica** (modelo independente, read-only) exigida pelo **ADR 0006 item 7** e pelo **ADR 0010**.
+Registro **append-only** de toda **crítica do Executor no papel de crítica** (modelo independente, read-only) exigida pelo **ADR 0006 item 7**, pelo **ADR 0010** e roteada em runtime pelo **ADR 0016**.
 
 **Verificado mecanicamente** por `.engrama/engine/scripts/critique-gate.sh` (git pre-commit + PreToolUse do harness). Um commit que toca superfície sensível é **bloqueado** se faltar, para CADA categoria tocada, uma entrada CONCLUÍDA referenciando a **branch**. O gate lê a versão **staged/HEAD** do ledger (não o working-tree), rejeita `<pendente>` e bloqueia `objeção` sem `waiver`.
 
@@ -46,6 +46,31 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 > Cada entrada precisa ter os 4 campos (incluindo `<ref>`). Linhas que não casam a gramática (bullets `-`, etc.) são ignoradas pelo gate. O `waiver` ainda é detectado por substring **dentro do campo 3** — escreva-o no positivo (`waiver <quem/quando>`).
 
 ---
+
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] rebind cumulativo PR #20 pos-fix CI | waiver Autoridade 2026-06-30 (execucao direta aprovada; rebind de CI) | sha256:b5b45b30bf333d96a14a452fbe583cc7341c9af4c0bcb0204c4b68465646f410
+- **Contexto:** apos o fix `bdd4c4b`, shellcheck/lint/test suite passaram, mas o gate de critica da CI passou a exigir o fingerprint cumulativo atualizado do PR #20 (`origin/main...HEAD`) em modo estrito.
+- **Escopo coberto pelo hash:** diff final esperado do PR #20, calculado a partir de commit temporario da arvore staged para incluir o novo checkpoint em `log.md` e excluir o proprio ledger conforme ADR 0011.
+- **Evidencia de QA:** shellcheck exato da CI verde; `tests/run.sh` verde; `release-gate` verde; `critique-gate` validado com `ENGRAMA_DIFF_HASH` cumulativo.
+
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [contract][governance] CI PR #20 shellcheck em tests/contract | waiver Autoridade 2026-06-30 (execucao direta aprovada; falha de CI corrigida) | sha256:30d932e043176dad2dcb10a5a8b0b7a3e03860e96cbdb10b14832b22d025e615
+- **Contexto:** correção da falha do job `test (ubuntu-latest)` no PR #20. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
+- **Escopo coberto pelo hash:** `tests/contract/sync.test.sh` e `tests/contract/usage-report.test.sh` ajustados para o shellcheck exato da CI; log atualizado.
+- **Evidência de QA:** shellcheck exato da CI verde; `sync` 27/27 verde; `usage-report` 5/5 verde; `tests/run.sh` verde.
+
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] review P2 exec-bridge sem events JSONL | waiver Autoridade 2026-06-30 (execucao direta aprovada; achado P2 incorporado) | sha256:eac5ded8c88a88794d180527f396e2f9620245089efa42947b676c2f97a042ab
+- **Contexto:** correção adicional do review da fatia ADR 0016. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
+- **Escopo coberto pelo hash:** `exec-bridge.sh` captura stderr do adapter, aborta sem parsers/transcript de resposta/ledger quando não há `events_file` com eventos; template sincronizado; contrato E10 cobre binário Codex inexistente; ADR/changelog/log alinhados.
+- **Evidência de QA:** `tests/run.sh` verde; `lint.sh` verde; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` verde; contratos focados `exec-bridge` e `sync` verdes.
+
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] review P2 do router/ledger ADR 0016 | waiver Autoridade 2026-06-30 (execucao direta aprovada; achados P2 incorporados) | sha256:407b5cdd8e058bef63b2e5e6f5f12ff025c1df9258f7e17912e01f920b263cf5
+- **Contexto:** esta correção responde aos 3 achados P2 do review da fatia ADR 0016. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
+- **Escopo coberto pelo hash:** `exec-bridge.sh` passa a distinguir `model` efetivo, `configured_model` e `observed_model`; `usage-report --month current` usa UTC; `sync-template.sh` gera `subscriptions.conf` neutro para o template; contratos e docs normativos foram alinhados.
+- **Evidência de QA:** `tests/run.sh` verde; `lint.sh` verde; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` verde; contratos focados de bridge/report/sync/bootstrap/release-surface verdes.
+
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] runtime model-router + usage ledger local (ADR 0016 / release 0.3.0) | waiver Autoridade 2026-06-30 (excecao: Codex executou sem Orquestrador separado) | sha256:209833bc720f01219dd53875246175950e7c196047ea1a6016c16e9b62ce33e0
+- **Contexto:** a Autoridade aprovou explicitamente no chat a implementacao direta por Codex porque nao havia Claude disponivel. Isto e uma excecao operacional consciente; nao e apresentado como critica independente.
+- **Escopo coberto pelo hash:** router/config/adapter/bridge usage ledger, gate/template/bootstrap/sync, ADR 0016, docs normativos, release 0.3.0 e testes associados.
+- **Evidencia de QA:** `tests/run.sh` verde; `lint.sh` verde; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` verde; `release-gate --mode warn` verde; rechecks focados de bridge/sync/release-surface/bootstrap verdes.
 
 ## [2026-06-20] main | [governance][gate][contract] ativacao da instancia viva do Engrama e template bootstrapavel | dispensada | Autoridade no chat em 2026-06-20
 - A Autoridade ordenou ativar o Engrama como repositório central, vivo, e fonte do template para novos projetos.

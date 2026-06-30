@@ -34,9 +34,9 @@ Defaults/heurísticas usados pelo bootstrap:
 | `DEV_URL` | **INFERIR** de engine/scripts/config (porta do dev) ou **PERGUNTAR** | |
 | `EXECUTOR` | **PADRÃO**: `Codex` | |
 | `EXECUTOR_CMD` | **ADAPTADOR CONCRETO atual do pack**: `codex exec` | |
-| `MODELO_CRITICA` | **EXEMPLO atual do pack**: `gpt-5.5` — confirme o id real contra o seu `codex exec` | |
-| `MODELO_EXECUTOR_PESADO` | **EXEMPLO atual do pack**: `gpt-5.4` — confirme o id real contra o seu `codex exec` | |
-| `MODELO_EXECUTOR_LEVE` | **EXEMPLO atual do pack**: `gpt-5.4-mini` — confirme o id real contra o seu `codex exec` | |
+| `MODELO_CRITICA` | **EXEMPLO atual do pack**: `gpt-5.5` — gravado em `models.conf`; confirme no adapter real | |
+| `MODELO_EXECUTOR_PESADO` | **EXEMPLO atual do pack**: `gpt-5.4` — gravado em `models.conf`; confirme no adapter real | |
+| `MODELO_EXECUTOR_LEVE` | **EXEMPLO atual do pack**: `gpt-5.4-mini` — gravado em `models.conf`; confirme no adapter real | |
 
 > O bootstrap já assume o padrão operacional atual do pack. Pergunte só quando o projeto-alvo divergir do padrão ou quando a `AUTORIDADE`/`STACK`/`DEV_URL` não estiverem claros. Glossário completo de cada placeholder: [INSTANTIATE.md](INSTANTIATE.md).
 
@@ -92,7 +92,7 @@ Se você usou `bin/bootstrap.sh`, o instalador **já semeia** no ledger uma linh
 
 1. Revise o Engrama instalado (placeholders trocados, `classify()` adaptado).
 2. Rode a **crítica do Executor** (read-only) sobre a governança instalada:
-   `<EXECUTOR_CMD> -m <MODELO_CRITICA>` com uma ordem de crítica read-only (sem patch).
+   `bash ./.engrama/engine/scripts/exec-bridge.sh --role critique --tier T4 --sandbox read-only -- "<ordem de crítica>"` (sem patch).
 3. Revise a linha `dispensada` semeada pelo instalador. Se o 1º commit for **o snapshot mecânico staged pelo bootstrap**, ela já cobre o diff. Se você editar arquivos sensíveis antes de commitar (por exemplo `classify()`, `.engrama/log.md` ou docs/ADRs de governança), o `sha256` fica obsoleto e você precisa **substituir** a dispensa por crítica real ou registrar o ledger manualmente.
 4. **Antes de commitar** (logar precede commit): registre a crítica em `.engrama/evidence/qa/criticas-do-executor.md` **e** a 1ª entrada em `.engrama/log.md` (substitua o exemplo seed; inclua o próximo passo seguro) sempre que o diff já não for mais o snapshot puro do instalador.
 5. **Consenso** → aprovação da **Autoridade** → 1º commit. **Impasse** → a Autoridade arbitra (o Executor tem voz, não veto).
