@@ -47,6 +47,12 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] feat/add-cognitive-observability-foundation | [governance] canonizacao da fundacao do Engrama Observatory | waiver Autoridade 2026-06-30 (lane de git/orquestracao aprovada; sem critico separado nesta sessao) | sha256:edefc06c8f2603a522ea0bed20f2fe0d9c03716daa9ba6ad0cca109fc7d64537
+- **Contexto:** `origin/main` ja citava `tools/engrama-observatory/` em docs/governanca, mas o diretorio inteiro ainda nao existia no Git. Esta fatia reconcilia a superficie versionada com a decisao ja documentada, em worktree limpo baseado em `origin/main`.
+- **Escopo coberto pelo hash:** `.gitignore` passa a ignorar `tools/engrama-observatory/node_modules` e `dist`; a ferramenta inteira entra em `tools/engrama-observatory/` com `README`, `package*.json`, `src/`, testes e configs necessarios.
+- **Exclusoes:** sem `governance_mode`, `role_contract` ou `role_contract_hash`; sem runtime, router, adapters, billing ou gates.
+- **Evidencia de QA:** `cd tools/engrama-observatory && npm install` -> 0; `npm test` -> 15 testes verdes; `npm run typecheck` -> 0; `npm run build` -> 0; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0. `npm install` reportou 5 vulnerabilidades e `recharts@2.x` deprecated como divida conhecida nao blocker desta fundacao.
+
 ## [2026-06-30] fix/follow-ups-pos-0.2.0 | [governance][gate][contract] fechamento follow-ups pos-0.2.0 (release-gate sem heredoc + exemplos 0.3.0) | waiver Autoridade 2026-06-30 (execucao direta aprovada; bridge sem events JSONL; QA do Orquestrador) | sha256:448fca61e7aab59ddabc23787a40b2ddb9c8db969cb65a794d62042fcfa2441e
 - **Contexto:** a tentativa de execucao via `exec-bridge.sh --role execute --tier T3` nao finalizou com events JSONL/transcript/usage ledger. A excecao operacional segue a aprovacao explicita da Autoridade nesta sessao; esta entrada nao afirma critica independente do Executor.
 - **Escopo coberto pelo hash:** `bin/release-gate.sh` remove heredoc do parser de waiver; `tests/gate/release-gate.test.sh` adiciona regressao RG10..RG10D; `engrama.values.example` e `docs/INSTANTIATE.md` alinham `ENGRAMA_VERSION` a `0.3.0`; gap/log registram fechamento.

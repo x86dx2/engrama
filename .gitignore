@@ -2,3 +2,5 @@
 .engrama.values
 .env
 .env.*
+tools/engrama-observatory/node_modules
+tools/engrama-observatory/dist
