@@ -56,6 +56,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 ## Páginas do seu projeto (domínio · roadmap · QA · gaps)
 
 - [[memory/gaps/metricas-de-engrama]] — estado das métricas mecanizadas do Engrama (densidade de enlaces, staleness) e pesquisas futuras sem runtime extra.
-- [[memory/gaps/follow-ups-pos-0.2.0]] — ressalvas não-bloqueantes da crítica do agregado do PR #16 (release-gate heredoc; `ENGRAMA_VERSION` stale em example/docs), deferidas para pós-`v0.2.0`.
+- [[memory/gaps/auditoria-e-plano-de-remediacao]] — registro histórico resolvido da auditoria inicial e do plano que originou gate/diff-binding/CI/sync.
+- [[memory/gaps/follow-ups-pos-0.2.0]] — registro histórico fechado no PR #21 (release-gate sem heredoc; exemplos `ENGRAMA_VERSION=0.3.0`).
 
 > Template: aqui entram as páginas de `memory/domain/`, `memory/roadmap/`, `memory/gaps/` e `evidence/qa/` DO SEU PROJETO (criadas conforme o trabalho avança). Este pack entrega só o esqueleto de governança/processo; o conteúdo de domínio, sequenciamento e cobertura é específico de cada projeto. Ao criá-las, registre-as nesta seção com um blurb curto e mantenha os cross-links (`touches`) em dia.
