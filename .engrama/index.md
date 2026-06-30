@@ -30,7 +30,6 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/decisions/0014-gate-de-release-repo-central]] — gate de release repo-central-only (CI derruba o job `test`; manifest explícito; escape `sem-release` bound-by-hash).
 - [[memory/decisions/0015-absorcao-seletiva-metodologia-superpowers]] — absorve do Superpowers só a camada de método (TDD/planejamento/depuração) como specs; rejeita subagent-escreve-código + fluidez de papéis/runtime que apaga o bridge.
 - [[memory/decisions/0016-runtime-model-router-usage-ledger]] — role+tier viram runtime via model-router; bridge registra rota e usage ledger local.
-- [[memory/decisions/0017-observabilidade-cognitiva-local]] — console local read-only primeiro, central ao repo, com control plane write-safe só em fatia posterior e governada.
 
 ## Specs (playbooks operacionais — o "como")
 - [[memory/specs/README]] — índice + princípio (spec ≠ subagente).
