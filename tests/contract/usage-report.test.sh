@@ -72,6 +72,33 @@ RC=$?
 if [ "$RC" -ne 0 ] && printf '%s\n' "$OUT" | grep -Fq 'agrupamento invalido'; then _r=0; else _r=1; fi
 check UR4 CORRETO "$_r" "agrupamento fora do contrato falha alto"
 
+TMP_BIN="$TMP_USAGE/bin"
+mkdir -p "$TMP_BIN"
+cat > "$TMP_BIN/date" <<'EOF'
+#!/usr/bin/env bash
+if [ "$#" -eq 2 ] && [ "$1" = "-u" ] && [ "$2" = "+%Y-%m" ]; then
+  printf '%s\n' "2026-06"
+  exit 0
+fi
+printf 'date stub esperava -u +%%Y-%%m, recebeu: %s\n' "$*" >&2
+exit 7
+EOF
+chmod +x "$TMP_BIN/date"
+
+OUT="$(
+  cd "$REPO_ROOT" || exit 2
+  PATH="$TMP_BIN:$PATH" ENGRAMA_USAGE_DIR="$TMP_USAGE" bash "$REPORT" --month current 2>&1
+)"
+RC=$?
+if [ "$RC" -eq 0 ] \
+  && printf '%s\n' "$OUT" | grep -Fq 'Engrama Usage Report — 2026-06' \
+  && printf '%s\n' "$OUT" | grep -Fq 'Total runs: 3'; then
+  _r=0
+else
+  _r=1
+fi
+check UR5 CORRETO "$_r" "--month current usa mes UTC, mesma convencao do writer do ledger"
+
 printf '%b\n' "$RESULTS"
 echo ""
 echo "Resumo: $PASS asserts batidos, $FAIL divergentes | $HOLES casos marcados FURO (a corrigir)"

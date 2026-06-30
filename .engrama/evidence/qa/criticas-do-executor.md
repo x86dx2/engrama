@@ -47,6 +47,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] review P2 do router/ledger ADR 0016 | waiver Autoridade 2026-06-30 (execucao direta aprovada; achados P2 incorporados) | sha256:407b5cdd8e058bef63b2e5e6f5f12ff025c1df9258f7e17912e01f920b263cf5
+- **Contexto:** esta correção responde aos 3 achados P2 do review da fatia ADR 0016. A exceção operacional segue a mesma aprovada pela Autoridade nesta sessão: Codex executou diretamente por indisponibilidade de Claude, sem claim de crítica independente.
+- **Escopo coberto pelo hash:** `exec-bridge.sh` passa a distinguir `model` efetivo, `configured_model` e `observed_model`; `usage-report --month current` usa UTC; `sync-template.sh` gera `subscriptions.conf` neutro para o template; contratos e docs normativos foram alinhados.
+- **Evidência de QA:** `tests/run.sh` verde; `lint.sh` verde; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` verde; contratos focados de bridge/report/sync/bootstrap/release-surface verdes.
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] runtime model-router + usage ledger local (ADR 0016 / release 0.3.0) | waiver Autoridade 2026-06-30 (excecao: Codex executou sem Orquestrador separado) | sha256:209833bc720f01219dd53875246175950e7c196047ea1a6016c16e9b62ce33e0
 - **Contexto:** a Autoridade aprovou explicitamente no chat a implementacao direta por Codex porque nao havia Claude disponivel. Isto e uma excecao operacional consciente; nao e apresentado como critica independente.
 - **Escopo coberto pelo hash:** router/config/adapter/bridge usage ledger, gate/template/bootstrap/sync, ADR 0016, docs normativos, release 0.3.0 e testes associados.

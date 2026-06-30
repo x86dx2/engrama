@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | review P2 do router/ledger: modelo observado, mes UTC e template neutro
+- Branch `feat-runtime-model-router-usage-ledger`. Correção dos 3 achados P2 do review sobre a fatia ADR 0016 antes de PR/merge.
+- **Ledger/modelo:** `exec-bridge.sh` agora grava `model` como modelo efetivo (observado pelo stream quando existir; configurado como fallback), mais `configured_model` e `observed_model`. Plano e custo estimado usam o mesmo modelo efetivo, evitando atribuir custo ao modelo errado em fallback/drift.
+- **Mes do relatório:** `usage-report --month current` usa `date -u +%Y-%m`, mesma convenção UTC usada para criar `usage-YYYY-MM.jsonl`.
+- **Template honesto:** `template/.engrama/engine/config/subscriptions.conf` nasce com assinaturas desativadas e mensalidade vazia; `sync-template.sh` neutraliza esse config ao gerar template, mantendo a raiz livre para refletir a assinatura real do operador.
+- **Contratos atualizados:** `exec-bridge`, `usage-report`, `sync`, `bootstrap` e `release-surface` travam os 3 fixes e a superfície distribuível transformada.
+- **QA executado:** contratos focados verdes (`exec-bridge` 11/11, `usage-report` 5/5, `sync` 27/27, `bootstrap` 15/15, `release-surface` 4/4); `bash tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` -> 0.
+- **PROXIMO:** registrar waiver/diff-binding desta correção no ledger de críticas, rodar gates finais e commitar. `docs/PRD.md` segue untracked e fora do escopo do commit.
+
 ## [2026-06-30] feat | runtime model-router + usage ledger local (ADR 0016) — release 0.3.0
 - Branch `feat-runtime-model-router-usage-ledger`. **Excecao aprovada pela Autoridade no chat:** sem Claude disponivel, Codex executou diretamente a fatia; sem claim de critica independente. A entrada de gate desta fatia sera waiver/diff-binding explicito, nao "confirmo" falso.
 - **Objetivo:** transformar a politica de modelos da ADR 0010 em runtime observavel: `role+tier -> adapter/provider/model/effort`, com adapter Codex explicito e ledger local de uso/billing.

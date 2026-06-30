@@ -163,6 +163,16 @@ compose_template_models_conf() {
     "$ROOT_MODELS_CONF" > "$out"
 }
 
+compose_template_subscriptions_conf() {
+  local out="$1"
+  sed \
+    -e 's/^ENGRAMA_CODEX_PRO_ENABLED=.*/ENGRAMA_CODEX_PRO_ENABLED=0/' \
+    -e 's/^ENGRAMA_CODEX_PRO_MONTHLY_USD=.*/ENGRAMA_CODEX_PRO_MONTHLY_USD=/' \
+    -e 's/^ENGRAMA_CLAUDE_MAX_ENABLED=.*/ENGRAMA_CLAUDE_MAX_ENABLED=0/' \
+    -e 's/^ENGRAMA_CLAUDE_MAX_MONTHLY_USD=.*/ENGRAMA_CLAUDE_MAX_MONTHLY_USD=/' \
+    "$ROOT_SUBSCRIPTIONS_CONF" > "$out"
+}
+
 main() {
   need_file "$ROOT_GATE"
   need_file "$ROOT_HOOK"
@@ -203,7 +213,7 @@ main() {
   cp "$ROOT_CI_GATE" "$TMPDIR_SYNC/critique-gate-ci.sh"
   cp "$ROOT_CODEX_ADAPTER" "$TMPDIR_SYNC/codex.sh"
   compose_template_models_conf "$TMPDIR_SYNC/models.conf"
-  cp "$ROOT_SUBSCRIPTIONS_CONF" "$TMPDIR_SYNC/subscriptions.conf"
+  compose_template_subscriptions_conf "$TMPDIR_SYNC/subscriptions.conf"
   cp "$ROOT_PRICES_CONF" "$TMPDIR_SYNC/prices.conf"
   cp "$ROOT_MARKDOWNLINT" "$TMPDIR_SYNC/markdownlint-cli2.yaml"
   cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"

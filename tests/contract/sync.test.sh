@@ -130,8 +130,19 @@ check S3CB CORRETO "$_r" "template/.engrama/engine/scripts/critique-gate-ci.sh i
 if cmp -s "$ROOT_CODEX_ADAPTER" "$TEMPLATE_CODEX_ADAPTER"; then _r=0; else _r=1; fi
 check S3CBA CORRETO "$_r" "codex adapter do template identico ao da raiz"
 
-if cmp -s "$ROOT_SUBSCRIPTIONS_CONF" "$TEMPLATE_SUBSCRIPTIONS_CONF" && cmp -s "$ROOT_PRICES_CONF" "$TEMPLATE_PRICES_CONF"; then _r=0; else _r=1; fi
-check S3CBB CORRETO "$_r" "subscriptions/prices config do template identicos aos da raiz"
+if cmp -s "$ROOT_PRICES_CONF" "$TEMPLATE_PRICES_CONF"; then _r=0; else _r=1; fi
+check S3CBB CORRETO "$_r" "prices config do template identico ao da raiz"
+
+if grep -Fq 'ENGRAMA_CODEX_PRO_ENABLED=0' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && grep -Eq '^ENGRAMA_CODEX_PRO_MONTHLY_USD=$' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && grep -Fq 'ENGRAMA_CLAUDE_MAX_ENABLED=0' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && grep -Eq '^ENGRAMA_CLAUDE_MAX_MONTHLY_USD=$' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
+  && ! grep -Fq 'ENGRAMA_CODEX_PRO_MONTHLY_USD=100' "$TEMPLATE_SUBSCRIPTIONS_CONF"; then
+  _r=0
+else
+  _r=1
+fi
+check S3CBC CORRETO "$_r" "subscriptions.conf do template nasce neutro, sem assinatura paga presumida"
 
 if cmp -s "$ROOT_MARKDOWNLINT" "$TEMPLATE_MARKDOWNLINT"; then _r=0; else _r=1; fi
 check S3CC CORRETO "$_r" "template/.markdownlint-cli2.yaml identico ao da raiz"
@@ -146,12 +157,13 @@ if grep -Fq 'ROOT_CI_GATE=' "$SYNC_SCRIPT" \
   && grep -Fq 'ROOT_CODEX_ADAPTER=' "$SYNC_SCRIPT" \
   && grep -Fq 'TEMPLATE_CODEX_ADAPTER=' "$SYNC_SCRIPT" \
   && grep -Fq 'ROOT_MARKDOWNLINT=' "$SYNC_SCRIPT" \
-  && grep -Fq 'TEMPLATE_MARKDOWNLINT=' "$SYNC_SCRIPT"; then
+  && grep -Fq 'TEMPLATE_MARKDOWNLINT=' "$SYNC_SCRIPT" \
+  && grep -Fq 'compose_template_subscriptions_conf' "$SYNC_SCRIPT"; then
   _r=0
 else
   _r=1
 fi
-check S3E CORRETO "$_r" "sync-template sincroniza gate-ci, router, adapter e .markdownlint-cli2.yaml"
+check S3E CORRETO "$_r" "sync-template sincroniza gate-ci/router/adapter e neutraliza subscriptions do template"
 
 if grep -Fq 'CRITIQUE_ROLE="critique"' "$TEMPLATE_GATE" \
   && grep -Fq 'CRITIQUE_TIER="T4"' "$TEMPLATE_GATE" \

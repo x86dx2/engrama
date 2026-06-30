@@ -138,6 +138,8 @@ if grep -Fq 'codex-session: 019ef9f3-e493-7a71-a5b2-688716a1281a' "$RESPONSE_OUT
   && grep -Fq 'tier: T2' "$RESPONSE_OUT" \
   && grep -Fq 'adapter: codex' "$RESPONSE_OUT" \
   && grep -Fq 'model: gpt-5.4' "$RESPONSE_OUT" \
+  && grep -Fq 'configured-model: gpt-5.4' "$RESPONSE_OUT" \
+  && grep -Fq 'observed-model: null' "$RESPONSE_OUT" \
   && grep -Fq 'effort: medium' "$RESPONSE_OUT" \
   && grep -Fq 'routing-mode: default' "$RESPONSE_OUT" \
   && grep -Fq 'sandbox: read-only' "$RESPONSE_OUT" \
@@ -149,6 +151,8 @@ if grep -Fq 'codex-session: 019ef9f3-e493-7a71-a5b2-688716a1281a' "$RESPONSE_OUT
   && grep -Fq '"role":"execute"' "$LEDGER_OUT" \
   && grep -Fq '"tier":"T2"' "$LEDGER_OUT" \
   && grep -Fq '"model":"gpt-5.4"' "$LEDGER_OUT" \
+  && grep -Fq '"configured_model":"gpt-5.4"' "$LEDGER_OUT" \
+  && grep -Fq '"observed_model":null' "$LEDGER_OUT" \
   && grep -Fq '"total_tokens":2' "$LEDGER_OUT"; then
   _r=0
 else
@@ -187,10 +191,16 @@ write_legacy_stream_stub "$STUBLEG"
   ENGRAMA_CODEX_BIN="$STUBLEG" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$ORDERLEG" --label legacy --date 2026-06-21 >/dev/null 2>&1
 )
 RESPONSE_OUT_LEG="$RLEG/.engrama/evidence/transcripts/2026-06-21-legacy-response.md"
+LEDGER_OUT_LEG="$(find "$RLEG/.engrama/evidence/usage" -type f -name 'usage-*.jsonl' | sort | tail -1)"
 if grep -Fq 'codex-session: sessao-legacy-321' "$RESPONSE_OUT_LEG" \
   && grep -Fq 'model: gpt-5.4-mini' "$RESPONSE_OUT_LEG" \
   && grep -Fq 'configured-model: gpt-5.4' "$RESPONSE_OUT_LEG" \
-  && grep -Fq 'RESPOSTA-LEGACY-CAPTURADA' "$RESPONSE_OUT_LEG"; then
+  && grep -Fq 'observed-model: gpt-5.4-mini' "$RESPONSE_OUT_LEG" \
+  && grep -Fq 'RESPOSTA-LEGACY-CAPTURADA' "$RESPONSE_OUT_LEG" \
+  && [ -f "$LEDGER_OUT_LEG" ] \
+  && grep -Fq '"model":"gpt-5.4-mini"' "$LEDGER_OUT_LEG" \
+  && grep -Fq '"configured_model":"gpt-5.4"' "$LEDGER_OUT_LEG" \
+  && grep -Fq '"observed_model":"gpt-5.4-mini"' "$LEDGER_OUT_LEG"; then
   _r=0
 else
   _r=1
@@ -344,7 +354,9 @@ if [ "$RC9" -eq 0 ] \
   && [ -f "$LEDGER_OUT9" ] \
   && grep -Fq '"role":"critique"' "$LEDGER_OUT9" \
   && grep -Fq '"tier":"T4"' "$LEDGER_OUT9" \
-  && grep -Fq '"model":"gpt-5.5"' "$LEDGER_OUT9"; then
+  && grep -Fq '"model":"gpt-5.5"' "$LEDGER_OUT9" \
+  && grep -Fq '"configured_model":"gpt-5.5"' "$LEDGER_OUT9" \
+  && grep -Fq '"observed_model":null' "$LEDGER_OUT9"; then
   _r=0
 else
   _r=1

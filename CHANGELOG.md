@@ -17,10 +17,12 @@ Todas as mudanças relevantes deste pack. Formato baseado em
   `codex exec --json`, isolando a sintaxe vendor-specific do núcleo do bridge.
 - **Observabilidade local de uso/billing:** `exec-bridge.sh` grava
   `evidence/usage/usage-YYYY-MM.jsonl` (`schema=engrama.usage.v1`) com rota, sessão,
-  transcript, duração, tokens quando disponíveis, turns, plano e custo estimado quando
-  configurável; `usage-report.sh` sumariza por mês/modelo/papel/tier/adapter.
+  transcript, duração, tokens quando disponíveis, turns, modelo efetivo/configurado/observado,
+  plano e custo estimado quando configurável; `usage-report.sh` sumariza por mês
+  UTC/modelo/papel/tier/adapter.
 - **Configs runtime portáveis:** `models.conf`, `subscriptions.conf` e `prices.conf`
-  entram no pack/template; preços vazios geram `unknown`, não falha.
+  entram no pack/template; preços vazios geram `unknown`, não falha, e o template
+  nasce sem assinatura paga ativa por padrão.
 
 ### Mudado
 - **Executor-bridge agora é sempre roteado:** ausência de `--role/--tier` vira default

@@ -407,6 +407,7 @@ price_key_for() {
 }
 
 resolve_billing_plan() {
+  local billing_model="${1:-$MODEL}"
   local subscriptions_conf="$REPO_ROOT/.engrama/engine/config/subscriptions.conf"
   BILLING_MODE="unknown"
   BILLING_PLAN="unknown"
@@ -418,7 +419,7 @@ resolve_billing_plan() {
   if [ "${ENGRAMA_CODEX_PRO_ENABLED:-0}" = "1" ] \
     && [ "$PROVIDER" = "${ENGRAMA_CODEX_PRO_PROVIDER:-}" ]; then
     # shellcheck disable=SC2254 # model pattern is intentionally a glob from subscriptions.conf.
-    case "$MODEL" in
+    case "$billing_model" in
       ${ENGRAMA_CODEX_PRO_MODEL_PATTERN:-__never_match__})
         BILLING_MODE="subscription"
         BILLING_PLAN="codex-pro"
@@ -430,7 +431,7 @@ resolve_billing_plan() {
   if [ "${ENGRAMA_CLAUDE_MAX_ENABLED:-0}" = "1" ] \
     && [ "$PROVIDER" = "${ENGRAMA_CLAUDE_MAX_PROVIDER:-}" ]; then
     # shellcheck disable=SC2254 # model pattern is intentionally a glob from subscriptions.conf.
-    case "$MODEL" in
+    case "$billing_model" in
       ${ENGRAMA_CLAUDE_MAX_MODEL_PATTERN:-__never_match__})
         BILLING_MODE="subscription"
         BILLING_PLAN="claude-max"
@@ -441,7 +442,8 @@ resolve_billing_plan() {
 }
 
 estimate_api_cost() {
-  local input_tokens="${1:-}" output_tokens="${2:-}" prices_conf key in_var out_var in_price out_price
+  local input_tokens="${1:-}" output_tokens="${2:-}" billing_model="${3:-$MODEL}"
+  local prices_conf key in_var out_var in_price out_price
   ESTIMATED_API_COST_USD=""
   [ -n "$input_tokens" ] || return 0
   [ -n "$output_tokens" ] || return 0
@@ -451,7 +453,7 @@ estimate_api_cost() {
   # shellcheck disable=SC1090
   . "$prices_conf"
 
-  key="$(price_key_for "$PROVIDER" "$MODEL")"
+  key="$(price_key_for "$PROVIDER" "$billing_model")"
   in_var="ENGRAMA_PRICE_${key}_INPUT_PER_1M_USD"
   out_var="ENGRAMA_PRICE_${key}_OUTPUT_PER_1M_USD"
   in_price="${!in_var-}"
@@ -465,6 +467,7 @@ estimate_api_cost() {
 append_usage_ledger() {
   local started_at="$1" finished_at="$2" started_epoch="$3" finished_epoch="$4"
   local response_rel="$5" codex_session="$6" codex_rc="$7" events_file="$8"
+  local effective_model="$9" observed_model="${10:-}"
   local usage_month usage_file run_stamp run_id project branch duration_seconds
   local input_tokens output_tokens cached_input_tokens total_tokens turns success
   local billing_mode plan estimated_cost
@@ -481,8 +484,8 @@ append_usage_ledger() {
   BILLING_MODE=""
   BILLING_PLAN=""
   ESTIMATED_API_COST_USD=""
-  resolve_billing_plan
-  estimate_api_cost "$input_tokens" "$output_tokens"
+  resolve_billing_plan "$effective_model"
+  estimate_api_cost "$input_tokens" "$output_tokens" "$effective_model"
   billing_mode="$BILLING_MODE"
   plan="$BILLING_PLAN"
   estimated_cost="$ESTIMATED_API_COST_USD"
@@ -515,7 +518,13 @@ append_usage_ledger() {
     printf '"adapter":%s,' "$(json_string "$ADAPTER")"
     printf '"provider":%s,' "$(json_string "$PROVIDER")"
     printf '"surface":"exec",'
-    printf '"model":%s,' "$(json_string "$MODEL")"
+    printf '"model":%s,' "$(json_string "$effective_model")"
+    printf '"configured_model":%s,' "$(json_string "$MODEL")"
+    if [ -n "$observed_model" ]; then
+      printf '"observed_model":%s,' "$(json_string "$observed_model")"
+    else
+      printf '"observed_model":null,'
+    fi
     printf '"effort":%s,' "$(json_string "$EFFORT")"
     printf '"billing_mode":%s,' "$(json_string "$billing_mode")"
     printf '"plan":%s,' "$(json_string "$plan")"
@@ -550,7 +559,8 @@ main() {
   local codex_rc=0
   local codex_session=""
   local codex_session_source="stream"
-  local stream_model=""
+  local observed_model=""
+  local effective_model=""
   local session_file=""
   local started_at=""
   local finished_at=""
@@ -622,8 +632,8 @@ $(cat "$stderr_file")"
     codex_session="$(sha256_short "$response_text")"
   fi
 
-  stream_model="$(extract_model_from_stream "$events_file")"
-  [ -n "$stream_model" ] || stream_model="$MODEL"
+  observed_model="$(extract_model_from_stream "$events_file")"
+  effective_model="${observed_model:-$MODEL}"
 
   {
     printf '%s\n' '---'
@@ -633,8 +643,9 @@ $(cat "$stderr_file")"
     printf 'tier: %s\n' "$TIER"
     printf 'adapter: %s\n' "$ADAPTER"
     printf 'provider: %s\n' "$PROVIDER"
-    printf 'model: %s\n' "$stream_model"
+    printf 'model: %s\n' "$effective_model"
     printf 'configured-model: %s\n' "$MODEL"
+    printf 'observed-model: %s\n' "${observed_model:-null}"
     printf 'effort: %s\n' "$EFFORT"
     printf 'no-fallback: %s\n' "$NO_FALLBACK"
     printf 'routing-mode: %s\n' "$ROUTING_MODE"
@@ -646,7 +657,7 @@ $(cat "$stderr_file")"
     printf '\n'
   } > "$response_path"
 
-  usage_rel="$(append_usage_ledger "$started_at" "$finished_at" "$started_epoch" "$finished_epoch" "$response_rel" "$codex_session" "$codex_rc" "$events_file")"
+  usage_rel="$(append_usage_ledger "$started_at" "$finished_at" "$started_epoch" "$finished_epoch" "$response_rel" "$codex_session" "$codex_rc" "$events_file" "$effective_model" "$observed_model")"
 
   printf '%s\n' "$order_rel"
   printf '%s\n' "$response_rel"

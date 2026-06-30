@@ -47,7 +47,7 @@ parse_args() {
 
 resolve_month() {
   if [ "$MONTH" = "current" ]; then
-    MONTH="$(date +%Y-%m)"
+    MONTH="$(date -u +%Y-%m)"
     return
   fi
 

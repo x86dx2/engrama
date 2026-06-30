@@ -143,6 +143,9 @@ if [ -x "$T8/.engrama/engine/scripts/model-router.sh" ] \
   && grep -Fq 'ENGRAMA_T1_MODEL=gpt-5.4-mini' "$T8/.engrama/engine/config/models.conf" \
   && grep -Fq 'ENGRAMA_T2_MODEL=gpt-5.4' "$T8/.engrama/engine/config/models.conf" \
   && grep -Fq 'ENGRAMA_T4_MODEL=gpt-5.5' "$T8/.engrama/engine/config/models.conf" \
+  && grep -Fq 'ENGRAMA_CODEX_PRO_ENABLED=0' "$T8/.engrama/engine/config/subscriptions.conf" \
+  && grep -Eq '^ENGRAMA_CODEX_PRO_MONTHLY_USD=$' "$T8/.engrama/engine/config/subscriptions.conf" \
+  && ! grep -Fq 'ENGRAMA_CODEX_PRO_MONTHLY_USD=100' "$T8/.engrama/engine/config/subscriptions.conf" \
   && ! grep -rq '{{MODELO_' "$T8/.engrama/engine/config" 2>/dev/null; then
   _r=0
 else
