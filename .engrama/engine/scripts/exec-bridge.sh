@@ -38,12 +38,17 @@ SANDBOX="read-only"
 ROLE=""
 TIER=""
 ROUTING_MODE=""
+GOVERNANCE_MODE=""
 ADAPTER=""
 PROVIDER=""
 MODEL=""
 EFFORT=""
 NO_FALLBACK=""
 ROUTING_REASON=""
+ROLE_CONTRACT_PATH=""
+ROLE_CONTRACT_REL=""
+ROLE_CONTRACT_HASH=""
+ADAPTER_PROMPT_FILE=""
 TMPDIR_BRIDGE=""
 declare -a CODEX_EXTRA_ARGS=()
 
@@ -56,7 +61,7 @@ Uso:
 Exemplo:
   bash .engrama/engine/scripts/exec-bridge.sh --role execute --tier T2 --order /tmp/ordem.md --label fatia-01 --sandbox workspace-write
 
-Se --role/--tier forem omitidos, o bridge usa execute/T2 e registra routing_mode=default.
+Se --role/--tier forem omitidos, o bridge usa execute/T2 e registra routing_mode=default + governance_mode=legacy/defaulted.
 EOF
 }
 
@@ -161,6 +166,7 @@ normalize_routing() {
     ROLE="execute"
     TIER="T2"
     ROUTING_MODE="default"
+    GOVERNANCE_MODE="legacy/defaulted"
     return
   fi
 
@@ -170,6 +176,27 @@ normalize_routing() {
   fi
 
   fail "--role e --tier devem ser informados juntos"
+}
+
+sha256_file() {
+  local path="$1"
+
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$path" | awk '{print $1}'
+    return
+  fi
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$path" | awk '{print $1}'
+    return
+  fi
+
+  if command -v openssl >/dev/null 2>&1; then
+    openssl dgst -sha256 -r "$path" | awk '{print $1}'
+    return
+  fi
+
+  fail "nao encontrei shasum, sha256sum ou openssl para calcular o hash do contrato"
 }
 
 resolve_route() {
@@ -381,6 +408,14 @@ json_string() {
   jq -Rn --arg v "$1" '$v'
 }
 
+json_string_or_null() {
+  if [ -n "${1:-}" ]; then
+    json_string "$1"
+  else
+    printf 'null'
+  fi
+}
+
 json_number_or_null() {
   local value="${1:-}"
   if [ -n "$value" ] && printf '%s\n' "$value" | grep -Eq '^-?[0-9]+([.][0-9]+)?$'; then
@@ -464,6 +499,61 @@ estimate_api_cost() {
   ESTIMATED_API_COST_USD="$(awk -v i="$input_tokens" -v o="$output_tokens" -v ip="$in_price" -v op="$out_price" 'BEGIN { printf "%.8f", (i / 1000000 * ip) + (o / 1000000 * op) }')"
 }
 
+load_role_contract() {
+  local contract_path=""
+
+  ROLE_CONTRACT_PATH=""
+  ROLE_CONTRACT_REL=""
+  ROLE_CONTRACT_HASH=""
+
+  if [ "$GOVERNANCE_MODE" = "legacy/defaulted" ]; then
+    return 0
+  fi
+
+  contract_path="$REPO_ROOT/.engrama/memory/governance/roles/$ROLE.md"
+  [ -f "$contract_path" ] || fail "role contract ausente para role=$ROLE: ${contract_path#"$REPO_ROOT"/}"
+
+  ROLE_CONTRACT_PATH="$contract_path"
+  ROLE_CONTRACT_REL="${contract_path#"$REPO_ROOT"/}"
+  ROLE_CONTRACT_HASH="$(sha256_file "$contract_path")"
+  GOVERNANCE_MODE="role-contract"
+}
+
+build_adapter_prompt() {
+  local prompt_path=""
+
+  if [ "$GOVERNANCE_MODE" = "legacy/defaulted" ]; then
+    ADAPTER_PROMPT_FILE="$ORDER_FILE"
+    return 0
+  fi
+
+  [ -n "$ROLE_CONTRACT_PATH" ] || fail "contrato de papel nao carregado para role=$ROLE"
+
+  ensure_tmpdir
+  prompt_path="$TMPDIR_BRIDGE/adapter-prompt.md"
+  {
+    printf '# Engrama Governanca Runtime\n\n'
+    printf 'Papel nao e decoracao; e contrato de alcada.\n\n'
+    printf -- '- governance_mode: %s\n' "$GOVERNANCE_MODE"
+    printf -- '- role: %s\n' "$ROLE"
+    printf -- '- tier: %s\n' "$TIER"
+    printf -- '- role_contract: %s\n' "$ROLE_CONTRACT_REL"
+    printf -- '- role_contract_hash: %s\n' "$ROLE_CONTRACT_HASH"
+    printf -- '- sandbox: %s\n' "$SANDBOX"
+    printf -- '- adapter: %s\n' "$ADAPTER"
+    printf -- '- provider: %s\n' "$PROVIDER"
+    printf -- '- configured_model: %s\n' "$MODEL"
+    printf -- '- configured_effort: %s\n\n' "$EFFORT"
+    printf '## Role Contract\n\n'
+    cat "$ROLE_CONTRACT_PATH"
+    printf '\n\n## Ordem Original\n\n'
+    cat "$ORDER_FILE"
+    printf '\n'
+  } > "$prompt_path"
+
+  ADAPTER_PROMPT_FILE="$prompt_path"
+}
+
 append_usage_ledger() {
   local started_at="$1" finished_at="$2" started_epoch="$3" finished_epoch="$4"
   local response_rel="$5" codex_session="$6" codex_rc="$7" events_file="$8"
@@ -539,6 +629,9 @@ append_usage_ledger() {
     printf '"estimated_api_cost_usd":%s,' "$(json_number_or_null "$estimated_cost")"
     printf '"allocated_subscription_cost_usd":null,'
     printf '"routing_reason":%s,' "$(json_string "$ROUTING_REASON")"
+    printf '"role_contract":%s,' "$(json_string_or_null "$ROLE_CONTRACT_REL")"
+    printf '"role_contract_hash":%s,' "$(json_string_or_null "$ROLE_CONTRACT_HASH")"
+    printf '"governance_mode":%s,' "$(json_string "$GOVERNANCE_MODE")"
     printf '"transcript_path":%s,' "$(json_string "$response_rel")"
     printf '"codex_session":%s,' "$(json_string "$codex_session")"
     printf '"success":%s' "$(json_bool "$success")"
@@ -577,6 +670,8 @@ main() {
   prepare_inline_order
   validate_inputs
   resolve_date
+  load_role_contract
+  build_adapter_prompt
 
   TRANSCRIPTS_DIR="$REPO_ROOT/.engrama/evidence/transcripts"
   order_rel=".engrama/evidence/transcripts/${RUN_DATE}-${LABEL}-order.md"
@@ -597,7 +692,7 @@ main() {
 
   adapter_script="$REPO_ROOT/.engrama/engine/adapters/$ADAPTER.sh"
   [ -f "$adapter_script" ] || fail "adapter ausente: $adapter_script"
-  adapter_cmd=(bash "$adapter_script" --model "$MODEL" --effort "$EFFORT" --sandbox "$SANDBOX" --prompt-file "$ORDER_FILE" --events-file "$events_file" --stderr-file "$stderr_file")
+  adapter_cmd=(bash "$adapter_script" --model "$MODEL" --effort "$EFFORT" --sandbox "$SANDBOX" --prompt-file "$ADAPTER_PROMPT_FILE" --events-file "$events_file" --stderr-file "$stderr_file")
   if [ "${#CODEX_EXTRA_ARGS[@]}" -gt 0 ]; then
     adapter_cmd+=(-- "${CODEX_EXTRA_ARGS[@]}")
   fi
@@ -663,6 +758,12 @@ $(cat "$stderr_file")"
     printf 'no-fallback: %s\n' "$NO_FALLBACK"
     printf 'routing-mode: %s\n' "$ROUTING_MODE"
     printf 'routing-reason: %s\n' "$ROUTING_REASON"
+    printf 'role-contract: %s\n' "${ROLE_CONTRACT_REL:-null}"
+    printf 'role-contract-hash: %s\n' "${ROLE_CONTRACT_HASH:-null}"
+    printf 'governance-mode: %s\n' "$GOVERNANCE_MODE"
+    if [ "$GOVERNANCE_MODE" = "legacy/defaulted" ]; then
+      printf 'governance-note: explicite --role e --tier para aplicar contrato de papel\n'
+    fi
     printf 'sandbox: %s\n' "$SANDBOX"
     printf 'label: %s\n' "$LABEL"
     printf '%s\n\n' '---'

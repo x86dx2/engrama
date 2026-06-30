@@ -2,9 +2,12 @@
 # sync-template.sh -- sincroniza artefatos mecanicos do template a partir da
 # raiz canonica do Engrama.
 #
-# Escopo intencional: scripts do harness/gate/bridge e settings mecanicos. Nao faz
-# reverse-substituicao cega em prosa de governanca/READMEs, porque valores
-# livres podem aparecer em texto e a operacao seria fragil.
+# Escopo intencional: scripts do harness/gate/bridge e settings mecanicos.
+# Excecao deliberada: docs normativos acoplados ao runtime governado
+# (`role-runtime-contracts.md` + `roles/*.md`) sao copiados verbatim para que o
+# template continue portavel. Nao faz reverse-substituicao cega em prosa livre
+# de governanca/READMEs, porque valores livres podem aparecer em texto e a
+# operacao seria fragil.
 set -eu
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -22,6 +25,8 @@ ROOT_CODEX_ADAPTER="$REPO_ROOT/.engrama/engine/adapters/codex.sh"
 ROOT_MODELS_CONF="$REPO_ROOT/.engrama/engine/config/models.conf"
 ROOT_SUBSCRIPTIONS_CONF="$REPO_ROOT/.engrama/engine/config/subscriptions.conf"
 ROOT_PRICES_CONF="$REPO_ROOT/.engrama/engine/config/prices.conf"
+ROOT_ROLE_RUNTIME_CONTRACTS="$REPO_ROOT/.engrama/memory/governance/role-runtime-contracts.md"
+ROOT_ROLES_DIR="$REPO_ROOT/.engrama/memory/governance/roles"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate.sh"
@@ -37,6 +42,8 @@ TEMPLATE_CODEX_ADAPTER="$REPO_ROOT/template/.engrama/engine/adapters/codex.sh"
 TEMPLATE_MODELS_CONF="$REPO_ROOT/template/.engrama/engine/config/models.conf"
 TEMPLATE_SUBSCRIPTIONS_CONF="$REPO_ROOT/template/.engrama/engine/config/subscriptions.conf"
 TEMPLATE_PRICES_CONF="$REPO_ROOT/template/.engrama/engine/config/prices.conf"
+TEMPLATE_ROLE_RUNTIME_CONTRACTS="$REPO_ROOT/template/.engrama/memory/governance/role-runtime-contracts.md"
+TEMPLATE_ROLES_DIR="$REPO_ROOT/template/.engrama/memory/governance/roles"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
@@ -174,6 +181,8 @@ compose_template_subscriptions_conf() {
 }
 
 main() {
+  local role_file role_name
+
   need_file "$ROOT_GATE"
   need_file "$ROOT_HOOK"
   need_file "$ROOT_SESSION_CONTEXT"
@@ -187,6 +196,7 @@ main() {
   need_file "$ROOT_MODELS_CONF"
   need_file "$ROOT_SUBSCRIPTIONS_CONF"
   need_file "$ROOT_PRICES_CONF"
+  need_file "$ROOT_ROLE_RUNTIME_CONTRACTS"
   need_file "$ROOT_MARKDOWNLINT"
   need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
@@ -217,6 +227,13 @@ main() {
   cp "$ROOT_PRICES_CONF" "$TMPDIR_SYNC/prices.conf"
   cp "$ROOT_MARKDOWNLINT" "$TMPDIR_SYNC/markdownlint-cli2.yaml"
   cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"
+  cp "$ROOT_ROLE_RUNTIME_CONTRACTS" "$TMPDIR_SYNC/role-runtime-contracts.md"
+
+  for role_file in "$ROOT_ROLES_DIR"/*.md; do
+    need_file "$role_file"
+    role_name="$(basename "$role_file")"
+    cp "$role_file" "$TMPDIR_SYNC/$role_name"
+  done
 
   write_if_changed "$TMPDIR_SYNC/critique-gate.sh" "$TEMPLATE_GATE"
   write_if_changed "$TMPDIR_SYNC/critique-gate-hook.sh" "$TEMPLATE_HOOK"
@@ -231,6 +248,13 @@ main() {
   write_if_changed "$TMPDIR_SYNC/models.conf" "$TEMPLATE_MODELS_CONF"
   write_if_changed "$TMPDIR_SYNC/subscriptions.conf" "$TEMPLATE_SUBSCRIPTIONS_CONF"
   write_if_changed "$TMPDIR_SYNC/prices.conf" "$TEMPLATE_PRICES_CONF"
+  write_if_changed "$TMPDIR_SYNC/role-runtime-contracts.md" "$TEMPLATE_ROLE_RUNTIME_CONTRACTS"
+
+  for role_file in "$ROOT_ROLES_DIR"/*.md; do
+    role_name="$(basename "$role_file")"
+    write_if_changed "$TMPDIR_SYNC/$role_name" "$TEMPLATE_ROLES_DIR/$role_name"
+  done
+
   write_if_changed "$TMPDIR_SYNC/markdownlint-cli2.yaml" "$TEMPLATE_MARKDOWNLINT"
   write_if_changed "$TMPDIR_SYNC/settings.json" "$TEMPLATE_SETTINGS"
 

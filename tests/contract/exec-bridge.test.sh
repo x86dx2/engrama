@@ -20,20 +20,29 @@ check() { # <id> <tag> <cond 0/1> <desc>
   RESULTS="$RESULTS\n  [$mark] $id  ($tag)  | $desc"
 }
 
+missing=0
+for role in orchestrate execute review critique audit authority; do
+  [ -f "$REPO_ROOT/.engrama/memory/governance/roles/$role.md" ] || missing=1
+done
+check E0 CORRETO "$missing" "existem contratos para todos os papeis oficiais do runtime"
+
 new_repo() {
   local d
   d="$(mktemp -d 2>/dev/null || mktemp -d -t engrama-exec-bridge-test)"
   git -C "$d" init -q -b main 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b main; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/engine/config" "$d/.engrama/engine/adapters" "$d/.engrama/evidence/usage"
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/engine/config" "$d/.engrama/engine/adapters" "$d/.engrama/evidence/usage" "$d/.engrama/memory/governance"
   cp "$WRAPPER_SRC" "$d/.engrama/engine/scripts/exec-bridge.sh"
   cp "$REPO_ROOT/.engrama/engine/scripts/model-router.sh" "$d/.engrama/engine/scripts/model-router.sh"
+  cp "$REPO_ROOT/.engrama/engine/scripts/usage-report.sh" "$d/.engrama/engine/scripts/usage-report.sh"
   cp "$REPO_ROOT/.engrama/engine/adapters/codex.sh" "$d/.engrama/engine/adapters/codex.sh"
   cp "$REPO_ROOT/.engrama/engine/config/models.conf" "$d/.engrama/engine/config/models.conf"
   cp "$REPO_ROOT/.engrama/engine/config/subscriptions.conf" "$d/.engrama/engine/config/subscriptions.conf"
   cp "$REPO_ROOT/.engrama/engine/config/prices.conf" "$d/.engrama/engine/config/prices.conf"
-  chmod +x "$d/.engrama/engine/scripts/exec-bridge.sh" "$d/.engrama/engine/scripts/model-router.sh" "$d/.engrama/engine/adapters/codex.sh"
+  cp "$REPO_ROOT/.engrama/memory/governance/role-runtime-contracts.md" "$d/.engrama/memory/governance/role-runtime-contracts.md"
+  cp -R "$REPO_ROOT/.engrama/memory/governance/roles" "$d/.engrama/memory/governance/"
+  chmod +x "$d/.engrama/engine/scripts/exec-bridge.sh" "$d/.engrama/engine/scripts/model-router.sh" "$d/.engrama/engine/scripts/usage-report.sh" "$d/.engrama/engine/adapters/codex.sh"
   printf '%s' "$d"
 }
 
@@ -142,6 +151,10 @@ if grep -Fq 'codex-session: 019ef9f3-e493-7a71-a5b2-688716a1281a' "$RESPONSE_OUT
   && grep -Fq 'observed-model: null' "$RESPONSE_OUT" \
   && grep -Fq 'effort: medium' "$RESPONSE_OUT" \
   && grep -Fq 'routing-mode: default' "$RESPONSE_OUT" \
+  && grep -Fq 'role-contract: null' "$RESPONSE_OUT" \
+  && grep -Fq 'role-contract-hash: null' "$RESPONSE_OUT" \
+  && grep -Fq 'governance-mode: legacy/defaulted' "$RESPONSE_OUT" \
+  && grep -Fq 'governance-note: explicite --role e --tier para aplicar contrato de papel' "$RESPONSE_OUT" \
   && grep -Fq 'sandbox: read-only' "$RESPONSE_OUT" \
   && grep -Fq 'label: demo' "$RESPONSE_OUT" \
   && grep -Fq 'PONG' "$RESPONSE_OUT" \
@@ -153,12 +166,15 @@ if grep -Fq 'codex-session: 019ef9f3-e493-7a71-a5b2-688716a1281a' "$RESPONSE_OUT
   && grep -Fq '"model":"gpt-5.4"' "$LEDGER_OUT" \
   && grep -Fq '"configured_model":"gpt-5.4"' "$LEDGER_OUT" \
   && grep -Fq '"observed_model":null' "$LEDGER_OUT" \
+  && grep -Fq '"role_contract":null' "$LEDGER_OUT" \
+  && grep -Fq '"role_contract_hash":null' "$LEDGER_OUT" \
+  && grep -Fq '"governance_mode":"legacy/defaulted"' "$LEDGER_OUT" \
   && grep -Fq '"total_tokens":2' "$LEDGER_OUT"; then
   _r=0
 else
   _r=1
 fi
-check E2 CORRETO "$_r" "schema real 0.142.0: transcript captura agent_message, registra rota execute/T2 e grava usage ledger"
+check E2 CORRETO "$_r" "schema real 0.142.0: transcript captura agent_message, marca legacy/defaulted e grava usage ledger sem contrato falso"
 
 if printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-order.md' \
   && printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-response.md' \
@@ -331,7 +347,22 @@ check E8 CORRETO "$_r" "auto-edicao do exec-bridge em runtime nao quebra a run; 
 # E9: chamada nova do PRD — role/tier explicitos + prompt inline + label automatico.
 R9="$(new_repo)"
 STUB9="$R9/codex-stub.sh"
-write_real_stream_stub "$STUB9"
+PROMPT_CAPTURE9="$R9/adapter-prompt.txt"
+cat > "$STUB9" <<EOF
+#!/usr/bin/env bash
+set -u
+
+[ "\${1:-}" = "exec" ] || { echo "stub recebeu comando inesperado: \${1:-<vazio>}" >&2; exit 9; }
+cat > "$PROMPT_CAPTURE9"
+cat <<'JSON'
+{"type":"thread.started","thread_id":"019ef9f3-e493-7a71-a5b2-688716a1281a"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"failed to parse plugin hooks config ... unknown field description"}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"PONG"}}
+{"type":"turn.completed","usage":{"input_tokens":1,"output_tokens":1}}
+JSON
+EOF
+chmod +x "$STUB9"
 OUT9="$(
   cd "$R9" || exit 2
   ENGRAMA_CODEX_BIN="$STUB9" bash ./.engrama/engine/scripts/exec-bridge.sh --role critique --tier T4 --sandbox read-only -- "ORDEM INLINE CRITICA"
@@ -345,23 +376,81 @@ LEDGER_OUT9="$(find "$R9/.engrama/evidence/usage" -type f -name 'usage-*.jsonl' 
 if [ "$RC9" -eq 0 ] \
   && [ -f "$ORDER_OUT9" ] \
   && [ -f "$RESP_OUT9" ] \
+  && [ -f "$PROMPT_CAPTURE9" ] \
   && grep -Fq 'ORDEM INLINE CRITICA' "$ORDER_OUT9" \
+  && grep -Fq '# Engrama Governanca Runtime' "$PROMPT_CAPTURE9" \
+  && grep -Fq 'Papel nao e decoracao; e contrato de alcada.' "$PROMPT_CAPTURE9" \
+  && grep -Fq 'role_contract: .engrama/memory/governance/roles/critique.md' "$PROMPT_CAPTURE9" \
+  && grep -Fq '## Role Contract' "$PROMPT_CAPTURE9" \
+  && grep -Fq '## Ordem Original' "$PROMPT_CAPTURE9" \
+  && grep -Fq 'ORDEM INLINE CRITICA' "$PROMPT_CAPTURE9" \
   && grep -Fq 'role: critique' "$RESP_OUT9" \
   && grep -Fq 'tier: T4' "$RESP_OUT9" \
   && grep -Fq 'model: gpt-5.5' "$RESP_OUT9" \
   && grep -Fq 'effort: high' "$RESP_OUT9" \
   && grep -Fq 'routing-mode: explicit' "$RESP_OUT9" \
+  && grep -Fq 'role-contract: .engrama/memory/governance/roles/critique.md' "$RESP_OUT9" \
+  && grep -Eq '^role-contract-hash: [0-9a-f]{64}$' "$RESP_OUT9" \
+  && grep -Fq 'governance-mode: role-contract' "$RESP_OUT9" \
   && [ -f "$LEDGER_OUT9" ] \
   && grep -Fq '"role":"critique"' "$LEDGER_OUT9" \
   && grep -Fq '"tier":"T4"' "$LEDGER_OUT9" \
   && grep -Fq '"model":"gpt-5.5"' "$LEDGER_OUT9" \
   && grep -Fq '"configured_model":"gpt-5.5"' "$LEDGER_OUT9" \
-  && grep -Fq '"observed_model":null' "$LEDGER_OUT9"; then
+  && grep -Fq '"observed_model":null' "$LEDGER_OUT9" \
+  && grep -Fq '"role_contract":".engrama/memory/governance/roles/critique.md"' "$LEDGER_OUT9" \
+  && grep -Eq '"role_contract_hash":"[0-9a-f]{64}"' "$LEDGER_OUT9" \
+  && grep -Fq '"governance_mode":"role-contract"' "$LEDGER_OUT9"; then
   _r=0
 else
   _r=1
 fi
-check E9 CORRETO "$_r" "role/tier explicitos com prompt inline geram auto-label, transcript roteado e usage ledger"
+check E9 CORRETO "$_r" "role/tier explicitos carregam contrato, injetam prompt governado, registram hash e gravam usage ledger"
+
+USAGE_REPORT9="$(
+  cd "$R9" || exit 2
+  bash ./.engrama/engine/scripts/usage-report.sh --month 2026-06 2>&1
+)"
+if printf '%s\n' "$USAGE_REPORT9" | grep -Fq 'Engrama Usage Report — 2026-06' \
+  && printf '%s\n' "$USAGE_REPORT9" | grep -Fq 'By role:'; then
+  _r=0
+else
+  _r=1
+fi
+check E9A CORRETO "$_r" "campos extras do ledger nao quebram usage-report"
+
+# E9B: papel oficial sem contrato deve falhar antes de chamar o adapter.
+R9B="$(new_repo)"
+STUB9B="$R9B/codex-stub.sh"
+CALLED9B="$R9B/adapter-called.txt"
+cat > "$STUB9B" <<EOF
+#!/usr/bin/env bash
+set -u
+touch "$CALLED9B"
+exit 9
+EOF
+chmod +x "$STUB9B"
+rm -f "$R9B/.engrama/memory/governance/roles/critique.md"
+printf 'ORDEM SEM CONTRATO\n' > "$R9B/ordem.md"
+OUT9B="$(
+  cd "$R9B" || exit 2
+  ENGRAMA_CODEX_BIN="$STUB9B" bash ./.engrama/engine/scripts/exec-bridge.sh --role critique --tier T4 --order "$R9B/ordem.md" --label missing-contract --date 2026-06-21 2>&1
+)"
+RC9B=$?
+ORDER_OUT9B="$R9B/.engrama/evidence/transcripts/2026-06-21-missing-contract-order.md"
+RESPONSE_OUT9B="$R9B/.engrama/evidence/transcripts/2026-06-21-missing-contract-response.md"
+LEDGER_COUNT9B="$(find "$R9B/.engrama/evidence/usage" -type f -name 'usage-*.jsonl' | wc -l | tr -d ' ')"
+if [ "$RC9B" -ne 0 ] \
+  && printf '%s\n' "$OUT9B" | grep -Fq 'role contract ausente para role=critique' \
+  && [ ! -e "$CALLED9B" ] \
+  && [ ! -e "$ORDER_OUT9B" ] \
+  && [ ! -e "$RESPONSE_OUT9B" ] \
+  && [ "$LEDGER_COUNT9B" -eq 0 ]; then
+  _r=0
+else
+  _r=1
+fi
+check E9B CORRETO "$_r" "papel oficial sem contrato falha alto antes do adapter e sem ledger falso"
 
 # E10: se o adapter falha antes de produzir events JSONL, o bridge nao pode
 # chamar jq em arquivo inexistente nem gravar response/usage artificiais.

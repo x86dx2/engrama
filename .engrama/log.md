@@ -7,6 +7,38 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] slice | role runtime contracts no executor-bridge
+- Branch `feat/cognitive-observability-foundation`. O Engrama agora separa papeis logicos em runtime por **Role Runtime Contracts** normativos, mesmo quando o adapter/modelo fisico for o mesmo.
+- **Normativo novo:** `.engrama/memory/governance/role-runtime-contracts.md` e `.engrama/memory/governance/roles/{orchestrate,execute,review,critique,audit,authority}.md` passam a ser a fonte de verdade dos contratos de papel; `curate` fica fora desta fatia.
+- **Runtime:** `.engrama/engine/scripts/exec-bridge.sh` agora carrega `roles/<role>.md` quando `--role/--tier` sao explicitos, sintetiza prompt com cabecalho de governanca + contrato + ordem original, registra `role-contract`, `role-contract-hash` e `governance-mode` no transcript e `role_contract`, `role_contract_hash` e `governance_mode` no usage ledger. Se o contrato do papel oficial faltar, o bridge falha alto antes do adapter e sem ledger falso.
+- **Compat legado:** chamadas sem `--role/--tier` continuam defaultando para `execute/T2`, mas ficam marcadas como `governance_mode=legacy/defaulted` e **nao** fingem contrato aplicado.
+- **Gateways/indices:** `AGENTS.md`, `CLAUDE.md`, `.engrama/CLAUDE.md`, `memory/governance/index.md` e `index.md` agora apontam para os contratos sem duplicar o conteudo normativo.
+- **QA alvo desta fatia:** estender `tests/contract/exec-bridge.test.sh` para contrato explicito, legado/defaulted e falta de contrato; provar tambem que campos extras no ledger nao quebram `usage-report` nem o parser da observabilidade.
+
+## [2026-06-30] slice | control plane write-safe do Engrama Observatory
+- Branch `feat/cognitive-observability-foundation`. A implementacao do PRD2 deixou de ser apenas read-only: o control plane agora valida e salva `models.conf` com diff, backup e evento auditavel.
+- **Servidor local:** `POST /api/models/validate` e `POST /api/models/save` foram adicionados ao backend da ferramenta. O save bloqueia fallback silencioso para critica/audit/authority, bloqueia campos vazios por tier, escreve backup em `.engrama/evidence/config-backups/`, salva `models.conf` e appenda `config-events-YYYY-MM.jsonl`.
+- **UI:** a tela `Plano de Controle de Modelos` agora e editavel por tier (`adapter`, `provider`, `model`, `effort`) e mostra validacao, diff textual, comandos sugeridos de revalidacao e o resultado do ultimo save.
+- **Read-only tambem fechado:** filtros minimos da tabela agora cobrem `mes`, `role`, `tier`, `adapter`, `provider`, `model`, `success` e `branch`; a tabela inclui as colunas operacionais pedidas; ha destaque para drift `configured_model != observed_model` e sinais de sizing/T4.
+- **Seguranca e testes:** a API mascara strings suspeitas, nunca le `.env`, restringe read/write por allowlist e ganhou testes de save/config/security/aggregation. `tools/engrama-observatory/README.md` passou a documentar validate/save.
+- **QA executado:** `bash ./.engrama/engine/scripts/lint.sh` -> 0; `bash tests/gate/critique-gate.test.sh` -> 14 asserts verdes; `cd tools/engrama-observatory && npm test` -> 10 testes verdes; `npm run typecheck` -> 0; `npm run build` -> 0.
+- **PROXIMO:** smoke HTTP final do fluxo `validate -> save` e depois crítica T4/diff-binding para preparar commit/PR da implementacao completa.
+
+## [2026-06-30] slice | scaffold read-only do Engrama Observatory
+- Branch `feat/cognitive-observability-foundation`. A fundacao governada do PRD2 saiu do papel e agora existe um app local em `tools/engrama-observatory/`.
+- **Implementado nesta fatia:** servidor Node local com endpoints read-only (`/api/usage`, `/api/usage/summary`, `/api/models`, `/api/config-events`); parser tolerante de JSONL; leitura shell-safe de `models.conf`, `subscriptions.conf` e `prices.conf`; dashboard React com cards, breakdowns por role/tier/model, timeline, tabela de runs e control plane em modo somente leitura.
+- **Seguranca explicita:** a ferramenta nao le `.env`; `path guards` restringem a leitura ao allowlist do repo; transcript continua so como path copiavel; `config-events` e exibido como leitura opcional.
+- **QA executado:** `bash tests/gate/critique-gate.test.sh` -> 14 asserts verdes; `bash ./.engrama/engine/scripts/lint.sh` -> 0; `cd tools/engrama-observatory && npm test` -> 4 testes verdes; `npm run typecheck` -> 0; `npm run build` -> 0; smoke HTTP em `http://localhost:4177` confirmou `200 OK`, resumo de usage real de junho/2026 e leitura real de `models.conf`.
+- **Observacao operacional:** o script `npm run dev` usa `node --import tsx src/server/index.ts` em vez do wrapper `tsx` puro, porque o CLI do `tsx` abriu pipe IPC incompatível com o sandbox desta maquina.
+- **PROXIMO:** decidir a proxima fatia entre (a) polimento/UX e docs adicionais ou (b) control plane write-safe de `models.conf`, que continua dependente de aprovacao explicita da Autoridade.
+
+## [2026-06-30] decision | fundacao governada da Observabilidade Cognitiva local
+- Branch `feat/cognitive-observability-foundation`, aberta a partir de `main` para isolar a execucao do PRD2 sem contaminar o PR documental `docs/runtime-usage-gateways`.
+- **Decisao ativa:** ADR [[memory/decisions/0017-observabilidade-cognitiva-local]] canoniza a ferramenta `tools/engrama-observatory/` como console local do repo central, com estrategia `read-only first`; a UI deve refletir o runtime atual tier-first (`models.conf` por tier; `role` so impõe piso de tier) e nao inventar matriz `role+tier` que o router nao suporta hoje.
+- **Gate endurecido:** `.engrama/engine/scripts/critique-gate.sh` passa a classificar `tools/engrama-observatory/*` como superficie `gate`; `tests/gate/critique-gate.test.sh` ganha regressao dedicada para esse caminho.
+- **Fora do escopo desta fatia:** ainda nao distribui a UI no `template/`, nao altera `release-surface.manifest`, nao adiciona save em `models.conf`, nao roda agentes pela UI e nao toca `.env`.
+- **PROXIMO:** scaffold do app local read-only (Vite + React + TS + servidor Node leve), parser tolerante do usage ledger e visualizacao inicial de dashboard/runs/models sem escrita.
+
 ## [2026-06-30] audit | checkpoint pos-PR #21 + revisao dos gaps restantes
 - Branch `chore/checkpoint-gap-review`. Estado factual: PR #21 (`fix/follow-ups-pos-0.2.0`) foi mergeado em `main` pelo merge commit `20b5f57`; `main` local estava alinhado com `origin/main` antes desta branch; `v0.3.0` segue como a ultima tag de release deliberada; `docs/PRD.md` continua untracked e fora do escopo versionado.
 - **Checkpoint corrigido:** o topo anterior ainda apontava para registrar binding/commitar/abrir PR da fatia #21, mas tudo isso ja foi executado e mergeado.

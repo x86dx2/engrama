@@ -29,6 +29,12 @@ TEMPLATE_MODELS_CONF="$REPO_ROOT/template/.engrama/engine/config/models.conf"
 TEMPLATE_SUBSCRIPTIONS_CONF="$REPO_ROOT/template/.engrama/engine/config/subscriptions.conf"
 ROOT_PRICES_CONF="$REPO_ROOT/.engrama/engine/config/prices.conf"
 TEMPLATE_PRICES_CONF="$REPO_ROOT/template/.engrama/engine/config/prices.conf"
+ROOT_ROLE_RUNTIME_CONTRACTS="$REPO_ROOT/.engrama/memory/governance/role-runtime-contracts.md"
+TEMPLATE_ROLE_RUNTIME_CONTRACTS="$REPO_ROOT/template/.engrama/memory/governance/role-runtime-contracts.md"
+ROOT_ROLES_DIR="$REPO_ROOT/.engrama/memory/governance/roles"
+TEMPLATE_ROLES_DIR="$REPO_ROOT/template/.engrama/memory/governance/roles"
+TEMPLATE_GOVERNANCE_INDEX="$REPO_ROOT/template/.engrama/memory/governance/index.md"
+TEMPLATE_ENGRAMA_INDEX="$REPO_ROOT/template/.engrama/index.md"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
@@ -131,6 +137,22 @@ check S3CBA CORRETO "$_r" "codex adapter do template identico ao da raiz"
 if cmp -s "$ROOT_PRICES_CONF" "$TEMPLATE_PRICES_CONF"; then _r=0; else _r=1; fi
 check S3CBB CORRETO "$_r" "prices config do template identico ao da raiz"
 
+if [ -f "$TEMPLATE_ROLE_RUNTIME_CONTRACTS" ] && cmp -s "$ROOT_ROLE_RUNTIME_CONTRACTS" "$TEMPLATE_ROLE_RUNTIME_CONTRACTS"; then
+  _r=0
+else
+  _r=1
+fi
+check S3CBBB CORRETO "$_r" "role-runtime-contracts.md e sincronizado para o template"
+
+for role_name in orchestrate execute review critique audit authority; do
+  if [ -f "$TEMPLATE_ROLES_DIR/$role_name.md" ] && cmp -s "$ROOT_ROLES_DIR/$role_name.md" "$TEMPLATE_ROLES_DIR/$role_name.md"; then
+    _r=0
+  else
+    _r=1
+  fi
+  check "S3CBB-${role_name}" CORRETO "$_r" "contrato runtime $role_name.md existe no template e bate com a raiz"
+done
+
 if grep -Fq 'ENGRAMA_CODEX_PRO_ENABLED=0' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
   && grep -Eq '^ENGRAMA_CODEX_PRO_MONTHLY_USD=$' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
   && grep -Fq 'ENGRAMA_CLAUDE_MAX_ENABLED=0' "$TEMPLATE_SUBSCRIPTIONS_CONF" \
@@ -148,12 +170,28 @@ check S3CC CORRETO "$_r" "template/.markdownlint-cli2.yaml identico ao da raiz"
 if cmp -s "$ROOT_SETTINGS" "$TEMPLATE_SETTINGS"; then _r=0; else _r=1; fi
 check S3D CORRETO "$_r" "settings.json do template identico ao da raiz"
 
+if grep -Fq '[[memory/governance/role-runtime-contracts]]' "$TEMPLATE_GOVERNANCE_INDEX"; then
+  _r=0
+else
+  _r=1
+fi
+check S3DA CORRETO "$_r" "governance/index do template aponta para role-runtime-contracts"
+
+if grep -Fq '[[memory/governance/role-runtime-contracts]]' "$TEMPLATE_ENGRAMA_INDEX"; then
+  _r=0
+else
+  _r=1
+fi
+check S3DB CORRETO "$_r" "index do template lista role-runtime-contracts"
+
 if grep -Fq 'ROOT_CI_GATE=' "$SYNC_SCRIPT" \
   && grep -Fq 'TEMPLATE_CI_GATE=' "$SYNC_SCRIPT" \
   && grep -Fq 'ROOT_MODEL_ROUTER=' "$SYNC_SCRIPT" \
   && grep -Fq 'TEMPLATE_MODEL_ROUTER=' "$SYNC_SCRIPT" \
   && grep -Fq 'ROOT_CODEX_ADAPTER=' "$SYNC_SCRIPT" \
   && grep -Fq 'TEMPLATE_CODEX_ADAPTER=' "$SYNC_SCRIPT" \
+  && grep -Fq 'ROOT_ROLE_RUNTIME_CONTRACTS=' "$SYNC_SCRIPT" \
+  && grep -Fq 'TEMPLATE_ROLE_RUNTIME_CONTRACTS=' "$SYNC_SCRIPT" \
   && grep -Fq 'ROOT_MARKDOWNLINT=' "$SYNC_SCRIPT" \
   && grep -Fq 'TEMPLATE_MARKDOWNLINT=' "$SYNC_SCRIPT" \
   && grep -Fq 'compose_template_subscriptions_conf' "$SYNC_SCRIPT"; then
@@ -161,7 +199,7 @@ if grep -Fq 'ROOT_CI_GATE=' "$SYNC_SCRIPT" \
 else
   _r=1
 fi
-check S3E CORRETO "$_r" "sync-template sincroniza gate-ci/router/adapter e neutraliza subscriptions do template"
+check S3E CORRETO "$_r" "sync-template sincroniza runtime/docs acopladas e neutraliza subscriptions do template"
 
 if grep -Fq 'CRITIQUE_ROLE="critique"' "$TEMPLATE_GATE" \
   && grep -Fq 'CRITIQUE_TIER="T4"' "$TEMPLATE_GATE" \

@@ -21,7 +21,7 @@ Se `.engrama/memory/project/bootstrap-do-projeto.md` estiver com `status: propos
 ## Modelo em uma página
 
 - **Tríade (por função, não por vendor):** **Orquestrador** = Orquestrador/Auditor/QA/Arquiteto (dono do git; **não escreve código de fatia**) · **Executor Crítico** = escreve o código; critica ativamente · **Autoridade de Mudança** = arbitra discordâncias; aprova produção.
-- **Executor-bridge:** o Orquestrador invoca o Executor direto (`codex exec`, adaptador concreto deste repo); **não há caminho de código sem o Executor**. Sempre audita antes de comitar. (ADR 0003)
+- **Executor-bridge:** o Orquestrador invoca o Executor pelo `exec-bridge.sh` roteado (`role+tier`, com Role Runtime Contracts em `.engrama/memory/governance/roles/`); **não há caminho de código sem o Executor**. `codex exec` direto é excecao operacional. Sempre audita antes de comitar. (ADR 0003)
 - **Executor é freio ativo:** objeção material → escala à Autoridade; o Orquestrador **não tem overrule**. (ADR 0004)
 - **Governança não se autoaprova:** edição de governança vai à **crítica do Executor antes do commit** — imposto pelo gate mecânico `.engrama/engine/scripts/critique-gate.sh`. (ADR 0006)
 - **Reconciliação explícita:** ADRs e páginas novas podem declarar `reconcilia:` (`ADD`/`UPDATE`/`DELETE`/`NOOP`) para explicitar como dialogam com a memória existente; schema e lint vivem em `.engrama/CLAUDE.md`.
@@ -29,7 +29,7 @@ Se `.engrama/memory/project/bootstrap-do-projeto.md` estiver com `status: propos
 - **Subagentes** só na lane do Orquestrador; **nunca** escrevem código de fatia. (ADR 0008)
 - **Produção intocável:** ordem + 2ª confirmação; o Orquestrador nunca aprova MR de prod. (ADR 0009)
 
-Detalhe normativo e matriz de alçadas: `.engrama/memory/governance/papeis-e-alcadas.md`. Schema do Engrama: `.engrama/CLAUDE.md`.
+Detalhe normativo e matriz de alçadas: `.engrama/memory/governance/papeis-e-alcadas.md`. Contratos completos por papel: `.engrama/memory/governance/roles/`. Schema do Engrama: `.engrama/CLAUDE.md`.
 
 ## Regras do projeto
 
