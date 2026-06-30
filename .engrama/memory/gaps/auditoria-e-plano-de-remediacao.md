@@ -1,18 +1,33 @@
 ---
 type: roadmap
-status: proposed
+status: resolved
 critica_tecnica: incorporada
 touches: [memory/decisions/0006-governanca-nao-se-autoaprova, memory/decisions/0010-roteamento-modelo-effort-do-executor, memory/governance/modelo-operacional, evidence/qa/criticas-do-executor]
-date: 2026-06-20
+date: 2026-06-30
 source_refs:
   - .engrama/engine/scripts/critique-gate.sh
   - .engrama/engine/scripts/critique-gate-hook.sh
   - bin/install.sh
   - tests/gate/critique-gate.test.sh
   - tests/contract/bootstrap.test.sh
+  - .engrama/memory/decisions/0011-diff-binding-atestacao-verificavel.md
+  - .engrama/memory/decisions/0016-runtime-model-router-usage-ledger.md
 ---
 
 Auditoria imparcial do Engrama (3 fontes independentes — leitura manual, workflow multi-agente de 47 agentes/39 achados confirmados, crítica externa do `codex`) **validada por testes** e **revisada pela crítica do Executor** (`codex exec`, veredito `discordo` → ajustes incorporados; ver [[evidence/qa/criticas-do-executor]]). Registra o que está **comprovadamente correto**, o que é **furo comprovado por teste**, e o **plano completo de remediação** por fases. Governança → não se autoaprova: o commit depende da Autoridade.
+
+## Revisão 2026-06-30 — resolvido como roadmap histórico
+
+Esta página não é mais backlog ativo. Ela permanece como **registro histórico da auditoria inicial** que originou o endurecimento do gate, diff-binding, CI server-side, sync raiz↔template, versionamento e disciplina de honestidade.
+
+Estado atual:
+
+- P0/P1/P2/P3 foram absorvidos por PRs posteriores e por ADRs ativas, principalmente [[memory/decisions/0006-governanca-nao-se-autoaprova]], [[memory/decisions/0011-diff-binding-atestacao-verificavel]], [[memory/decisions/0014-gate-de-release-repo-central]] e [[memory/decisions/0016-runtime-model-router-usage-ledger]].
+- O gap [[memory/gaps/follow-ups-pos-0.2.0]] fechou as duas ressalvas remanescentes da release 0.2.0 no PR #21.
+- O residual **R1 identidade do crítico** permanece teto aceito: o gate prova cobertura do diff, não identidade criptográfica ou independente do crítico. A mitigação vigente é server-side: CI required + diff-binding estrito.
+- A ressalva de PR multi-commit continua como limite operacional documentado na ADR 0011.
+
+Uso correto desta página daqui em diante: citar como origem/diagnóstico da remediação, não como lista viva de tarefas.
 
 ## STATUS FINAL (2026-06-20) — roadmap entregue
 
@@ -105,15 +120,15 @@ Esta sessão rodou o **executor-bridge real**: o Orquestrador autorou, o Executo
 
 **Residual escalado à Autoridade:** o veredito foi `discordo` (governança/gate é material). Por ADR 0004/0006, o Orquestrador **não comita por conta própria**: incorporou os ajustes e **apresenta à Autoridade** para a decisão de commit (consenso sobre o artefato revisado ou nova rodada).
 
-## Critério de pronto
+## Critério de pronto original — status revisado em 2026-06-30
 
 - [x] Crítica do Executor registrada em [[evidence/qa/criticas-do-executor]] (`critica_tecnica → incorporada`).
 - [x] Suítes `tests/` verdes, shellcheck-limpas e fail-fast (20 asserts, 8 furos caracterizados).
-- [ ] Decisão da Autoridade sobre este commit (governança não se autoaprova; Executor `discordo` incorporado).
-- [ ] P0–P2: cada FURO promovido (assert FURO vira CORRETO) com crítica registrada por commit.
+- [x] Decisão da Autoridade sobre este commit (governança não se autoaprova; Executor `discordo` incorporado).
+- [x] P0–P2: furos fecháveis promovidos e travados por teste; R1 identidade do crítico reclassificado como teto aceito/mitigado, não bug aberto.
 - [x] `sync-template.sh` + CI que reexecuta o gate; referência fantasma resolvida.
 - [x] Required check ativo no *branch protection* (job `test` embute o gate-contra-PR) → enforcement vinculante.
-- [ ] ADRs 0011+ formalizando vínculo-ao-diff, enforcement server-side, fonte única, testes portáveis.
+- [x] ADRs 0011+ formalizam vínculo-ao-diff, enforcement server-side, fonte única, testes portáveis e roteamento runtime.
 
 ## Pendências aceitas / tetos (2026-06-21)
 

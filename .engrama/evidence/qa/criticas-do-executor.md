@@ -52,6 +52,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 - **Escopo coberto pelo hash:** `bin/release-gate.sh` remove heredoc do parser de waiver; `tests/gate/release-gate.test.sh` adiciona regressao RG10..RG10D; `engrama.values.example` e `docs/INSTANTIATE.md` alinham `ENGRAMA_VERSION` a `0.3.0`; gap/log registram fechamento.
 - **Evidencia de QA:** shellcheck focado e shellcheck amplo da CI -> 0; `release-gate.test` 16/16 verde; `tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `release-gate --mode warn --base-ref main` -> 0; payload hash de release -> vazio.
 
+## [2026-06-30] chore/checkpoint-gap-review | [governance] checkpoint pos-PR #21 + revisao dos gaps restantes | waiver Autoridade 2026-06-30 (pedido direto: faca 1 e 2; sem critica independente disponivel) | sha256:da9527b34ca03b705231cef8cc3782639d8e65cba377caf2d9eb5bcfac64c490
+- **Contexto:** atualizacao de memoria/checkpoint solicitada pela Autoridade: registrar estado pos-merge do PR #21 e revisar os gaps `metricas-de-engrama` e `auditoria-e-plano-de-remediacao`.
+- **Escopo coberto pelo hash:** `.engrama/log.md`, `.engrama/index.md`, `metricas-de-engrama` mantido como gap proposto de pesquisa markdown-puro, e `auditoria-e-plano-de-remediacao` reclassificado como `resolved`/historico.
+- **Evidencia de QA:** `lint.sh` verde antes do binding; `critique-gate` sera reexecutado no indice final pelo Orquestrador. Nao ha alteracao de codigo, template, VERSION ou CHANGELOG.
+
 ## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] rebind cumulativo PR #20 pos-fix CI | waiver Autoridade 2026-06-30 (execucao direta aprovada; rebind de CI) | sha256:b5b45b30bf333d96a14a452fbe583cc7341c9af4c0bcb0204c4b68465646f410
 - **Contexto:** apos o fix `bdd4c4b`, shellcheck/lint/test suite passaram, mas o gate de critica da CI passou a exigir o fingerprint cumulativo atualizado do PR #20 (`origin/main...HEAD`) em modo estrito.
 - **Escopo coberto pelo hash:** diff final esperado do PR #20, calculado a partir de commit temporario da arvore staged para incluir o novo checkpoint em `log.md` e excluir o proprio ledger conforme ADR 0011.

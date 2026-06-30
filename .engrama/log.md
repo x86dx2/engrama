@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] audit | checkpoint pos-PR #21 + revisao dos gaps restantes
+- Branch `chore/checkpoint-gap-review`. Estado factual: PR #21 (`fix/follow-ups-pos-0.2.0`) foi mergeado em `main` pelo merge commit `20b5f57`; `main` local estava alinhado com `origin/main` antes desta branch; `v0.3.0` segue como a ultima tag de release deliberada; `docs/PRD.md` continua untracked e fora do escopo versionado.
+- **Checkpoint corrigido:** o topo anterior ainda apontava para registrar binding/commitar/abrir PR da fatia #21, mas tudo isso ja foi executado e mergeado.
+- **Gaps revisados:** [[memory/gaps/follow-ups-pos-0.2.0]] esta fechado desde o PR #21; [[memory/gaps/auditoria-e-plano-de-remediacao]] foi reclassificado como `resolved`/historico de remediacao, nao backlog ativo; [[memory/gaps/metricas-de-engrama]] continua `proposed` como pesquisa futura limitada a markdown-puro.
+- **Sem codigo de produto:** esta fatia so atualiza memoria/checkpoint/indice; nao altera `VERSION`, `CHANGELOG`, template, router, bridge ou gates.
+- **PROXIMO:** decidir o destino de `docs/PRD.md` (remover localmente, versionar como insumo historico ou manter untracked) antes de abrir nova fatia de produto/processo.
+
 ## [2026-06-30] fix | fechamento dos follow-ups pos-0.2.0 apos v0.3.0
 - Branch `fix/follow-ups-pos-0.2.0`. Fecha as 2 ressalvas abertas em [[memory/gaps/follow-ups-pos-0.2.0]] sem alterar `VERSION`/`CHANGELOG`; `docs/PRD.md` segue untracked e fora do escopo.
 - **Execucao:** o Orquestrador tentou acionar o Executor via `exec-bridge.sh --role execute --tier T3`, mas o Codex CLI nao finalizou com eventos JSONL e o bridge abortou sem transcript/usage ledger. O diff ficou no workspace e foi tratado como excecao operacional ja aprovada pela Autoridade, sem claim de critica independente.
