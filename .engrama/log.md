@@ -7,6 +7,14 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] slice | canonizacao da fundacao do Engrama Observatory
+- Branch `feat/add-cognitive-observability-foundation`, criada em worktree limpo a partir de `origin/main` para reconciliar a divergencia entre docs/governanca e a superficie Git: `tools/engrama-observatory/` ja era citado como ferramenta oficial, mas ainda nao existia no indice.
+- **Implementado:** adiciona `.gitignore` para `tools/engrama-observatory/{node_modules,dist}` e canoniza `tools/engrama-observatory/` com app local Vite/React/TypeScript, parser/agregacoes do usage ledger, dashboard, tabela de runs, control plane local e testes.
+- **Fora de escopo nesta fundacao:** nao expõe `governance_mode`, `role_contract` ou `role_contract_hash`; nao altera runtime, router, adapters, billing ou gates.
+- **QA executado no worktree limpo:** `cd tools/engrama-observatory && npm install` -> 0; `npm test` -> 15 testes verdes; `npm run typecheck` -> 0; `npm run build` -> 0; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+- **Divida conhecida:** `npm install` reportou 5 vulnerabilidades nas dependencias e `recharts@2.x` deprecated; nao tratado aqui para manter o PR de fundacao focado.
+- **PROXIMO:** abrir PR `feat: add cognitive observability foundation`; depois, em branch separada, expor governanca de contratos no observatory.
+
 ## [2026-06-30] slice | role runtime contracts no executor-bridge
 - Branch `feat/cognitive-observability-foundation`. O Engrama agora separa papeis logicos em runtime por **Role Runtime Contracts** normativos, mesmo quando o adapter/modelo fisico for o mesmo.
 - **Normativo novo:** `.engrama/memory/governance/role-runtime-contracts.md` e `.engrama/memory/governance/roles/{orchestrate,execute,review,critique,audit,authority}.md` passam a ser a fonte de verdade dos contratos de papel; `curate` fica fora desta fatia.
