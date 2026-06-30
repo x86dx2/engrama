@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | fechamento dos follow-ups pos-0.2.0 apos v0.3.0
+- Branch `fix/follow-ups-pos-0.2.0`. Fecha as 2 ressalvas abertas em [[memory/gaps/follow-ups-pos-0.2.0]] sem alterar `VERSION`/`CHANGELOG`; `docs/PRD.md` segue untracked e fora do escopo.
+- **Execucao:** o Orquestrador tentou acionar o Executor via `exec-bridge.sh --role execute --tier T3`, mas o Codex CLI nao finalizou com eventos JSONL e o bridge abortou sem transcript/usage ledger. O diff ficou no workspace e foi tratado como excecao operacional ja aprovada pela Autoridade, sem claim de critica independente.
+- **`bin/release-gate.sh`:** `has_valid_release_waiver` saiu do heredoc e agora separa os campos `|` por expansao de shell, preservando a gramatica `## [data] contexto | sem-release | sha256:<64hex> | motivo` sem tempfile/here-string.
+- **Regressao:** `tests/gate/release-gate.test.sh` ganhou `RG10..RG10D` para travar o parser sem heredoc/here-string/tempfile/caminho temporario fixo; `RG3` e `RG4` continuam cobrindo waiver valido e stale.
+- **Exemplos de versao:** `engrama.values.example` e `docs/INSTANTIATE.md` agora apontam `ENGRAMA_VERSION` para `0.3.0` e mantem a orientacao de derivar o valor via `VERSION`.
+- **QA executado pelo Orquestrador:** `shellcheck bin/release-gate.sh tests/gate/release-gate.test.sh` -> 0; shellcheck amplo da CI -> 0; `bash tests/gate/release-gate.test.sh` -> 16 asserts verdes; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `lint.sh` -> 0; `release-gate --mode warn --base-ref main` -> 0; `release-gate --print-hash --base-ref main` -> hash vazio da superficie distribuivel.
+- **PROXIMO:** registrar waiver/diff-binding desta excecao no ledger de criticas, validar o gate com o diff staged e commitar a branch para PR.
+
 ## [2026-06-30] fix | CI PR #20: rebind cumulativo apos fix de shellcheck
 - Branch `feat-runtime-model-router-usage-ledger`, PR #20. Shellcheck/lint/suite passaram no novo run, mas o gate de crítica da CI falhou no passo `Re-run critique gate against pull request diff`.
 - **Causa:** o commit `bdd4c4b` mudou o diff cumulativo `origin/main...HEAD`; as entradas anteriores de diff-binding passaram a cobrir diffs antigos. A CI roda com `ENGRAMA_REQUIRE_DIFF_BIND=1`, portanto exige um `sha256` que bata o PR inteiro, não apenas o último commit.

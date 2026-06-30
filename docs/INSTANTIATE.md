@@ -31,7 +31,7 @@ Todos os pontos variáveis usam `{{CHAVE}}`. Defina os valores do seu projeto:
 |---|---|---|
 | `{{PROJETO}}` | nome do projeto | `MeuProjeto` |
 | `{{REPO_PATH}}` | caminho absoluto do repo (para `source_refs`) | `/caminho/absoluto/do/repo` |
-| `{{ENGRAMA_VERSION}}` | versão do pack que gerou a instalação (`.engrama/VERSION`) | `0.1.0` |
+| `{{ENGRAMA_VERSION}}` | versão do pack que gerou a instalação (`.engrama/VERSION`) | `0.3.0` |
 | `{{ORQUESTRADOR}}` | agente no papel de Orquestrador/Auditor | `Claude (Claude Code)` |
 | `{{EXECUTOR}}` | agente no papel de Executor Crítico | `Codex` |
 | `{{AUTORIDADE}}` | quem é a Autoridade de Mudança | `Humano (voce@exemplo.com)` |
@@ -64,7 +64,7 @@ grep -rl '{{EXECUTOR_CMD}}' . | xargs sed -i '' 's#{{EXECUTOR_CMD}}#codex exec#g
 # … repita por placeholder …
 ```
 
-> `{{ENGRAMA_VERSION}}` deve receber a versão do pack-fonte que você está instalando (tipicamente `cat /caminho/do/engrama/VERSION`). `{{MODELO_*}}` são **exemplos**: confirme os ids reais no namespace do seu `codex exec` antes de gravar. Para o inventário completo de overrides/defaults do bootstrap (incluindo `CMD_E2E`), confira `engrama.values.example`.
+> `{{ENGRAMA_VERSION}}` deve receber a versão do pack-fonte que você está instalando (tipicamente `cat /caminho/do/engrama/VERSION`; no estado atual deste repo, `0.3.0`). `{{MODELO_*}}` são **exemplos**: confirme os ids reais no namespace do seu `codex exec` antes de gravar. Para o inventário completo de overrides/defaults do bootstrap (incluindo `CMD_E2E`), confira `engrama.values.example`.
 
 > **Decisão de estilo:** o modelo é *"papéis por função, não por vendor"*. Na prosa normativa, os papéis aparecem como **Orquestrador / Executor / Autoridade** (canônicos). Os `{{ORQUESTRADOR/EXECUTOR/AUTORIDADE}}` aparecem **uma vez**, na tabela "Mapeamento atual" de `.engrama/memory/governance/papeis-e-alcadas.md`. Trocar quem ocupa cada papel = editar só essa tabela.
 

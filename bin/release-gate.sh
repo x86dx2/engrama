@@ -178,16 +178,42 @@ has_valid_current_changelog_heading() {
 }
 
 has_valid_release_waiver() {
-  local wanted_hash="$1" line field2 field3
+  local wanted_hash="$1" line rest field2 field3
 
   [ -f "$WAIVER_REL" ] || return 1
 
   while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in
       '## ['*)
-        IFS='|' read -r _field1 field2 field3 _field4 _rest <<EOF
-$line
-EOF
+        rest="$line"
+        case "$rest" in
+          *'|'*)
+            rest="${rest#*|}"
+            ;;
+          *)
+            continue
+            ;;
+        esac
+
+        case "$rest" in
+          *'|'*)
+            field2="${rest%%|*}"
+            rest="${rest#*|}"
+            ;;
+          *)
+            continue
+            ;;
+        esac
+
+        case "$rest" in
+          *'|'*)
+            field3="${rest%%|*}"
+            ;;
+          *)
+            continue
+            ;;
+        esac
+
         field2="$(trim "${field2:-}")"
         field3="$(trim "${field3:-}")"
 
