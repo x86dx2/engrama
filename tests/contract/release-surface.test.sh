@@ -53,6 +53,10 @@ sync_source_set() {
     [ -n "$var_name" ] || continue
     root_var_value "$var_name"
   done | sort -u
+
+  if grep -Fq 'ROOT_ROLES_DIR=' "$SYNC_SCRIPT"; then
+    find "$REPO_ROOT/$(root_var_value ROOT_ROLES_DIR)" -type f | sed "s#^$REPO_ROOT/##" | sort
+  fi
 }
 
 expected_surface_set() {

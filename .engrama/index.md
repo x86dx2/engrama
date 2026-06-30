@@ -9,6 +9,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/governance/index]] — porta de entrada; ordem de leitura.
 - [[memory/governance/modelo-operacional]] — princípios inegociáveis + separação de funções.
 - [[memory/governance/papeis-e-alcadas]] — tríade de papéis + matriz de alçadas.
+- [[memory/governance/role-runtime-contracts]] — contratos normativos por papel + regras de runtime do bridge.
 - [[memory/governance/cadeia-de-comando]] — protocolo Orquestrador ↔ Executor ↔ Autoridade + executor-bridge.
 - [[memory/governance/continuidade-de-sessao]] — abrir/trabalhar/encerrar/handoff.
 
@@ -29,6 +30,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/decisions/0014-gate-de-release-repo-central]] — gate de release repo-central-only (CI derruba o job `test`; manifest explícito; escape `sem-release` bound-by-hash).
 - [[memory/decisions/0015-absorcao-seletiva-metodologia-superpowers]] — absorve do Superpowers só a camada de método (TDD/planejamento/depuração) como specs; rejeita subagent-escreve-código + fluidez de papéis/runtime que apaga o bridge.
 - [[memory/decisions/0016-runtime-model-router-usage-ledger]] — role+tier viram runtime via model-router; bridge registra rota e usage ledger local.
+- [[memory/decisions/0017-observabilidade-cognitiva-local]] — console local read-only primeiro, central ao repo, com control plane write-safe só em fatia posterior e governada.
 
 ## Specs (playbooks operacionais — o "como")
 - [[memory/specs/README]] — índice + princípio (spec ≠ subagente).
@@ -52,6 +54,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 ## Processo
 - [[evidence/qa/criticas-do-executor]] — ledger de críticas do Executor (modelo configurado de crítica) + gate mecânico de commit (ADR 0006/0010/0016).
 - `evidence/usage/` — ledger JSONL local de uso/billing gerado pelo executor-bridge (ADR 0016).
+- `tools/engrama-observatory/` — camada local opcional para visualizar usage ledger e configurar `models.conf`; nao substitui bridge, router, gates ou ADRs.
 
 ## Páginas do seu projeto (domínio · roadmap · QA · gaps)
 

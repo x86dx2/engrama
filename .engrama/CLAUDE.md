@@ -9,7 +9,7 @@ Este engrama é a **memória institucional** do projeto. Ele NÃO é o código n
 ```
 SOURCE_OF_TRUTH_REPO: .
 - CLAUDE.md / AGENTS.md       → gates de governança (entry-points)
-- .engrama/memory/governance/*          → processo entre agentes (papéis, alçadas, handoff)
+- .engrama/memory/governance/*          → processo entre agentes (papeis, alcadas, handoff, role runtime contracts)
 - .engrama/memory/decisions/*           → ADRs (por quê de cada decisão)
 - (domínio/arquitetura)       → criados conforme o projeto avança
 ```
@@ -37,7 +37,7 @@ NÃO replica: estrutura de pastas do código, assinaturas/tipos/schemas, estado 
 ├── VERSION        # versão do pack/instância
 ├── .gitignore     # carve-outs mecânicos do engrama
 ├── memory/
-│   ├── governance/  # processo entre agentes
+│   ├── governance/  # processo entre agentes + role runtime contracts
 │   ├── decisions/   # ADRs
 │   ├── project/     # bootstrap do projeto
 │   ├── specs/       # playbooks operacionais

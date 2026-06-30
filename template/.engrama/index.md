@@ -9,6 +9,7 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/governance/index]] — porta de entrada; ordem de leitura.
 - [[memory/governance/modelo-operacional]] — princípios inegociáveis + separação de funções.
 - [[memory/governance/papeis-e-alcadas]] — tríade de papéis + matriz de alçadas.
+- [[memory/governance/role-runtime-contracts]] — contratos normativos por papel + regras de runtime do bridge.
 - [[memory/governance/cadeia-de-comando]] — protocolo Orquestrador ↔ Executor ↔ Autoridade + executor-bridge.
 - [[memory/governance/continuidade-de-sessao]] — abrir/trabalhar/encerrar/handoff.
 

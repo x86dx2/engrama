@@ -26,16 +26,25 @@ Se `.engrama/memory/project/bootstrap-do-projeto.md` estiver com `status: propos
 
 Mapeamento concreto (quem é quem) e matriz de alçadas: `.engrama/memory/governance/papeis-e-alcadas.md`.
 
+## Role Runtime Contracts
+
+Execucao governada deve usar `bash .engrama/engine/scripts/exec-bridge.sh --role <role> --tier <tier> ...`.
+
+- Papel nao e decoracao; e contrato de alcada.
+- `codex exec` direto e excecao operacional explicita.
+- Contratos completos vivem em `.engrama/memory/governance/roles/`.
+- Quando houver execucao roteada, o handoff deve informar `role`, `tier`, `role_contract_hash`, `adapter/model`, `transcript` e `usage ledger`.
+
 ## Se você é o Executor
 
-Escreve o código da fatia na branch que o Orquestrador indicar — **nunca cego**. Para cada ordem (via `codex exec`), devolva: (1) leitura da ordem · (2) **crítica técnica antes de executar** · (3) veredito `concordo` | `ajuste-menor` | `discordo` · (4) execução · (5) evidências · (6) pendências. **Discordância material → NÃO execute**; devolva a objeção (a Autoridade arbitra, via Orquestrador; você tem voz, não veto).
+Escreve o código da fatia na branch que o Orquestrador indicar — **nunca cego**. Para cada ordem governada (via `exec-bridge.sh --role <role> --tier <tier>`), devolva: (1) leitura da ordem · (2) **crítica técnica antes de executar** · (3) veredito `concordo` | `ajuste-menor` | `discordo` · (4) execução · (5) evidências · (6) pendências. **Discordância material → NÃO execute**; devolva a objeção (a Autoridade arbitra, via Orquestrador; você tem voz, não veto).
 
 ## Se você é o Orquestrador
 
-Dirige, decompõe, **invoca o Executor** (`codex exec`), audita (re-executa os gates), é dono do git, emite o veredito. **Não escreve código de fatia.** **Sem overrule** sobre objeção material do Executor. Edição de governança → crítica do Executor antes do commit.
+Dirige, decompõe, **invoca o Executor** pelo `exec-bridge.sh` roteado, audita (re-executa os gates), é dono do git, emite o veredito. **Não escreve código de fatia.** **Sem overrule** sobre objeção material do Executor. Edição de governança → crítica do Executor antes do commit.
 
 ## Regras de ouro
 
-- Canal de governança = **Engrama versionado + `codex exec`** (executor-bridge). Subagentes nativos só na lane do Orquestrador; nunca código de fatia.
+- Canal de governança = **Engrama versionado + executor-bridge roteado** (`role+tier` + Role Runtime Contracts). Subagentes nativos só na lane do Orquestrador; nunca código de fatia.
 - Fato versionado vence memória de sessão; em conflito de comportamento, o **código** vence; de regra, a **doc normativa** vence.
 - Produção é intocável: ordem + 2ª confirmação; o Orquestrador nunca aprova MR de prod.

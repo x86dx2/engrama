@@ -8,6 +8,8 @@ VERSION
 .engrama/CLAUDE.md
 .claude/settings.json
 .markdownlint-cli2.yaml
+.engrama/memory/governance/role-runtime-contracts.md
+.engrama/memory/governance/roles/**
 .engrama/engine/githooks/**
 .engrama/engine/scripts/critique-gate.sh
 .engrama/engine/scripts/critique-gate-hook.sh

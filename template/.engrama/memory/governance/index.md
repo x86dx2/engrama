@@ -1,7 +1,7 @@
 ---
 type: governance
 status: active
-touches: [memory/governance/papeis-e-alcadas, memory/governance/cadeia-de-comando, memory/governance/modelo-operacional, memory/governance/continuidade-de-sessao]
+touches: [memory/governance/papeis-e-alcadas, memory/governance/role-runtime-contracts, memory/governance/cadeia-de-comando, memory/governance/modelo-operacional, memory/governance/continuidade-de-sessao]
 date: {{DATA}}
 source_refs:
   - CLAUDE.md
@@ -26,17 +26,19 @@ Governança **não** substitui o bootstrap do projeto. O **perfil inicial do pro
 ## Ordem mínima de leitura (qualquer agente novo)
 
 1. [[memory/governance/papeis-e-alcadas]] — qual é o seu papel, quem dirige quem, o que cada um pode fazer.
-2. [[memory/governance/cadeia-de-comando]] — protocolo Orquestrador ↔ Executor ↔ Autoridade + o **executor-bridge** (o Orquestrador invoca o Executor direto).
-3. [[memory/governance/modelo-operacional]] — os princípios inegociáveis.
-4. [[memory/governance/continuidade-de-sessao]] — abrir, trabalhar, encerrar, handoff.
-5. [[memory/project/bootstrap-do-projeto]] — se estiver `proposed`, a primeira tarefa é completar o bootstrap com a Autoridade.
-6. ADRs de processo [[memory/decisions/0001-governanca-tres-papeis]] … [[memory/decisions/0009-producao-intocavel-dupla-confirmacao]] + roteamento de modelo/effort [[memory/decisions/0010-roteamento-modelo-effort-do-executor]] + diff-binding verificável [[memory/decisions/0011-diff-binding-atestacao-verificavel]].
-7. Topo do [[log]] — estado factual recente.
+2. [[memory/governance/role-runtime-contracts]] — contratos normativos por papel e regras de runtime do bridge.
+3. [[memory/governance/cadeia-de-comando]] — protocolo Orquestrador ↔ Executor ↔ Autoridade + o **executor-bridge** (o Orquestrador invoca o Executor direto).
+4. [[memory/governance/modelo-operacional]] — os princípios inegociáveis.
+5. [[memory/governance/continuidade-de-sessao]] — abrir, trabalhar, encerrar, handoff.
+6. [[memory/project/bootstrap-do-projeto]] — se estiver `proposed`, a primeira tarefa é completar o bootstrap com a Autoridade.
+7. ADRs de processo [[memory/decisions/0001-governanca-tres-papeis]] … [[memory/decisions/0009-producao-intocavel-dupla-confirmacao]] + roteamento de modelo/effort [[memory/decisions/0010-roteamento-modelo-effort-do-executor]] + diff-binding verificável [[memory/decisions/0011-diff-binding-atestacao-verificavel]].
+8. Topo do [[log]] — estado factual recente.
 
 ## O que adaptar por projeto
 
 - **Executor-bridge automatizado:** o **Orquestrador invoca o Executor diretamente** pelo executor-bridge roteado (`role+tier`) e fecha o loop até staging sozinho, sem relay humano de rotina. Ver [[memory/decisions/0003-executor-bridge-orquestrador-invoca-executor]].
   > Template: defina o adapter/config runtime em `.engrama/engine/adapters/` e `.engrama/engine/config/models.conf`. O roteamento escolhe o *modelo*, nunca *se* o Executor participa.
+- **Role Runtime Contracts:** o runtime governado carrega contratos em `.engrama/memory/governance/roles/*.md`; gateways da raiz sao so ponteiros curtos, nao fonte normativa duplicada.
 - **Executor como freio ativo:** o Executor critica ativamente **toda ordem**; qualquer discordância material **escala à Autoridade** — o Orquestrador **não tem overrule**. Ver [[memory/decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]].
 - **Bootstrap do projeto no 1º startup:** o Orquestrador entrevista a Autoridade e fecha finalidade/stack/comandos/superfícies sensíveis em [[memory/project/bootstrap-do-projeto]] antes de trabalho substantivo.
 - **Tooling de swarm é subordinado**, não o modelo de coordenação. A tríade é o modelo; **qualquer tooling de swarm/orquestração de subagentes** (e seus mecanismos de mensagem) não é o canal de governança — o canal é o **engrama versionado + executor-bridge**.
