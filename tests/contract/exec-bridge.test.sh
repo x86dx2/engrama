@@ -26,9 +26,14 @@ new_repo() {
   git -C "$d" init -q -b main 2>/dev/null || { git -C "$d" init -q; git -C "$d" checkout -q -b main; }
   git -C "$d" config user.email t@t
   git -C "$d" config user.name t
-  mkdir -p "$d/.engrama/engine/scripts"
+  mkdir -p "$d/.engrama/engine/scripts" "$d/.engrama/engine/config" "$d/.engrama/engine/adapters" "$d/.engrama/evidence/usage"
   cp "$WRAPPER_SRC" "$d/.engrama/engine/scripts/exec-bridge.sh"
-  chmod +x "$d/.engrama/engine/scripts/exec-bridge.sh"
+  cp "$REPO_ROOT/.engrama/engine/scripts/model-router.sh" "$d/.engrama/engine/scripts/model-router.sh"
+  cp "$REPO_ROOT/.engrama/engine/adapters/codex.sh" "$d/.engrama/engine/adapters/codex.sh"
+  cp "$REPO_ROOT/.engrama/engine/config/models.conf" "$d/.engrama/engine/config/models.conf"
+  cp "$REPO_ROOT/.engrama/engine/config/subscriptions.conf" "$d/.engrama/engine/config/subscriptions.conf"
+  cp "$REPO_ROOT/.engrama/engine/config/prices.conf" "$d/.engrama/engine/config/prices.conf"
+  chmod +x "$d/.engrama/engine/scripts/exec-bridge.sh" "$d/.engrama/engine/scripts/model-router.sh" "$d/.engrama/engine/adapters/codex.sh"
   printf '%s' "$d"
 }
 
@@ -126,27 +131,40 @@ else
 fi
 check E1 CORRETO "$_r" "salva order+response em .engrama/evidence/transcripts/ com data fixa e copia verbatim da ordem"
 
+LEDGER_OUT="$(find "$R/.engrama/evidence/usage" -type f -name 'usage-*.jsonl' | sort | tail -1)"
 if grep -Fq 'codex-session: 019ef9f3-e493-7a71-a5b2-688716a1281a' "$RESPONSE_OUT" \
   && grep -Fq 'codex-session-source: stream' "$RESPONSE_OUT" \
-  && grep -Fq 'model: unknown' "$RESPONSE_OUT" \
+  && grep -Fq 'role: execute' "$RESPONSE_OUT" \
+  && grep -Fq 'tier: T2' "$RESPONSE_OUT" \
+  && grep -Fq 'adapter: codex' "$RESPONSE_OUT" \
+  && grep -Fq 'model: gpt-5.4' "$RESPONSE_OUT" \
+  && grep -Fq 'effort: medium' "$RESPONSE_OUT" \
+  && grep -Fq 'routing-mode: default' "$RESPONSE_OUT" \
   && grep -Fq 'sandbox: read-only' "$RESPONSE_OUT" \
   && grep -Fq 'label: demo' "$RESPONSE_OUT" \
   && grep -Fq 'PONG' "$RESPONSE_OUT" \
-  && ! grep -Fq "unknown field \`description\`" "$RESPONSE_OUT"; then
+  && ! grep -Fq "unknown field \`description\`" "$RESPONSE_OUT" \
+  && [ -f "$LEDGER_OUT" ] \
+  && grep -Fq '"schema":"engrama.usage.v1"' "$LEDGER_OUT" \
+  && grep -Fq '"role":"execute"' "$LEDGER_OUT" \
+  && grep -Fq '"tier":"T2"' "$LEDGER_OUT" \
+  && grep -Fq '"model":"gpt-5.4"' "$LEDGER_OUT" \
+  && grep -Fq '"total_tokens":2' "$LEDGER_OUT"; then
   _r=0
 else
   _r=1
 fi
-check E2 CORRETO "$_r" "schema real 0.142.0: transcript captura agent_message, ignora item.completed/error e preserva codex-session do stream"
+check E2 CORRETO "$_r" "schema real 0.142.0: transcript captura agent_message, registra rota execute/T2 e grava usage ledger"
 
 if printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-order.md' \
   && printf '%s\n' "$OUT" | grep -Fqx '.engrama/evidence/transcripts/2026-06-21-demo-response.md' \
-  && printf '%s\n' "$OUT" | grep -Fqx 'codex-session:019ef9f3-e493-7a71-a5b2-688716a1281a'; then
+  && printf '%s\n' "$OUT" | grep -Fqx 'codex-session:019ef9f3-e493-7a71-a5b2-688716a1281a' \
+  && printf '%s\n' "$OUT" | grep -Eq '^usage-ledger:.engrama/evidence/usage/usage-[0-9]{4}-[0-9]{2}[.]jsonl$'; then
   _r=0
 else
   _r=1
 fi
-check E3 CORRETO "$_r" "stdout imprime os dois caminhos salvos e a linha codex-session:<id>"
+check E3 CORRETO "$_r" "stdout imprime os dois caminhos salvos, codex-session:<id> e usage-ledger:<path>"
 
 REAL_EVENTS="$R/codex-real-0.142.0.jsonl"
 write_real_stream_events "$REAL_EVENTS"
@@ -171,6 +189,7 @@ write_legacy_stream_stub "$STUBLEG"
 RESPONSE_OUT_LEG="$RLEG/.engrama/evidence/transcripts/2026-06-21-legacy-response.md"
 if grep -Fq 'codex-session: sessao-legacy-321' "$RESPONSE_OUT_LEG" \
   && grep -Fq 'model: gpt-5.4-mini' "$RESPONSE_OUT_LEG" \
+  && grep -Fq 'configured-model: gpt-5.4' "$RESPONSE_OUT_LEG" \
   && grep -Fq 'RESPOSTA-LEGACY-CAPTURADA' "$RESPONSE_OUT_LEG"; then
   _r=0
 else
@@ -216,15 +235,15 @@ check E5 CORRETO "$_r" "falta de --order falha com mensagem clara"
 printf 'ORDEM\n' > "$R3/ordem.md"
 OUT4="$(
   cd "$R3" || exit 2
-  ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/engine/scripts/exec-bridge.sh --order "$R3/ordem.md" --date 2026-06-21 2>&1
+  ENGRAMA_CODEX_BIN="$STUB3" bash ./.engrama/engine/scripts/exec-bridge.sh --role critique --order "$R3/ordem.md" --date 2026-06-21 2>&1
 )"
 RC4=$?
-if [ "$RC4" -ne 0 ] && printf '%s\n' "$OUT4" | grep -Fq 'faltou --label'; then
+if [ "$RC4" -ne 0 ] && printf '%s\n' "$OUT4" | grep -Fq -- '--role e --tier devem ser informados juntos'; then
   _r=0
 else
   _r=1
 fi
-check E6 CORRETO "$_r" "falta de --label falha com mensagem clara"
+check E6 CORRETO "$_r" "role sem tier falha com mensagem clara"
 
 # E7: fallback do session file com session id no schema NOVO do stream.
 R7="$(new_repo)"
@@ -298,6 +317,39 @@ else
   _r=1
 fi
 check E8 CORRETO "$_r" "auto-edicao do exec-bridge em runtime nao quebra a run; bridge sai 0 e preserva transcripts"
+
+# E9: chamada nova do PRD — role/tier explicitos + prompt inline + label automatico.
+R9="$(new_repo)"
+STUB9="$R9/codex-stub.sh"
+write_real_stream_stub "$STUB9"
+OUT9="$(
+  cd "$R9" || exit 2
+  ENGRAMA_CODEX_BIN="$STUB9" bash ./.engrama/engine/scripts/exec-bridge.sh --role critique --tier T4 --sandbox read-only -- "ORDEM INLINE CRITICA"
+)"
+RC9=$?
+ORDER_REL9="$(printf '%s\n' "$OUT9" | sed -n '1p')"
+RESP_REL9="$(printf '%s\n' "$OUT9" | sed -n '2p')"
+ORDER_OUT9="$R9/$ORDER_REL9"
+RESP_OUT9="$R9/$RESP_REL9"
+LEDGER_OUT9="$(find "$R9/.engrama/evidence/usage" -type f -name 'usage-*.jsonl' | sort | tail -1)"
+if [ "$RC9" -eq 0 ] \
+  && [ -f "$ORDER_OUT9" ] \
+  && [ -f "$RESP_OUT9" ] \
+  && grep -Fq 'ORDEM INLINE CRITICA' "$ORDER_OUT9" \
+  && grep -Fq 'role: critique' "$RESP_OUT9" \
+  && grep -Fq 'tier: T4' "$RESP_OUT9" \
+  && grep -Fq 'model: gpt-5.5' "$RESP_OUT9" \
+  && grep -Fq 'effort: high' "$RESP_OUT9" \
+  && grep -Fq 'routing-mode: explicit' "$RESP_OUT9" \
+  && [ -f "$LEDGER_OUT9" ] \
+  && grep -Fq '"role":"critique"' "$LEDGER_OUT9" \
+  && grep -Fq '"tier":"T4"' "$LEDGER_OUT9" \
+  && grep -Fq '"model":"gpt-5.5"' "$LEDGER_OUT9"; then
+  _r=0
+else
+  _r=1
+fi
+check E9 CORRETO "$_r" "role/tier explicitos com prompt inline geram auto-label, transcript roteado e usage ledger"
 
 printf '%b\n' "$RESULTS"
 echo ""

@@ -15,7 +15,13 @@ ROOT_SESSION_CONTEXT="$REPO_ROOT/.engrama/engine/scripts/session-context.sh"
 ROOT_LINT="$REPO_ROOT/.engrama/engine/scripts/lint.sh"
 ROOT_DIFF_HASH="$REPO_ROOT/.engrama/engine/scripts/engrama-diff-hash.sh"
 ROOT_EXEC_BRIDGE="$REPO_ROOT/.engrama/engine/scripts/exec-bridge.sh"
+ROOT_MODEL_ROUTER="$REPO_ROOT/.engrama/engine/scripts/model-router.sh"
+ROOT_USAGE_REPORT="$REPO_ROOT/.engrama/engine/scripts/usage-report.sh"
 ROOT_CI_GATE="$REPO_ROOT/.engrama/engine/scripts/critique-gate-ci.sh"
+ROOT_CODEX_ADAPTER="$REPO_ROOT/.engrama/engine/adapters/codex.sh"
+ROOT_MODELS_CONF="$REPO_ROOT/.engrama/engine/config/models.conf"
+ROOT_SUBSCRIPTIONS_CONF="$REPO_ROOT/.engrama/engine/config/subscriptions.conf"
+ROOT_PRICES_CONF="$REPO_ROOT/.engrama/engine/config/prices.conf"
 ROOT_MARKDOWNLINT="$REPO_ROOT/.markdownlint-cli2.yaml"
 ROOT_SETTINGS="$REPO_ROOT/.claude/settings.json"
 TEMPLATE_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate.sh"
@@ -24,7 +30,13 @@ TEMPLATE_SESSION_CONTEXT="$REPO_ROOT/template/.engrama/engine/scripts/session-co
 TEMPLATE_LINT="$REPO_ROOT/template/.engrama/engine/scripts/lint.sh"
 TEMPLATE_DIFF_HASH="$REPO_ROOT/template/.engrama/engine/scripts/engrama-diff-hash.sh"
 TEMPLATE_EXEC_BRIDGE="$REPO_ROOT/template/.engrama/engine/scripts/exec-bridge.sh"
+TEMPLATE_MODEL_ROUTER="$REPO_ROOT/template/.engrama/engine/scripts/model-router.sh"
+TEMPLATE_USAGE_REPORT="$REPO_ROOT/template/.engrama/engine/scripts/usage-report.sh"
 TEMPLATE_CI_GATE="$REPO_ROOT/template/.engrama/engine/scripts/critique-gate-ci.sh"
+TEMPLATE_CODEX_ADAPTER="$REPO_ROOT/template/.engrama/engine/adapters/codex.sh"
+TEMPLATE_MODELS_CONF="$REPO_ROOT/template/.engrama/engine/config/models.conf"
+TEMPLATE_SUBSCRIPTIONS_CONF="$REPO_ROOT/template/.engrama/engine/config/subscriptions.conf"
+TEMPLATE_PRICES_CONF="$REPO_ROOT/template/.engrama/engine/config/prices.conf"
 TEMPLATE_MARKDOWNLINT="$REPO_ROOT/template/.markdownlint-cli2.yaml"
 TEMPLATE_SETTINGS="$REPO_ROOT/template/.claude/settings.json"
 TMPDIR_SYNC=""
@@ -38,9 +50,9 @@ need_file() {
   [ -f "$1" ] || fail "arquivo obrigatorio ausente: $1"
 }
 
-section_before_executor_cmd() {
+section_before_critique_route() {
   awk '
-    /^EXECUTOR_CMD=/{ exit }
+    /^CRITIQUE_ROLE=/{ exit }
     { print }
   ' "$1"
 }
@@ -64,8 +76,8 @@ section_after_classify() {
 
 emit_template_gate_vars() {
   cat <<'EOF'
-EXECUTOR_CMD="{{EXECUTOR_CMD}}"            # ex.: "codex exec"
-CRITIQUE_MODEL="{{MODELO_CRITICA}}"        # ex.: "gpt-5.5"
+CRITIQUE_ROLE="critique"
+CRITIQUE_TIER="T4"
 EOF
 }
 
@@ -85,7 +97,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/memory/governance/*|.engrama/memory/decisions/*|.engrama/memory/specs/*|.engrama/memory/project/*|.engrama/evidence/qa/*) addcat governance ;;
     .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*|.engrama/memory/workflows/*) addcat governance ;;
-    .engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/adapters/*.sh|.engrama/engine/config/*.conf|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
@@ -123,7 +135,7 @@ write_if_changed() {
 compose_template_gate() {
   local tmpdir="$1" out="$2"
 
-  section_before_executor_cmd "$ROOT_GATE" > "$tmpdir/prefix"
+  section_before_critique_route "$ROOT_GATE" > "$tmpdir/prefix"
   section_between_repo_root_and_classify_comment "$ROOT_GATE" > "$tmpdir/middle"
   section_after_classify "$ROOT_GATE" > "$tmpdir/tail"
 
@@ -140,6 +152,17 @@ compose_template_gate() {
   } > "$out"
 }
 
+compose_template_models_conf() {
+  local out="$1"
+  sed \
+    -e 's/^ENGRAMA_T1_MODEL=.*/ENGRAMA_T1_MODEL={{MODELO_EXECUTOR_LEVE}}/' \
+    -e 's/^ENGRAMA_T2_MODEL=.*/ENGRAMA_T2_MODEL={{MODELO_EXECUTOR_PESADO}}/' \
+    -e 's/^ENGRAMA_T3_MODEL=.*/ENGRAMA_T3_MODEL={{MODELO_EXECUTOR_PESADO}}/' \
+    -e 's/^ENGRAMA_T4_MODEL=.*/ENGRAMA_T4_MODEL={{MODELO_CRITICA}}/' \
+    -e 's/^ENGRAMA_T4_PLUS_MODEL=.*/ENGRAMA_T4_PLUS_MODEL={{MODELO_CRITICA}}/' \
+    "$ROOT_MODELS_CONF" > "$out"
+}
+
 main() {
   need_file "$ROOT_GATE"
   need_file "$ROOT_HOOK"
@@ -147,7 +170,13 @@ main() {
   need_file "$ROOT_LINT"
   need_file "$ROOT_DIFF_HASH"
   need_file "$ROOT_EXEC_BRIDGE"
+  need_file "$ROOT_MODEL_ROUTER"
+  need_file "$ROOT_USAGE_REPORT"
   need_file "$ROOT_CI_GATE"
+  need_file "$ROOT_CODEX_ADAPTER"
+  need_file "$ROOT_MODELS_CONF"
+  need_file "$ROOT_SUBSCRIPTIONS_CONF"
+  need_file "$ROOT_PRICES_CONF"
   need_file "$ROOT_MARKDOWNLINT"
   need_file "$ROOT_SETTINGS"
   need_file "$TEMPLATE_GATE"
@@ -155,6 +184,7 @@ main() {
   need_file "$TEMPLATE_SESSION_CONTEXT"
   need_file "$TEMPLATE_LINT"
   need_file "$TEMPLATE_DIFF_HASH"
+  need_file "$TEMPLATE_EXEC_BRIDGE"
   need_file "$TEMPLATE_CI_GATE"
   need_file "$TEMPLATE_MARKDOWNLINT"
   need_file "$TEMPLATE_SETTINGS"
@@ -168,7 +198,13 @@ main() {
   cp "$ROOT_LINT" "$TMPDIR_SYNC/lint.sh"
   cp "$ROOT_DIFF_HASH" "$TMPDIR_SYNC/engrama-diff-hash.sh"
   cp "$ROOT_EXEC_BRIDGE" "$TMPDIR_SYNC/exec-bridge.sh"
+  cp "$ROOT_MODEL_ROUTER" "$TMPDIR_SYNC/model-router.sh"
+  cp "$ROOT_USAGE_REPORT" "$TMPDIR_SYNC/usage-report.sh"
   cp "$ROOT_CI_GATE" "$TMPDIR_SYNC/critique-gate-ci.sh"
+  cp "$ROOT_CODEX_ADAPTER" "$TMPDIR_SYNC/codex.sh"
+  compose_template_models_conf "$TMPDIR_SYNC/models.conf"
+  cp "$ROOT_SUBSCRIPTIONS_CONF" "$TMPDIR_SYNC/subscriptions.conf"
+  cp "$ROOT_PRICES_CONF" "$TMPDIR_SYNC/prices.conf"
   cp "$ROOT_MARKDOWNLINT" "$TMPDIR_SYNC/markdownlint-cli2.yaml"
   cp "$ROOT_SETTINGS" "$TMPDIR_SYNC/settings.json"
 
@@ -178,11 +214,17 @@ main() {
   write_if_changed "$TMPDIR_SYNC/lint.sh" "$TEMPLATE_LINT"
   write_if_changed "$TMPDIR_SYNC/engrama-diff-hash.sh" "$TEMPLATE_DIFF_HASH"
   write_if_changed "$TMPDIR_SYNC/exec-bridge.sh" "$TEMPLATE_EXEC_BRIDGE"
+  write_if_changed "$TMPDIR_SYNC/model-router.sh" "$TEMPLATE_MODEL_ROUTER"
+  write_if_changed "$TMPDIR_SYNC/usage-report.sh" "$TEMPLATE_USAGE_REPORT"
   write_if_changed "$TMPDIR_SYNC/critique-gate-ci.sh" "$TEMPLATE_CI_GATE"
+  write_if_changed "$TMPDIR_SYNC/codex.sh" "$TEMPLATE_CODEX_ADAPTER"
+  write_if_changed "$TMPDIR_SYNC/models.conf" "$TEMPLATE_MODELS_CONF"
+  write_if_changed "$TMPDIR_SYNC/subscriptions.conf" "$TEMPLATE_SUBSCRIPTIONS_CONF"
+  write_if_changed "$TMPDIR_SYNC/prices.conf" "$TEMPLATE_PRICES_CONF"
   write_if_changed "$TMPDIR_SYNC/markdownlint-cli2.yaml" "$TEMPLATE_MARKDOWNLINT"
   write_if_changed "$TMPDIR_SYNC/settings.json" "$TEMPLATE_SETTINGS"
 
-  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" "$TEMPLATE_EXEC_BRIDGE" "$TEMPLATE_CI_GATE" 2>/dev/null || true
+  chmod +x "$TEMPLATE_GATE" "$TEMPLATE_HOOK" "$TEMPLATE_SESSION_CONTEXT" "$TEMPLATE_LINT" "$TEMPLATE_DIFF_HASH" "$TEMPLATE_EXEC_BRIDGE" "$TEMPLATE_MODEL_ROUTER" "$TEMPLATE_USAGE_REPORT" "$TEMPLATE_CI_GATE" "$TEMPLATE_CODEX_ADAPTER" 2>/dev/null || true
 }
 
 main "$@"

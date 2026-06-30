@@ -135,6 +135,21 @@ else
 fi
 check C11 CORRETO "$_r" "bootstrap instala .engrama/engine/scripts/exec-bridge.sh e .engrama/evidence/transcripts/README.md no projeto-alvo"
 
+# C11C: bootstrap instala router/report/adapter/config e substitui modelos no config.
+if [ -x "$T8/.engrama/engine/scripts/model-router.sh" ] \
+  && [ -x "$T8/.engrama/engine/scripts/usage-report.sh" ] \
+  && [ -x "$T8/.engrama/engine/adapters/codex.sh" ] \
+  && [ -f "$T8/.engrama/evidence/usage/.gitkeep" ] \
+  && grep -Fq 'ENGRAMA_T1_MODEL=gpt-5.4-mini' "$T8/.engrama/engine/config/models.conf" \
+  && grep -Fq 'ENGRAMA_T2_MODEL=gpt-5.4' "$T8/.engrama/engine/config/models.conf" \
+  && grep -Fq 'ENGRAMA_T4_MODEL=gpt-5.5' "$T8/.engrama/engine/config/models.conf" \
+  && ! grep -rq '{{MODELO_' "$T8/.engrama/engine/config" 2>/dev/null; then
+  _r=0
+else
+  _r=1
+fi
+check C11C CORRETO "$_r" "bootstrap instala router/report/adapter/config e models.conf sem placeholders crus"
+
 # C11B: release-gate repo-central-only nao e distribuido ao adotante.
 if [ ! -e "$T8/bin/release-gate.sh" ] \
   && [ ! -e "$T8/.engrama/release-surface.manifest" ] \

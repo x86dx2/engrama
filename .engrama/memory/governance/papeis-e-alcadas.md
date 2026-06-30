@@ -22,7 +22,7 @@ Operam por **validação cruzada**: o Executor não se autoaprova; o Orquestrado
 | Papel canônico | Agente concreto |
 |----------------|-----------------|
 | Orquestrador / Auditor / QA / Arquiteto / Guardião de Produção | **Claude (Claude Code)** |
-| Executor Crítico | **Codex** (codex exec, modelo por tier) |
+| Executor Crítico | **Codex** (via executor-bridge, modelo por `role+tier`) |
 | Autoridade de Mudança | **Humano (preencher)** |
 
 > Mapeamento **mutável**: trocar quem ocupa cada papel não invalida o modelo — valem as funções e a matriz.
@@ -31,13 +31,13 @@ Operam por **validação cruzada**: o Executor não se autoaprova; o Orquestrado
 
 ## Camada de adaptadores de vendor
 
-`EXECUTOR_CMD` (neste repo, `codex exec`), os ids de modelo/tier e o `.claude/settings.json` sao o **adaptador concreto**, trocavel. O nucleo (`Orquestrador` / `Executor` / `Autoridade`, alçadas, handshake e gate) continua **vendor-agnostico**. Quando um comando ou id de modelo aparecer na prosa, leia como configuracao concreta ou exemplo do adaptador atual — nao como namespace universal verificado.
+`.engrama/engine/adapters/*`, `.engrama/engine/config/models.conf`, os ids de modelo/tier e o `.claude/settings.json` sao a **camada concreta de adapter/runtime**, trocavel. Neste repo, o adapter ativo é Codex. O nucleo (`Orquestrador` / `Executor` / `Autoridade`, alçadas, handshake e gate) continua **vendor-agnostico**. Quando um comando ou id de modelo aparecer na prosa, leia como configuracao concreta ou exemplo do adaptador atual — nao como namespace universal verificado.
 
 ## Como o Orquestrador aciona o Executor (executor-bridge)
 
-O Orquestrador **invoca o Executor diretamente** via codex exec (sem relay humano de rotina), passando a **ordem mínima** (ver [[memory/governance/continuidade-de-sessao]]). O **roteamento pesado/leve** define o **modelo do Executor** (leve → tier leve configurado; pesado → tier pesado configurado; confirme os ids reais no adaptador em uso), nunca se o Executor participa. O Executor devolve a **resposta crítica** (leitura/crítica/ajustes/execução/evidências/pendências). O Orquestrador **sempre audita** antes de comitar. Detalhe em [[memory/decisions/0003-executor-bridge-orquestrador-invoca-executor]].
+O Orquestrador **invoca o Executor diretamente** pelo executor-bridge (sem relay humano de rotina), passando a **ordem mínima** (ver [[memory/governance/continuidade-de-sessao]]). O **roteamento `role+tier`** define adapter, provider, modelo e effort do Executor (ver [[memory/decisions/0016-runtime-model-router-usage-ledger]]), nunca se o Executor participa. O Executor devolve a **resposta crítica** (leitura/crítica/ajustes/execução/evidências/pendências). O Orquestrador **sempre audita** antes de comitar. Detalhe em [[memory/decisions/0003-executor-bridge-orquestrador-invoca-executor]].
 
-> Nota: qualquer tooling de swarm/orquestração de subagentes é **subordinado**, não o canal de governança. O canal de governança é **o engrama versionado + codex exec (executor-bridge)**.
+> Nota: qualquer tooling de swarm/orquestração de subagentes é **subordinado**, não o canal de governança. O canal de governança é **o engrama versionado + executor-bridge**.
 
 ## Matriz de alçadas
 
@@ -47,7 +47,7 @@ Legenda: **D** dirige/delega · **E** executa · **C** critica/contesta · **R**
 |------|--------------|----------|------------|------------|
 | Leitura e análise (read-only) | E | E | I | ambos inspecionam tudo; sem aprovação |
 | Diagnóstico, decomposição da fatia, critérios de aceite | **D** | **C** | I | Orquestrador define; Executor reage criticamente |
-| Ordem operacional + invocação do Executor (codex exec) | **E/D** | **C** | I | Orquestrador monta a ordem e chama o Executor; **Executor critica ativamente antes de executar** |
+| Ordem operacional + invocação do Executor (executor-bridge) | **E/D** | **C** | I | Orquestrador monta a ordem e chama o Executor; **Executor critica ativamente antes de executar** |
 | Escrita de código da fatia | R | **E** | I | **Executor escreve**; Orquestrador só toca código p/ auditar/corrigir pontual (typo/lint/1–2 linhas) |
 | **Discordância material do Executor sobre a ordem** | **R** | **C** | **A/AA** | Executor não executa, devolve objeção+justificativas; **Orquestrador apresenta à Autoridade**; Autoridade decide (Orquestrador **sem overrule**). "Material" = 4 gatilhos (perda de dados/quebra do fluxo/irreversível/contradição). **Override = AA** (2ª confirmação reconhecendo o gatilho); objeção sempre logada. Anti-loop: após 2 rodadas idênticas, só waiver/reformular/bloquear |
 | Break-glass: código sem Executor disponível | **E** *(escopo mínimo)* | — | **A** | default = código **aguarda**; exceção só sob ordem da Autoridade + log + revisão retroativa do Executor |

@@ -35,10 +35,10 @@ Governança **não** substitui o bootstrap do projeto. O **perfil inicial do pro
 
 ## O que adaptar por projeto
 
-- **Executor-bridge automatizado:** o **Orquestrador invoca o Executor diretamente** (`{{EXECUTOR_CMD}}`) e fecha o loop até staging sozinho, sem relay humano de rotina. Ver [[memory/decisions/0003-executor-bridge-orquestrador-invoca-executor]].
-  > Template: defina o comando concreto de invocação do Executor (`{{EXECUTOR_CMD}}`) e o roteamento de modelos do seu projeto (`{{MODELO_EXECUTOR_PESADO}}` / `{{MODELO_EXECUTOR_LEVE}}` como exemplo/configuracao concreta; confirme os ids reais no adaptador). O roteamento escolhe o *modelo*, nunca *se* o Executor participa.
+- **Executor-bridge automatizado:** o **Orquestrador invoca o Executor diretamente** pelo executor-bridge roteado (`role+tier`) e fecha o loop até staging sozinho, sem relay humano de rotina. Ver [[memory/decisions/0003-executor-bridge-orquestrador-invoca-executor]].
+  > Template: defina o adapter/config runtime em `.engrama/engine/adapters/` e `.engrama/engine/config/models.conf`. O roteamento escolhe o *modelo*, nunca *se* o Executor participa.
 - **Executor como freio ativo:** o Executor critica ativamente **toda ordem**; qualquer discordância material **escala à Autoridade** — o Orquestrador **não tem overrule**. Ver [[memory/decisions/0004-executor-critica-ativa-discordancia-escala-a-autoridade]].
 - **Bootstrap do projeto no 1º startup:** o Orquestrador entrevista a Autoridade e fecha finalidade/stack/comandos/superfícies sensíveis em [[memory/project/bootstrap-do-projeto]] antes de trabalho substantivo.
-- **Tooling de swarm é subordinado**, não o modelo de coordenação. A tríade é o modelo; **qualquer tooling de swarm/orquestração de subagentes** (e seus mecanismos de mensagem) não é o canal de governança — o canal é o **engrama versionado + `{{EXECUTOR_CMD}}` (executor-bridge)**.
+- **Tooling de swarm é subordinado**, não o modelo de coordenação. A tríade é o modelo; **qualquer tooling de swarm/orquestração de subagentes** (e seus mecanismos de mensagem) não é o canal de governança — o canal é o **engrama versionado + executor-bridge**.
 - **Gates de produção/staging/CI inativos até existir deploy.** Marcados na matriz; ativam quando o ambiente existir.
   > Template: decida quais gates (produção, staging, CI) já existem no seu projeto e ative-os na matriz de alçadas; mantenha inativos os ambientes que ainda não foram provisionados.

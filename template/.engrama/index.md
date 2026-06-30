@@ -35,7 +35,8 @@ Catálogo navegável. Ler primeiro ao abrir o projeto: [[memory/governance/index
 - [[memory/specs/licao-aprendida]] — loop falha→regra (a memória que compõe).
 
 ## Processo
-- [[evidence/qa/criticas-do-executor]] — ledger de críticas do Executor ({{MODELO_CRITICA}}) + gate mecânico de commit (ADR 0006/0010).
+- [[evidence/qa/criticas-do-executor]] — ledger de críticas do Executor (modelo configurado de crítica) + gate mecânico de commit (ADR 0006/0010).
+- `evidence/usage/` — ledger JSONL local de uso/billing gerado pelo executor-bridge.
 
 ## Páginas do seu projeto (domínio · roadmap · QA · gaps)
 

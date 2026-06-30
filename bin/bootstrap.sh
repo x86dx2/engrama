@@ -308,9 +308,9 @@ Bootstrap concluído com os defaults:
 - CMD_E2E=$CMD_E2E
 - EXECUTOR=$EXECUTOR
 - EXECUTOR_CMD=$EXECUTOR_CMD  (adaptador concreto do ambiente)
-- MODELO_CRITICA=$MODELO_CRITICA  (EXEMPLO — confirme o id real contra o seu codex exec)
-- MODELO_EXECUTOR_PESADO=$MODELO_EXECUTOR_PESADO  (EXEMPLO — confirme o id real contra o seu codex exec)
-- MODELO_EXECUTOR_LEVE=$MODELO_EXECUTOR_LEVE  (EXEMPLO — confirme o id real contra o seu codex exec)
+- MODELO_CRITICA=$MODELO_CRITICA  (EXEMPLO — gravado em .engrama/engine/config/models.conf; confirme no adapter real)
+- MODELO_EXECUTOR_PESADO=$MODELO_EXECUTOR_PESADO  (EXEMPLO — gravado em .engrama/engine/config/models.conf; confirme no adapter real)
+- MODELO_EXECUTOR_LEVE=$MODELO_EXECUTOR_LEVE  (EXEMPLO — gravado em .engrama/engine/config/models.conf; confirme no adapter real)
 
 Próximo passo:
 - adaptar .engrama/engine/scripts/critique-gate.sh ao domínio do projeto;

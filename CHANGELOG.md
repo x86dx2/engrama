@@ -6,6 +6,31 @@ Todas as mudanças relevantes deste pack. Formato baseado em
 
 ## [Não lançado]
 
+## [0.3.0] - 2026-06-30
+
+### Adicionado
+- **Runtime model router + usage ledger (ADR 0016):** `model-router.sh` resolve
+  `role+tier -> adapter/provider/model/effort` a partir de `engine/config/models.conf`,
+  com pisos mecânicos para crítica/auditoria/autoridade e falha explícita quando falta
+  configuração.
+- **Adapter Codex explícito:** `engine/adapters/codex.sh` encapsula a chamada
+  `codex exec --json`, isolando a sintaxe vendor-specific do núcleo do bridge.
+- **Observabilidade local de uso/billing:** `exec-bridge.sh` grava
+  `evidence/usage/usage-YYYY-MM.jsonl` (`schema=engrama.usage.v1`) com rota, sessão,
+  transcript, duração, tokens quando disponíveis, turns, plano e custo estimado quando
+  configurável; `usage-report.sh` sumariza por mês/modelo/papel/tier/adapter.
+- **Configs runtime portáveis:** `models.conf`, `subscriptions.conf` e `prices.conf`
+  entram no pack/template; preços vazios geram `unknown`, não falha.
+
+### Mudado
+- **Executor-bridge agora é sempre roteado:** ausência de `--role/--tier` vira default
+  explícito `execute/T2` registrado em transcript/ledger; `--role` sem `--tier` falha.
+- **Critique gate orienta pelo bridge/router:** a mensagem de bloqueio sugere
+  `exec-bridge.sh --role critique --tier T4 --sandbox read-only`, não `codex exec -m`.
+- **Template/bootstrap/sync:** projetos novos recebem router, report, adapter, configs e
+  `evidence/usage/`; `models.conf` no template preserva placeholders substituídos pelo
+  bootstrap.
+
 ## [0.2.0] - 2026-06-24
 
 Cobre todo o intervalo desde `v0.1.0` (PRs #6–#15 + as fatias da disciplina de release desta branch).

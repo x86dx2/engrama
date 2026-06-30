@@ -7,9 +7,9 @@ source_refs:
   - .engrama/engine/scripts/critique-gate.sh
 ---
 
-# Ledger de críticas do Executor (gpt-5.5) — gate de superfície sensível
+# Ledger de críticas do Executor (modelo configurado de crítica) — gate de superfície sensível
 
-Registro **append-only** de toda **crítica do Executor no papel de crítica** (modelo independente, read-only) exigida pelo **ADR 0006 item 7** e pelo **ADR 0010**.
+Registro **append-only** de toda **crítica do Executor no papel de crítica** (modelo independente, read-only) exigida pelo **ADR 0006 item 7**, pelo **ADR 0010** e roteada em runtime pelo **ADR 0016**.
 
 **Verificado mecanicamente** por `.engrama/engine/scripts/critique-gate.sh` (git pre-commit + PreToolUse do harness). Um commit que toca superfície sensível é **bloqueado** se faltar, para CADA categoria tocada, uma entrada CONCLUÍDA referenciando a **branch**. O gate lê a versão **staged/HEAD** do ledger (não o working-tree), rejeita `<pendente>` e bloqueia `objeção` sem `waiver`.
 
@@ -46,6 +46,11 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 > Cada entrada precisa ter os 4 campos (incluindo `<ref>`). Linhas que não casam a gramática (bullets `-`, etc.) são ignoradas pelo gate. O `waiver` ainda é detectado por substring **dentro do campo 3** — escreva-o no positivo (`waiver <quem/quando>`).
 
 ---
+
+## [2026-06-30] feat-runtime-model-router-usage-ledger | [governance][gate][contract] runtime model-router + usage ledger local (ADR 0016 / release 0.3.0) | waiver Autoridade 2026-06-30 (excecao: Codex executou sem Orquestrador separado) | sha256:209833bc720f01219dd53875246175950e7c196047ea1a6016c16e9b62ce33e0
+- **Contexto:** a Autoridade aprovou explicitamente no chat a implementacao direta por Codex porque nao havia Claude disponivel. Isto e uma excecao operacional consciente; nao e apresentado como critica independente.
+- **Escopo coberto pelo hash:** router/config/adapter/bridge usage ledger, gate/template/bootstrap/sync, ADR 0016, docs normativos, release 0.3.0 e testes associados.
+- **Evidencia de QA:** `tests/run.sh` verde; `lint.sh` verde; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` verde; `release-gate --mode warn` verde; rechecks focados de bridge/sync/release-surface/bootstrap verdes.
 
 ## [2026-06-20] main | [governance][gate][contract] ativacao da instancia viva do Engrama e template bootstrapavel | dispensada | Autoridade no chat em 2026-06-20
 - A Autoridade ordenou ativar o Engrama como repositório central, vivo, e fonte do template para novos projetos.

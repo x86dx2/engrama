@@ -16,7 +16,7 @@
 # classify() + parsing do ledger — ver ADR 0006.
 #
 # ── COMO ADAPTAR AO SEU PROJETO ───────────────────────────────────────────────
-# 1. Ajuste as variáveis EXECUTOR_CMD / CRITIQUE_MODEL abaixo.
+# 1. Ajuste .engrama/engine/config/models.conf para o seu adapter/modelo de crítica.
 # 2. No bloco "CONFIG DO PROJETO" (a função classify), mapear os ARQUIVOS/GLOBS
 #    sensíveis do SEU código para categorias e OBRIGATORIO antes do 1o commit
 #    de codigo de dominio. O que NAO estiver no `case` passa SEM revisao por este
@@ -27,9 +27,9 @@
 # ──────────────────────────────────────────────────────────────────────────────
 set -u
 
-# >>> TEMPLATE: preencha com o seu executor/modelo de crítica <<<
-EXECUTOR_CMD="{{EXECUTOR_CMD}}"            # ex.: "codex exec"
-CRITIQUE_MODEL="{{MODELO_CRITICA}}"        # ex.: "gpt-5.5"
+# Rota canônica de crítica: o modelo vem do model-router, não deste gate.
+CRITIQUE_ROLE="critique"
+CRITIQUE_TIER="T4"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 cd "$REPO_ROOT" || exit 0
 
@@ -100,7 +100,7 @@ classify() {
     .engrama/CLAUDE.md|.engrama/index.md|.engrama/log.md) addcat governance ;;
     .engrama/memory/governance/*|.engrama/memory/decisions/*|.engrama/memory/specs/*|.engrama/memory/project/*|.engrama/evidence/qa/*) addcat governance ;;
     .engrama/memory/gaps/*|.engrama/memory/roadmap/*|.engrama/memory/domain/*|.engrama/memory/workflows/*) addcat governance ;;
-    .engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
+    .engrama/VERSION|.engrama/engine/scripts/*.sh|.engrama/engine/adapters/*.sh|.engrama/engine/config/*.conf|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
     tests/gate/*|*/tests/gate/*) addcat gate ;;
     tests/contract/*|*/tests/contract/*) addcat contract ;;
@@ -299,8 +299,8 @@ done
   echo "    $CURRENT_DIFF_HASH"
   echo "Fonte unica do fingerprint:"
   echo "  bash ./.engrama/engine/scripts/engrama-diff-hash.sh"
-  echo "Rode a crítica (read-only, modelo independente):"
-  echo "  $EXECUTOR_CMD -m $CRITIQUE_MODEL \"<ordem de crítica>\"   (sem auto-aplicar)"
+  echo "Rode a crítica (read-only, via bridge/router; sem auto-aplicar):"
+  echo "  bash ./.engrama/engine/scripts/exec-bridge.sh --role $CRITIQUE_ROLE --tier $CRITIQUE_TIER --sandbox read-only -- \"<ordem de crítica>\""
   echo "──────────────────────────────────────────────────────────────"
 } >&2
 exit 2

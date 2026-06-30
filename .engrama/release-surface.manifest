@@ -15,6 +15,10 @@ VERSION
 .engrama/engine/scripts/lint.sh
 .engrama/engine/scripts/engrama-diff-hash.sh
 .engrama/engine/scripts/exec-bridge.sh
+.engrama/engine/scripts/model-router.sh
+.engrama/engine/scripts/usage-report.sh
 .engrama/engine/scripts/critique-gate-ci.sh
+.engrama/engine/adapters/**
+.engrama/engine/config/**
 bin/bootstrap.sh
 bin/install.sh

@@ -63,6 +63,7 @@ expected_surface_set() {
       "VERSION" \
       ".engrama/CLAUDE.md" \
       ".engrama/engine/githooks/pre-commit" \
+      ".engrama/engine/config/models.conf" \
       "bin/bootstrap.sh" \
       "bin/install.sh"
   } | sort -u

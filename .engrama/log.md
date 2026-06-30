@@ -7,6 +7,15 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] feat | runtime model-router + usage ledger local (ADR 0016) — release 0.3.0
+- Branch `feat-runtime-model-router-usage-ledger`. **Excecao aprovada pela Autoridade no chat:** sem Claude disponivel, Codex executou diretamente a fatia; sem claim de critica independente. A entrada de gate desta fatia sera waiver/diff-binding explicito, nao "confirmo" falso.
+- **Objetivo:** transformar a politica de modelos da ADR 0010 em runtime observavel: `role+tier -> adapter/provider/model/effort`, com adapter Codex explicito e ledger local de uso/billing.
+- **Implementado:** `.engrama/engine/config/{models,subscriptions,prices}.conf`; `.engrama/engine/scripts/model-router.sh`; `.engrama/engine/adapters/codex.sh`; `exec-bridge.sh` roteado (default explicito `execute/T2` quando role/tier ausentes; prompt inline; transcript com rota; usage ledger JSONL `engrama.usage.v1`); `usage-report.sh`; `evidence/usage/.gitkeep`.
+- **Gate/contract/template:** critique-gate orienta `exec-bridge.sh --role critique --tier T4 --sandbox read-only`; `classify()` cobre scripts/adapters/config; `sync-template.sh` sincroniza router/report/adapter/config e preserva placeholders em `template/.engrama/engine/config/models.conf`; bootstrap/install substituem `.conf`, instalam usage e smokeiam novos scripts.
+- **Governanca/docs:** ADR [[memory/decisions/0016-runtime-model-router-usage-ledger]] ativa; ADR 0010 marcada como runtime; schema `.engrama/CLAUDE.md`, specs e governanca atualizados para bridge/router; `VERSION` 0.2.0 -> 0.3.0 e `CHANGELOG.md` com 0.3.0. O `docs/PRD.md` foi tratado como insumo local, nao canonico; a canonizacao duravel e a ADR 0016.
+- **QA executado:** `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0; `shellcheck bin/*.sh .engrama/engine/scripts/*.sh .engrama/engine/adapters/*.sh` -> 0; `bash bin/release-gate.sh --mode warn` -> 0; rechecks focados `exec-bridge`, `sync`, `release-surface`, `bootstrap` verdes.
+- **PROXIMO:** registrar waiver/diff-binding no ledger de criticas para esta excecao aprovada; rodar lint/gate final; commit/PR. Pos-merge: tag `v0.3.0` (alcada da Autoridade).
+
 ## [2026-06-27] decision | PROPOSTA (proposed) — pagina workflow fluxo-operacional (fluxograma do engrama) + governa namespace memory/workflows/
 - Branch `feat/workflow-fluxo-operacional`. A Autoridade pediu o fluxograma do engrama "com todos os caminhos" e escolheu versiona-lo como **pagina workflow no .engrama** (passar pelo gate).
 - **Conteudo:** `.engrama/memory/workflows/fluxo-operacional.md` (type workflow, `proposed`) com 2 Mermaid inline (fluxo principal + ingestao 2 fases) + legenda + assets (`engrama-fluxo.{mmd,png}`, `engrama-ingest.{mmd,png}`). E **visualizacao** dos normativos (cadeia/modelo/continuidade) — em divergencia prevalece o normativo.

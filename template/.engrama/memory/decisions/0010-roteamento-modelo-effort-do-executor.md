@@ -85,3 +85,7 @@ A cada **20–30 chamadas** (ou fim de ciclo), medir e logar: **distribuição T
 - Custo/latência por chamada maior que "conservador-pra-baixo", mas qualidade máxima por chamada — alinhado a "errar sai caro". Paralelização ganha wall-clock; economia vem do T1 (trivial → modelo leve).
 - "Risco define piso" + "xhigh só por gatilho" mantêm a postura **conservador-pra-cima sem degenerar** em T4-universal.
 - A política **se auto-aplica**: a crítica desta própria ADR (e da governança inicial) já roda sob ela — no papel de crítica, modelo máximo (`{{MODELO_CRITICA}}`), pegando contradições internas e guardrails ausentes antes do commit.
+
+## Status runtime
+
+O template inclui runtime de roteamento em `.engrama/engine/scripts/model-router.sh`, `.engrama/engine/config/models.conf` e `.engrama/engine/adapters/`. Os ids de modelo continuam sendo configuração local, não verdade universal.
