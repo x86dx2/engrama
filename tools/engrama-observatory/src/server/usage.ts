@@ -87,6 +87,9 @@ function normalizeRecord(raw: Record<string, unknown>): UsageRecord {
     allocated_subscription_cost_usd: asNullableNumber(
       raw.allocated_subscription_cost_usd,
     ),
+    governance_mode: asNullableString(raw.governance_mode),
+    role_contract: asNullableString(raw.role_contract),
+    role_contract_hash: asNullableString(raw.role_contract_hash),
     routing_reason: asNullableString(raw.routing_reason),
     transcript_path: asNullableString(raw.transcript_path),
     codex_session: asNullableString(raw.codex_session),

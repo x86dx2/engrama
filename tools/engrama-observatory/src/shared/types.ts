@@ -24,6 +24,9 @@ export type UsageRecord = {
   turns: number | null;
   estimated_api_cost_usd: number | null;
   allocated_subscription_cost_usd: number | null;
+  governance_mode: string | null;
+  role_contract: string | null;
+  role_contract_hash: string | null;
   routing_reason: string | null;
   transcript_path: string | null;
   codex_session: string | null;

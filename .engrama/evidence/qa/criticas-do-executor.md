@@ -47,6 +47,12 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] feat/expose-role-contract-governance-in-observatory | [governance] governanca de contratos exposta no observatory | waiver Autoridade 2026-06-30 (execucao direta autorizada nesta sessao; mesma lane governada das fatias anteriores) | sha256:c66eb7eff2d352cc37b97faa4a04326702c95b46add86536a9d214e2a05b85b4
+- **Contexto:** a fundacao do observatory ja estava canonizada em `main`; esta fatia pequena so expõe no dashboard os campos de governanca introduzidos pelos Role Runtime Contracts, sem tocar runtime.
+- **Escopo coberto pelo hash:** `tools/engrama-observatory/src/{shared,server,client}` para parser, tipagem, overview, attention, filtro/badge de runs e testes correspondentes.
+- **Exclusoes:** sem `exec-bridge.sh`, `model-router.sh`, adapters, `usage-report.sh`, `models.conf`, role contracts, template, billing ou follow-up de dependencias.
+- **Evidencia de QA:** `cd tools/engrama-observatory && npm test` -> 17 testes verdes; `npm run typecheck` -> 0; `npm run build` -> 0; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+
 ## [2026-06-30] feat/add-cognitive-observability-foundation | [governance] canonizacao da fundacao do Engrama Observatory | waiver Autoridade 2026-06-30 (lane de git/orquestracao aprovada; sem critico separado nesta sessao) | sha256:edefc06c8f2603a522ea0bed20f2fe0d9c03716daa9ba6ad0cca109fc7d64537
 - **Contexto:** `origin/main` ja citava `tools/engrama-observatory/` em docs/governanca, mas o diretorio inteiro ainda nao existia no Git. Esta fatia reconcilia a superficie versionada com a decisao ja documentada, em worktree limpo baseado em `origin/main`.
 - **Escopo coberto pelo hash:** `.gitignore` passa a ignorar `tools/engrama-observatory/node_modules` e `dist`; a ferramenta inteira entra em `tools/engrama-observatory/` com `README`, `package*.json`, `src/`, testes e configs necessarios.

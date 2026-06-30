@@ -23,7 +23,14 @@ import type {
   UsageRecord,
   UsageSummary,
 } from "../shared/types";
-import { filterRuns, type RunFilterState, valueOrUnknown } from "./runs";
+import {
+  filterRuns,
+  getGovernanceIndicator,
+  getGovernanceModeValue,
+  summarizeGovernance,
+  type RunFilterState,
+  valueOrUnknown,
+} from "./runs";
 
 type LoadState = {
   summary: UsageSummary | null;
@@ -43,6 +50,9 @@ type InsightState = {
   t4FailureShare: number | null;
   runsWithoutTier: number;
   driftRuns: number;
+  governedRuns: number;
+  governedShare: number | null;
+  legacyDefaultedRuns: number;
   rolesAboveExpected: string[];
   effectiveCostPerRun: number | null;
   effectiveCostPerTurn: number | null;
@@ -68,6 +78,7 @@ const initialFilters: RunFilterState = {
   model: "all",
   success: "all",
   branch: "all",
+  governanceMode: "all",
 };
 
 const TABS: Array<{ id: TabId; label: string }> = [
@@ -504,6 +515,7 @@ function RunsFilters({
   roleOptions,
   tierOptions,
   adapterOptions,
+  governanceModeOptions,
   modelOptions,
   branchOptions,
   onChange,
@@ -512,6 +524,7 @@ function RunsFilters({
   roleOptions: string[];
   tierOptions: string[];
   adapterOptions: string[];
+  governanceModeOptions: string[];
   modelOptions: string[];
   branchOptions: string[];
   onChange: <Key extends keyof RunFilterState>(key: Key, value: RunFilterState[Key]) => void;
@@ -559,6 +572,19 @@ function RunsFilters({
         </select>
       </label>
       <label>
+        Governance
+        <select
+          value={filters.governanceMode}
+          onChange={(event) => onChange("governanceMode", event.target.value)}
+        >
+          {governanceModeOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
         Success
         <select value={filters.success} onChange={(event) => onChange("success", event.target.value)}>
           <option value="all">all</option>
@@ -586,6 +612,7 @@ function RunsTable({
   roleOptions,
   tierOptions,
   adapterOptions,
+  governanceModeOptions,
   modelOptions,
   branchOptions,
   onFilterChange,
@@ -595,6 +622,7 @@ function RunsTable({
   roleOptions: string[];
   tierOptions: string[];
   adapterOptions: string[];
+  governanceModeOptions: string[];
   modelOptions: string[];
   branchOptions: string[];
   onFilterChange: <Key extends keyof RunFilterState>(
@@ -615,6 +643,7 @@ function RunsTable({
         roleOptions={roleOptions}
         tierOptions={tierOptions}
         adapterOptions={adapterOptions}
+        governanceModeOptions={governanceModeOptions}
         modelOptions={modelOptions}
         branchOptions={branchOptions}
         onChange={onFilterChange}
@@ -625,6 +654,7 @@ function RunsTable({
             <tr>
               <th>Started</th>
               <th>Role</th>
+              <th>Gov</th>
               <th>Tier</th>
               <th>Adapter</th>
               <th>Model</th>
@@ -640,13 +670,18 @@ function RunsTable({
           <tbody>
             {filteredRuns.length === 0 && (
               <tr>
-                <td colSpan={12}>Nenhum run combina com os filtros atuais.</td>
+                <td colSpan={13}>Nenhum run combina com os filtros atuais.</td>
               </tr>
             )}
             {filteredRuns.map((run) => (
               <tr key={run.run_id}>
                 <td>{formatDate(run.started_at)}</td>
                 <td>{valueOrUnknown(run.role)}</td>
+                <td>
+                  <span className={`pill pill-${getGovernanceIndicator(run)}`}>
+                    {getGovernanceIndicator(run)}
+                  </span>
+                </td>
                 <td>{valueOrUnknown(run.tier)}</td>
                 <td>{valueOrUnknown(run.adapter)}</td>
                 <td>{valueOrUnknown(run.model)}</td>
@@ -696,6 +731,12 @@ function RunsTable({
                       <dd>{valueOrUnknown(run.provider)}</dd>
                       <dt>Effort</dt>
                       <dd>{valueOrUnknown(run.effort)}</dd>
+                      <dt>Governance</dt>
+                      <dd>{valueOrUnknown(run.governance_mode)}</dd>
+                      <dt>Role contract</dt>
+                      <dd>{valueOrUnknown(run.role_contract)}</dd>
+                      <dt>Contract hash</dt>
+                      <dd>{run.role_contract_hash ? <code>{run.role_contract_hash}</code> : "unknown"}</dd>
                       <dt>Branch</dt>
                       <dd>{run.branch}</dd>
                       <dt>Routing</dt>
@@ -1076,6 +1117,10 @@ export function App() {
     [state.summary],
   );
   const modelOptions = useMemo(() => optionSet((run) => valueOrUnknown(run.model)), [state.summary]);
+  const governanceModeOptions = useMemo(
+    () => optionSet((run) => getGovernanceModeValue(run)),
+    [state.summary],
+  );
   const branchOptions = useMemo(() => optionSet((run) => run.branch), [state.summary]);
 
   const insights = useMemo<InsightState | null>(() => {
@@ -1088,6 +1133,7 @@ export function App() {
     const t4Failures = t4Runs.filter((run) => run.success === false);
     const missingTier = runs.filter((run) => !run.tier);
     const driftRuns = runs.filter(hasModelDrift);
+    const governance = summarizeGovernance(runs);
     const policyMap = new Map(
       state.models.rolePolicy.map((item) => [item.role, item.minimumTier]),
     );
@@ -1102,6 +1148,9 @@ export function App() {
       t4FailureShare: t4Runs.length > 0 ? (t4Failures.length / t4Runs.length) * 100 : null,
       runsWithoutTier: missingTier.length,
       driftRuns: driftRuns.length,
+      governedRuns: governance.governedRuns,
+      governedShare: governance.governedShare,
+      legacyDefaultedRuns: governance.legacyDefaultedRuns,
       rolesAboveExpected: Array.from(new Set(oversized.map((run) => run.role || "unknown"))),
       effectiveCostPerRun: state.summary.subscription.effectiveCostPerRunUsd,
       effectiveCostPerTurn: state.summary.subscription.effectiveCostPerTurnUsd,
@@ -1140,6 +1189,12 @@ export function App() {
       items.push({
         tone: "danger",
         text: `${state.summary.counts.failures} execução(ões) falharam neste mês.`,
+      });
+    }
+    if (insights.legacyDefaultedRuns > 0) {
+      items.push({
+        tone: "warning",
+        text: `${insights.legacyDefaultedRuns} execuções rodaram em modo legado/defaulted sem contrato de papel.`,
       });
     }
     if (state.summary.counts.unknownTokenRuns > 0) {
@@ -1339,6 +1394,22 @@ export function App() {
                     tone={summary.counts.failures > 0 ? "danger" : "success"}
                   />
                   <MetricCard
+                    label="Runs governadas por contrato"
+                    value={
+                      summary.counts.runs > 0
+                        ? formatPercent(insights.governedShare)
+                        : "sem ledger"
+                    }
+                    detail={`${insights.governedRuns}/${summary.counts.runs} runs`}
+                    tone={
+                      summary.counts.runs === 0
+                        ? "muted"
+                        : insights.legacyDefaultedRuns > 0
+                          ? "warning"
+                          : "success"
+                    }
+                  />
+                  <MetricCard
                     label="T4/T4+"
                     value={formatNumber(insights.t4Runs)}
                     detail={formatPercent(insights.t4Share)}
@@ -1448,6 +1519,7 @@ export function App() {
                 roleOptions={roleOptions}
                 tierOptions={tierOptions}
                 adapterOptions={adapterOptions}
+                governanceModeOptions={governanceModeOptions}
                 modelOptions={modelOptions}
                 branchOptions={branchOptions}
                 onFilterChange={updateFilter}
