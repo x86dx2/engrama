@@ -47,6 +47,12 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance] fix de markdown no waiver sem-release do PR #27 | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:d4890ceafb2c5fa68b5b7991616540e394757ce64f899fbb583efbf65612ca27
+- **Contexto:** apos o fix de `E9A` e do `release-gate`, a CI do PR #27 ainda falhou no job `markdown`. O log bate com o padrao ja visto em outros PRs: a nova entrada `## [...]` de `.engrama/evidence/qa/release-waivers.md` terminava com `.` e acionou `MD026/no-trailing-punctuation`.
+- **Escopo coberto pelo hash:** apenas `.engrama/evidence/qa/release-waivers.md` (remove o `.` final do heading do waiver) e `log.md` (registro factual desta correcao).
+- **Exclusoes:** sem codigo, sem runtime, sem template, sem `VERSION`, sem `CHANGELOG`, sem alterar o hash ou a semantica do waiver sem-release.
+- **Evidencia de QA:** a causa raiz foi confirmada pelo log do GitHub Actions no job `markdown`; o ajuste e textual e restrito ao heading append-only.
+
 ## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][contract] fix de CI do E9A por rollover UTC no mes do ledger | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:e426a3ef31d284723c7bfd6bc4f02ac1f98fc0ff54ecbe5e2cfc6d85c1186928
 - **Contexto:** o PR #27 tocava apenas governanca/gate, mas a CI falhou em `tests/contract/exec-bridge.test.sh` caso `E9A`. A execucao da fixture caiu em `2026-07-01T00:04:03Z`, gravou `usage-2026-07.jsonl` e o teste ainda consultava `usage-report.sh --month 2026-06`.
 - **Escopo coberto pelo hash:** `tests/contract/exec-bridge.test.sh` passa a derivar o mes diretamente do arquivo `usage-*.jsonl` gerado pela fixture; `log.md` registra a causa raiz e a validacao local do fix; `.engrama/evidence/qa/release-waivers.md` adiciona o `sem-release` waiver do payload distribuivel tocado pelo PR.

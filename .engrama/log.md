@@ -7,6 +7,12 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | markdown do waiver sem-release do PR #27
+- Branch `chore/include-observatory-in-critique-gate-surface`. O job `markdown` da CI falhou apos o waiver do release-gate.
+- **Causa raiz:** a nova linha append-only em `.engrama/evidence/qa/release-waivers.md` termina com `.`; como a gramática do arquivo usa `## [...]` em cada entrada, o `markdownlint` aplica `MD026/no-trailing-punctuation` ao heading.
+- **Implementado:** removido apenas o `.` final da linha do waiver sem-release do PR #27.
+- **QA alvo:** o ajuste nao altera o hash do payload distribuivel nem a semantica do waiver; serve apenas para destravar o job `markdown`.
+
 ## [2026-06-30] fix | CI do PR #27: E9A deriva o mes do ledger real
 - Branch `chore/include-observatory-in-critique-gate-surface`. A CI do PR #27 falhou fora da fatia principal no contrato `E9A` de `tests/contract/exec-bridge.test.sh`.
 - **Causa raiz:** o fixture de `E9A` executa o `exec-bridge` sem `--date`, entao o writer grava o ledger no mes UTC efetivo da run. Perto da virada, a fixture caiu em `2026-07-01T00:04:03Z`, gerou `usage-2026-07.jsonl`, mas o teste ainda consultava `usage-report.sh --month 2026-06`.
