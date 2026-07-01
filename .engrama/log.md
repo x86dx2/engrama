@@ -7,6 +7,12 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | rebind cumulativo do PR #27 para o critique-gate estrito
+- Branch `chore/include-observatory-in-critique-gate-surface`. A CI restante do PR #27 falhou no passo `Re-run critique gate against pull request diff`.
+- **Causa raiz:** o PR acumulou 4 commits. Em modo estrito, `critique-gate-ci.sh` exige um `sha256` que cubra o diff cumulativo `origin/main...HEAD`; os hashes registrados ate aqui cobriam os commits/parciais locais, nao o conjunto final do PR.
+- **Implementado:** adicionada uma entrada cumulativa `[governance][gate][contract]` no ledger de criticas para o fingerprint real do PR; junto dela, uma auto-vinculacao local `N/A` cobre apenas este commit de evidencia para satisfazer o gate local sem `--no-verify`.
+- **QA alvo:** `bash ./.engrama/engine/scripts/critique-gate.sh` e `bash ./bin/release-gate.sh --mode ci --base-ref origin/main` continuam verdes localmente apos o rebind.
+
 ## [2026-06-30] fix | markdown do waiver sem-release do PR #27
 - Branch `chore/include-observatory-in-critique-gate-surface`. O job `markdown` da CI falhou apos o waiver do release-gate.
 - **Causa raiz:** a nova linha append-only em `.engrama/evidence/qa/release-waivers.md` termina com `.`; como a gramática do arquivo usa `## [...]` em cada entrada, o `markdownlint` aplica `MD026/no-trailing-punctuation` ao heading.

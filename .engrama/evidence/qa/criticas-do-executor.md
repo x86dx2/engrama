@@ -47,6 +47,18 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][gate][contract] rebind cumulativo do PR #27 para o critique-gate estrito | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; diff cumulativo do PR) | sha256:bd096d30e5abca4bb886a265e4fbf888f5741771c1603ae115099e7d58d2b595
+- **Contexto:** depois dos fixes de `E9A`, do `release-gate` e do heading sem `.` no waiver, a CI do PR #27 continuou falhando no passo `Re-run critique gate against pull request diff`. O gate da CI roda em modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) e compara contra o fingerprint cumulativo `origin/main...HEAD`, nao contra hashes de commits parciais.
+- **Escopo coberto pelo hash:** diff final do PR #27 ate este ponto, incluindo `.engrama/engine/scripts/critique-gate.sh`, `tests/gate/critique-gate.test.sh`, `tests/contract/exec-bridge.test.sh`, `.engrama/evidence/qa/release-waivers.md`, `.engrama/log.md` e este ledger de criticas.
+- **Exclusoes:** sem runtime (`exec-bridge.sh`, `usage-report.sh`, `model-router.sh`), sem observatory app, sem `models.conf`, sem template, sem dependencias e sem ampliar a mudanca para alem do desbloqueio da CI.
+- **Evidencia de QA:** o fingerprint foi reproduzido localmente com `bash ./.engrama/engine/scripts/engrama-diff-hash.sh --range origin/main...HEAD`, retornando o mesmo `sha256:bd096d30e5abca4bb886a265e4fbf888f5741771c1603ae115099e7d58d2b595` exigido pela CI.
+
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance] auto-vinculacao local do commit de evidencia do PR #27 | N/A: registro de evidencia local para satisfazer o gate staged | sha256:e2acd3d5062dd9382069fd5e7eeb0fc5edb7e2a387910b3d2a6254bbb587269d
+- **Contexto:** este commit toca apenas `log.md` e o proprio ledger de criticas para registrar o rebind cumulativo exigido pela CI. Como o gate local tambem valida diff-binding no indice staged, a evidencia precisa carregar um hash forte do diff local deste commit.
+- **Escopo coberto pelo hash:** somente `.engrama/log.md` e `.engrama/evidence/qa/criticas-do-executor.md`.
+- **Exclusoes:** sem alteracao de runtime, sem alterar testes, sem mexer em waiver sem-release, sem alterar o payload distribuivel do PR.
+- **Evidencia de QA:** o hash final desta entrada sera calculado no indice staged por `bash ./.engrama/engine/scripts/engrama-diff-hash.sh`, alinhando a validacao local ao mesmo mecanismo usado pelo gate.
+
 ## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance] fix de markdown no waiver sem-release do PR #27 | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:d4890ceafb2c5fa68b5b7991616540e394757ce64f899fbb583efbf65612ca27
 - **Contexto:** apos o fix de `E9A` e do `release-gate`, a CI do PR #27 ainda falhou no job `markdown`. O log bate com o padrao ja visto em outros PRs: a nova entrada `## [...]` de `.engrama/evidence/qa/release-waivers.md` terminava com `.` e acionou `MD026/no-trailing-punctuation`.
 - **Escopo coberto pelo hash:** apenas `.engrama/evidence/qa/release-waivers.md` (remove o `.` final do heading do waiver) e `log.md` (registro factual desta correcao).
