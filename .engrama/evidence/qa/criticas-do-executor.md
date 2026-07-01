@@ -47,10 +47,10 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
-## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][contract] fix de CI do E9A por rollover UTC no mes do ledger | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:30fe7e5d22c28a3d15a17100a02603bebc3a1db3fcfba488c9a95d520a66be84
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][contract] fix de CI do E9A por rollover UTC no mes do ledger | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:e426a3ef31d284723c7bfd6bc4f02ac1f98fc0ff54ecbe5e2cfc6d85c1186928
 - **Contexto:** o PR #27 tocava apenas governanca/gate, mas a CI falhou em `tests/contract/exec-bridge.test.sh` caso `E9A`. A execucao da fixture caiu em `2026-07-01T00:04:03Z`, gravou `usage-2026-07.jsonl` e o teste ainda consultava `usage-report.sh --month 2026-06`.
-- **Escopo coberto pelo hash:** `tests/contract/exec-bridge.test.sh` passa a derivar o mes diretamente do arquivo `usage-*.jsonl` gerado pela fixture; `log.md` registra a causa raiz e a validacao local do fix.
-- **Exclusoes:** sem `exec-bridge.sh`, `usage-report.sh`, `model-router.sh`, `critique-gate.sh`, observatory app, `models.conf`, template ou dependencias.
+- **Escopo coberto pelo hash:** `tests/contract/exec-bridge.test.sh` passa a derivar o mes diretamente do arquivo `usage-*.jsonl` gerado pela fixture; `log.md` registra a causa raiz e a validacao local do fix; `.engrama/evidence/qa/release-waivers.md` adiciona o `sem-release` waiver do payload distribuivel tocado pelo PR.
+- **Exclusoes:** sem `exec-bridge.sh`, `usage-report.sh`, `model-router.sh`, observatory app, `models.conf`, template ou dependencias.
 - **Evidencia de QA:** `bash tests/contract/exec-bridge.test.sh` -> 15 asserts verdes; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
 
 ## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][gate] observatory classificado como superficie gate | waiver Autoridade 2026-06-30 (execucao direta aprovada nesta sessao; fatia restrita a governanca do gate) | sha256:4cf7cae0a02bfde3f07a74f039765181216d8cd46774a09143b3dae2aa08f54e

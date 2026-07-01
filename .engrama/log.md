@@ -12,6 +12,7 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 - **Causa raiz:** o fixture de `E9A` executa o `exec-bridge` sem `--date`, entao o writer grava o ledger no mes UTC efetivo da run. Perto da virada, a fixture caiu em `2026-07-01T00:04:03Z`, gerou `usage-2026-07.jsonl`, mas o teste ainda consultava `usage-report.sh --month 2026-06`.
 - **Implementado:** `E9A` agora deriva `YYYY-MM` diretamente do arquivo `usage-*.jsonl` efetivamente criado pela fixture e usa esse valor tanto na chamada do `usage-report.sh` quanto na assercao do cabecalho.
 - **Robustez:** o teste passa a seguir o mesmo criterio UTC do writer sem fixar um mes arbitrario nem depender do fuso local da maquina/runner.
+- **Release gate:** como o PR tambem altera `.engrama/engine/scripts/critique-gate.sh` (superficie distribuivel do pack), foi adicionado `sem-release` waiver em `.engrama/evidence/qa/release-waivers.md` para o hash distribuivel atual, mantendo a fatia fora de um corte de `VERSION` isolado.
 - **QA executado:** `bash tests/contract/exec-bridge.test.sh` -> 15 asserts verdes; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
 
 ## [2026-06-30] chore | observatory entra na superficie do critique-gate
