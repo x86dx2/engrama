@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | CI do PR #27: E9A deriva o mes do ledger real
+- Branch `chore/include-observatory-in-critique-gate-surface`. A CI do PR #27 falhou fora da fatia principal no contrato `E9A` de `tests/contract/exec-bridge.test.sh`.
+- **Causa raiz:** o fixture de `E9A` executa o `exec-bridge` sem `--date`, entao o writer grava o ledger no mes UTC efetivo da run. Perto da virada, a fixture caiu em `2026-07-01T00:04:03Z`, gerou `usage-2026-07.jsonl`, mas o teste ainda consultava `usage-report.sh --month 2026-06`.
+- **Implementado:** `E9A` agora deriva `YYYY-MM` diretamente do arquivo `usage-*.jsonl` efetivamente criado pela fixture e usa esse valor tanto na chamada do `usage-report.sh` quanto na assercao do cabecalho.
+- **Robustez:** o teste passa a seguir o mesmo criterio UTC do writer sem fixar um mes arbitrario nem depender do fuso local da maquina/runner.
+- **QA executado:** `bash tests/contract/exec-bridge.test.sh` -> 15 asserts verdes; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+
 ## [2026-06-30] chore | observatory entra na superficie do critique-gate
 - Branch `chore/include-observatory-in-critique-gate-surface`, aberta a partir de `main` para fechar um gap de governanca: `tools/engrama-observatory/**` ja era ferramenta oficial do repo, mas ainda nao disparava o `critique-gate` como superficie `gate`.
 - **Implementado:** `.engrama/engine/scripts/critique-gate.sh` agora classifica `tools/engrama-observatory/*` como `gate`; `tests/gate/critique-gate.test.sh` ganhou a regressao `G6B`, provando que um arquivo do observatory exige ledger de critica staged para liberar o commit.

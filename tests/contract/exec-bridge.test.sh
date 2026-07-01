@@ -407,11 +407,14 @@ else
 fi
 check E9 CORRETO "$_r" "role/tier explicitos carregam contrato, injetam prompt governado, registram hash e gravam usage ledger"
 
+LEDGER_MONTH9="${LEDGER_OUT9##*/}"
+LEDGER_MONTH9="${LEDGER_MONTH9#usage-}"
+LEDGER_MONTH9="${LEDGER_MONTH9%.jsonl}"
 USAGE_REPORT9="$(
   cd "$R9" || exit 2
-  bash ./.engrama/engine/scripts/usage-report.sh --month 2026-06 2>&1
+  bash ./.engrama/engine/scripts/usage-report.sh --month "$LEDGER_MONTH9" 2>&1
 )"
-if printf '%s\n' "$USAGE_REPORT9" | grep -Fq 'Engrama Usage Report — 2026-06' \
+if printf '%s\n' "$USAGE_REPORT9" | grep -Fq "Engrama Usage Report — $LEDGER_MONTH9" \
   && printf '%s\n' "$USAGE_REPORT9" | grep -Fq 'By role:'; then
   _r=0
 else
