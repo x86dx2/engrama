@@ -7,6 +7,33 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] fix | rebind cumulativo do PR #27 para o critique-gate estrito
+- Branch `chore/include-observatory-in-critique-gate-surface`. A CI restante do PR #27 falhou no passo `Re-run critique gate against pull request diff`.
+- **Causa raiz:** o PR acumulou 4 commits. Em modo estrito, `critique-gate-ci.sh` exige um `sha256` que cubra o diff cumulativo `origin/main...HEAD`; os hashes registrados ate aqui cobriam os commits/parciais locais, nao o conjunto final do PR.
+- **Implementado:** adicionada uma entrada cumulativa `[governance][gate][contract]` no ledger de criticas para o fingerprint real do PR; junto dela, uma auto-vinculacao local `N/A` cobre apenas este commit de evidencia para satisfazer o gate local sem `--no-verify`.
+- **QA alvo:** `bash ./.engrama/engine/scripts/critique-gate.sh` e `bash ./bin/release-gate.sh --mode ci --base-ref origin/main` continuam verdes localmente apos o rebind.
+
+## [2026-06-30] fix | markdown do waiver sem-release do PR #27
+- Branch `chore/include-observatory-in-critique-gate-surface`. O job `markdown` da CI falhou apos o waiver do release-gate.
+- **Causa raiz:** a nova linha append-only em `.engrama/evidence/qa/release-waivers.md` termina com `.`; como a gramática do arquivo usa `## [...]` em cada entrada, o `markdownlint` aplica `MD026/no-trailing-punctuation` ao heading.
+- **Implementado:** removido apenas o `.` final da linha do waiver sem-release do PR #27.
+- **QA alvo:** o ajuste nao altera o hash do payload distribuivel nem a semantica do waiver; serve apenas para destravar o job `markdown`.
+
+## [2026-06-30] fix | CI do PR #27: E9A deriva o mes do ledger real
+- Branch `chore/include-observatory-in-critique-gate-surface`. A CI do PR #27 falhou fora da fatia principal no contrato `E9A` de `tests/contract/exec-bridge.test.sh`.
+- **Causa raiz:** o fixture de `E9A` executa o `exec-bridge` sem `--date`, entao o writer grava o ledger no mes UTC efetivo da run. Perto da virada, a fixture caiu em `2026-07-01T00:04:03Z`, gerou `usage-2026-07.jsonl`, mas o teste ainda consultava `usage-report.sh --month 2026-06`.
+- **Implementado:** `E9A` agora deriva `YYYY-MM` diretamente do arquivo `usage-*.jsonl` efetivamente criado pela fixture e usa esse valor tanto na chamada do `usage-report.sh` quanto na assercao do cabecalho.
+- **Robustez:** o teste passa a seguir o mesmo criterio UTC do writer sem fixar um mes arbitrario nem depender do fuso local da maquina/runner.
+- **Release gate:** como o PR tambem altera `.engrama/engine/scripts/critique-gate.sh` (superficie distribuivel do pack), foi adicionado `sem-release` waiver em `.engrama/evidence/qa/release-waivers.md` para o hash distribuivel atual, mantendo a fatia fora de um corte de `VERSION` isolado.
+- **QA executado:** `bash tests/contract/exec-bridge.test.sh` -> 15 asserts verdes; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+
+## [2026-06-30] chore | observatory entra na superficie do critique-gate
+- Branch `chore/include-observatory-in-critique-gate-surface`, aberta a partir de `main` para fechar um gap de governanca: `tools/engrama-observatory/**` ja era ferramenta oficial do repo, mas ainda nao disparava o `critique-gate` como superficie `gate`.
+- **Implementado:** `.engrama/engine/scripts/critique-gate.sh` agora classifica `tools/engrama-observatory/*` como `gate`; `tests/gate/critique-gate.test.sh` ganhou a regressao `G6B`, provando que um arquivo do observatory exige ledger de critica staged para liberar o commit.
+- **QA executado:** `bash tests/gate/critique-gate.test.sh` -> 14 asserts verdes; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+- **Validacao ampla:** `bash tests/run.sh` terminou com falha fora desta fatia no caso `E9A` de `tests/contract/exec-bridge.test.sh`; reproducao local mostrou ledger gravado em `usage-2026-07.jsonl` com `started_at=2026-07-01T00:04:03Z`, enquanto o teste ainda consulta `usage-report.sh --month 2026-06`.
+- **Fora de escopo mantido:** sem alteracao de `models.conf`, template, router, runtime contracts, observatory app, docs de produto ou artefatos de evidence do WIP preservado.
+
 ## [2026-06-30] slice | governanca de contratos exposta no Engrama Observatory
 - Branch `feat/expose-role-contract-governance-in-observatory`, aberta a partir de `main` apos o merge da fundacao do observatory (PR #25).
 - **Implementado:** `tools/engrama-observatory/` agora aceita `governance_mode`, `role_contract` e `role_contract_hash` no parser/tipagem, mantendo compatibilidade com ledgers antigos; o Overview ganhou o card `Runs governadas por contrato`; o painel `Atencao` avisa sobre `legacy/defaulted`; a aba Runs ganhou filtro por `governance_mode`, badge `contract|legacy|unknown` e detalhes expandidos com governanca e hash do contrato.

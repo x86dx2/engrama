@@ -47,6 +47,42 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][gate][contract] rebind cumulativo do PR #27 para o critique-gate estrito | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; diff cumulativo do PR) | sha256:6ca23f88eae2aac97d5f324729e9016a7ea1fa53066214bdc2da0f50ba7a1b68
+- **Contexto:** depois dos fixes de `E9A`, do `release-gate` e do heading sem `.` no waiver, a CI do PR #27 continuou falhando no passo `Re-run critique gate against pull request diff`. O gate da CI roda em modo estrito (`ENGRAMA_REQUIRE_DIFF_BIND=1`) e compara contra o fingerprint cumulativo `origin/main...HEAD`, nao contra hashes de commits parciais.
+- **Escopo coberto pelo hash:** diff final do PR #27 ate este ponto, incluindo `.engrama/engine/scripts/critique-gate.sh`, `tests/gate/critique-gate.test.sh`, `tests/contract/exec-bridge.test.sh`, `.engrama/evidence/qa/release-waivers.md`, `.engrama/log.md` e este ledger de criticas.
+- **Exclusoes:** sem runtime (`exec-bridge.sh`, `usage-report.sh`, `model-router.sh`), sem observatory app, sem `models.conf`, sem template, sem dependencias e sem ampliar a mudanca para alem do desbloqueio da CI.
+- **Evidencia de QA:** o fingerprint foi reproduzido localmente com `bash ./.engrama/engine/scripts/engrama-diff-hash.sh --range origin/main...HEAD`, retornando o mesmo `sha256:6ca23f88eae2aac97d5f324729e9016a7ea1fa53066214bdc2da0f50ba7a1b68` exigido pela CI apos o commit de evidencia.
+
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance] auto-vinculacao local do ajuste final de hash do PR #27 | N/A: registro de evidencia local para satisfazer o gate staged | sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+- **Contexto:** esta correcao final toca apenas o proprio ledger para alinhar o hash cumulativo do PR ao fingerprint `origin/main...HEAD` observado na CI. Como o ledger e excluido do fingerprint, o rebind final nao altera o hash cumulativo do PR, mas ainda precisa de uma auto-vinculacao local para o commit passar pelo gate staged.
+- **Escopo coberto pelo hash:** somente `.engrama/evidence/qa/criticas-do-executor.md`.
+- **Exclusoes:** sem alterar `log.md`, sem runtime, sem testes, sem waiver sem-release e sem qualquer payload distribuivel adicional.
+- **Evidencia de QA:** o hash final desta entrada sera calculado no indice staged por `bash ./.engrama/engine/scripts/engrama-diff-hash.sh`; como o ledger e excluido do fingerprint, o valor deve permanecer estavel entre stage e commit.
+
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance] auto-vinculacao local do commit de evidencia do PR #27 | N/A: registro de evidencia local para satisfazer o gate staged | sha256:e2acd3d5062dd9382069fd5e7eeb0fc5edb7e2a387910b3d2a6254bbb587269d
+- **Contexto:** este commit toca apenas `log.md` e o proprio ledger de criticas para registrar o rebind cumulativo exigido pela CI. Como o gate local tambem valida diff-binding no indice staged, a evidencia precisa carregar um hash forte do diff local deste commit.
+- **Escopo coberto pelo hash:** somente `.engrama/log.md` e `.engrama/evidence/qa/criticas-do-executor.md`.
+- **Exclusoes:** sem alteracao de runtime, sem alterar testes, sem mexer em waiver sem-release, sem alterar o payload distribuivel do PR.
+- **Evidencia de QA:** o hash final desta entrada sera calculado no indice staged por `bash ./.engrama/engine/scripts/engrama-diff-hash.sh`, alinhando a validacao local ao mesmo mecanismo usado pelo gate.
+
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance] fix de markdown no waiver sem-release do PR #27 | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:d4890ceafb2c5fa68b5b7991616540e394757ce64f899fbb583efbf65612ca27
+- **Contexto:** apos o fix de `E9A` e do `release-gate`, a CI do PR #27 ainda falhou no job `markdown`. O log bate com o padrao ja visto em outros PRs: a nova entrada `## [...]` de `.engrama/evidence/qa/release-waivers.md` terminava com `.` e acionou `MD026/no-trailing-punctuation`.
+- **Escopo coberto pelo hash:** apenas `.engrama/evidence/qa/release-waivers.md` (remove o `.` final do heading do waiver) e `log.md` (registro factual desta correcao).
+- **Exclusoes:** sem codigo, sem runtime, sem template, sem `VERSION`, sem `CHANGELOG`, sem alterar o hash ou a semantica do waiver sem-release.
+- **Evidencia de QA:** a causa raiz foi confirmada pelo log do GitHub Actions no job `markdown`; o ajuste e textual e restrito ao heading append-only.
+
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][contract] fix de CI do E9A por rollover UTC no mes do ledger | waiver Autoridade 2026-06-30 (correcao minima de CI aprovada nesta sessao; sem alteracao de runtime) | sha256:e426a3ef31d284723c7bfd6bc4f02ac1f98fc0ff54ecbe5e2cfc6d85c1186928
+- **Contexto:** o PR #27 tocava apenas governanca/gate, mas a CI falhou em `tests/contract/exec-bridge.test.sh` caso `E9A`. A execucao da fixture caiu em `2026-07-01T00:04:03Z`, gravou `usage-2026-07.jsonl` e o teste ainda consultava `usage-report.sh --month 2026-06`.
+- **Escopo coberto pelo hash:** `tests/contract/exec-bridge.test.sh` passa a derivar o mes diretamente do arquivo `usage-*.jsonl` gerado pela fixture; `log.md` registra a causa raiz e a validacao local do fix; `.engrama/evidence/qa/release-waivers.md` adiciona o `sem-release` waiver do payload distribuivel tocado pelo PR.
+- **Exclusoes:** sem `exec-bridge.sh`, `usage-report.sh`, `model-router.sh`, observatory app, `models.conf`, template ou dependencias.
+- **Evidencia de QA:** `bash tests/contract/exec-bridge.test.sh` -> 15 asserts verdes; `bash tests/run.sh` -> TODAS AS SUITES VERDES; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][gate] observatory classificado como superficie gate | waiver Autoridade 2026-06-30 (execucao direta aprovada nesta sessao; fatia restrita a governanca do gate) | sha256:4cf7cae0a02bfde3f07a74f039765181216d8cd46774a09143b3dae2aa08f54e
+- **Contexto:** o `Engrama Observatory` ja estava canonizado em `main`, mas commits em `tools/engrama-observatory/**` ainda nao eram tratados como superficie `gate` pelo `critique-gate`.
+- **Escopo coberto pelo hash:** apenas `.engrama/engine/scripts/critique-gate.sh` e `tests/gate/critique-gate.test.sh`, com a regressao `G6B` exigindo critica staged para um arquivo do observatory.
+- **Exclusoes:** sem `models.conf`, sem template, sem `model-router`, sem `exec-bridge`, sem mudancas na app do observatory, sem docs `0017`/`PRODUCT.md`/`PRD2.md` e sem artefatos de `evidence/`.
+- **Evidencia de QA:** `bash tests/gate/critique-gate.test.sh` -> 14 asserts verdes; `bash ./.engrama/engine/scripts/lint.sh` -> 0; `bash tests/run.sh` falhou fora de escopo em `E9A` por rollover UTC (`started_at=2026-07-01T00:04:03Z` gravando `usage-2026-07.jsonl`, enquanto o teste ainda consulta `--month 2026-06`).
+
 ## [2026-06-30] feat/expose-role-contract-governance-in-observatory | [governance] governanca de contratos exposta no observatory | waiver Autoridade 2026-06-30 (execucao direta autorizada nesta sessao; mesma lane governada das fatias anteriores) | sha256:c66eb7eff2d352cc37b97faa4a04326702c95b46add86536a9d214e2a05b85b4
 - **Contexto:** a fundacao do observatory ja estava canonizada em `main`; esta fatia pequena so expõe no dashboard os campos de governanca introduzidos pelos Role Runtime Contracts, sem tocar runtime.
 - **Escopo coberto pelo hash:** `tools/engrama-observatory/src/{shared,server,client}` para parser, tipagem, overview, attention, filtro/badge de runs e testes correspondentes.

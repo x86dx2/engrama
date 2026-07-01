@@ -110,6 +110,7 @@ classify() {
     engrama.values.example) addcat gate ;;
     .engrama/engine/scripts/*.sh|.engrama/engine/adapters/*.sh|.engrama/engine/config/*.conf|.engrama/engine/githooks/*|.claude/settings.json) addcat gate ;;
     .github/*) addcat gate ;;
+    tools/engrama-observatory/*) addcat gate ;;
     template/.engrama/engine/scripts/*.sh|template/.engrama/engine/adapters/*.sh|template/.engrama/engine/config/*.conf|template/.engrama/engine/githooks/*|template/.claude/settings.json) addcat gate ;;
 
     # Contrato verificavel do bootstrap/template.

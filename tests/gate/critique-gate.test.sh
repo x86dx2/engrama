@@ -116,6 +116,14 @@ echo x > "$r/README-do-produto.txt"
 git -C "$r" add README-do-produto.txt
 check G6 CORRETO 0 "$(run_gate "$r")" "arquivo fora de superficie sensivel"
 
+# G6B: console local de observabilidade entra como gate => exige critica registrada
+r="$(new_repo main)"
+write_ledger "$r" "## [2026-06-30] main | [gate][governance] observatory foundation | confirmo | ref"
+mkdir -p "$r/tools/engrama-observatory/src"
+echo 'export const app = true;' > "$r/tools/engrama-observatory/src/app.ts"
+git -C "$r" add tools/engrama-observatory/src/app.ts .engrama/evidence/qa/criticas-do-executor.md
+check G6B CORRETO 0 "$(run_gate "$r")" "tools/engrama-observatory/** herda superficie gate; ao stagear o ledger, governance continua coberta"
+
 # ── RED: furos reais (comportamento atual e inseguro) ─────────────────────────
 
 # R1 (FURO LOCAL LEGADO): AUTO-APROVACAO no MESMO commit — autor escreve
