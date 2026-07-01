@@ -47,6 +47,12 @@ Vereditos OK (campo 3): `confirmo` · `confirmo-bug` · `ressalvas` · `dispensa
 
 ---
 
+## [2026-06-30] chore/include-observatory-in-critique-gate-surface | [governance][gate] observatory classificado como superficie gate | waiver Autoridade 2026-06-30 (execucao direta aprovada nesta sessao; fatia restrita a governanca do gate) | sha256:4cf7cae0a02bfde3f07a74f039765181216d8cd46774a09143b3dae2aa08f54e
+- **Contexto:** o `Engrama Observatory` ja estava canonizado em `main`, mas commits em `tools/engrama-observatory/**` ainda nao eram tratados como superficie `gate` pelo `critique-gate`.
+- **Escopo coberto pelo hash:** apenas `.engrama/engine/scripts/critique-gate.sh` e `tests/gate/critique-gate.test.sh`, com a regressao `G6B` exigindo critica staged para um arquivo do observatory.
+- **Exclusoes:** sem `models.conf`, sem template, sem `model-router`, sem `exec-bridge`, sem mudancas na app do observatory, sem docs `0017`/`PRODUCT.md`/`PRD2.md` e sem artefatos de `evidence/`.
+- **Evidencia de QA:** `bash tests/gate/critique-gate.test.sh` -> 14 asserts verdes; `bash ./.engrama/engine/scripts/lint.sh` -> 0; `bash tests/run.sh` falhou fora de escopo em `E9A` por rollover UTC (`started_at=2026-07-01T00:04:03Z` gravando `usage-2026-07.jsonl`, enquanto o teste ainda consulta `--month 2026-06`).
+
 ## [2026-06-30] feat/expose-role-contract-governance-in-observatory | [governance] governanca de contratos exposta no observatory | waiver Autoridade 2026-06-30 (execucao direta autorizada nesta sessao; mesma lane governada das fatias anteriores) | sha256:c66eb7eff2d352cc37b97faa4a04326702c95b46add86536a9d214e2a05b85b4
 - **Contexto:** a fundacao do observatory ja estava canonizada em `main`; esta fatia pequena so expõe no dashboard os campos de governanca introduzidos pelos Role Runtime Contracts, sem tocar runtime.
 - **Escopo coberto pelo hash:** `tools/engrama-observatory/src/{shared,server,client}` para parser, tipagem, overview, attention, filtro/badge de runs e testes correspondentes.

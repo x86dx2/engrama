@@ -7,6 +7,13 @@ Permite `grep "^## \[" log.md | tail -N` para varrer o histórico.
 
 ---
 
+## [2026-06-30] chore | observatory entra na superficie do critique-gate
+- Branch `chore/include-observatory-in-critique-gate-surface`, aberta a partir de `main` para fechar um gap de governanca: `tools/engrama-observatory/**` ja era ferramenta oficial do repo, mas ainda nao disparava o `critique-gate` como superficie `gate`.
+- **Implementado:** `.engrama/engine/scripts/critique-gate.sh` agora classifica `tools/engrama-observatory/*` como `gate`; `tests/gate/critique-gate.test.sh` ganhou a regressao `G6B`, provando que um arquivo do observatory exige ledger de critica staged para liberar o commit.
+- **QA executado:** `bash tests/gate/critique-gate.test.sh` -> 14 asserts verdes; `bash ./.engrama/engine/scripts/lint.sh` -> 0.
+- **Validacao ampla:** `bash tests/run.sh` terminou com falha fora desta fatia no caso `E9A` de `tests/contract/exec-bridge.test.sh`; reproducao local mostrou ledger gravado em `usage-2026-07.jsonl` com `started_at=2026-07-01T00:04:03Z`, enquanto o teste ainda consulta `usage-report.sh --month 2026-06`.
+- **Fora de escopo mantido:** sem alteracao de `models.conf`, template, router, runtime contracts, observatory app, docs de produto ou artefatos de evidence do WIP preservado.
+
 ## [2026-06-30] slice | governanca de contratos exposta no Engrama Observatory
 - Branch `feat/expose-role-contract-governance-in-observatory`, aberta a partir de `main` apos o merge da fundacao do observatory (PR #25).
 - **Implementado:** `tools/engrama-observatory/` agora aceita `governance_mode`, `role_contract` e `role_contract_hash` no parser/tipagem, mantendo compatibilidade com ledgers antigos; o Overview ganhou o card `Runs governadas por contrato`; o painel `Atencao` avisa sobre `legacy/defaulted`; a aba Runs ganhou filtro por `governance_mode`, badge `contract|legacy|unknown` e detalhes expandidos com governanca e hash do contrato.
